@@ -35,8 +35,6 @@ La solución está diseñada con una arquitectura modular y escalable para evolu
 
 AdminGest surge como una reconstrucción independiente del proyecto final **GestorAdministrativo**, desarrollado originalmente para la asignatura **Administración de Proyectos de Software** del **Instituto Tecnológico de Las Américas (ITLA)** durante el período académico **2018-C3**.
 
-Esta fue la **segunda asignatura cursada por Francis Jairo Matías Rosario con el profesor Juan Martínez López**. La primera fue **Diseño Centrado en el Usuario (SOF-010)**, cursada en el período **2018-C1**, cuyo proyecto final fue [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora).
-
 El repositorio original de `GestorAdministrativo` fue eliminado posteriormente y el código fuente dejó de estar disponible. Por esa razón, esta versión se diseña y desarrolla completamente desde cero, conservando el contexto académico del proyecto, pero aplicando una arquitectura moderna, buenas prácticas de desarrollo y una visión de producto más profesional.
 
 La identidad visual y el módulo de proyectos también hacen referencia a la asignatura original mediante conceptos como planificación, cronogramas, costos, recursos, tareas, hitos y diagramas de Gantt inspirados en Microsoft Project.
@@ -358,23 +356,19 @@ Las credenciales reales y los secretos no deben incluirse en el repositorio.
 | Alexander Dionicio Mercedes | 2016-3962 |
 | Raymundo Eduardo Peña Sánchez | 2016-4276 |
 
-**Asignatura:** Administración de Proyectos de Software  
-**Profesor:** Juan Martínez López  
-**Institución:** Instituto Tecnológico de Las Américas — ITLA  
-**Período académico:** 2018-C3  
-**Tipo de proyecto:** Proyecto final
+### 📌 Información académica
 
----
+| Información | Detalle |
+|-------------|---------|
+| 📖 Asignatura | Administración de Proyectos de Software |
+| 👨‍🏫 Profesor | Juan Martínez López |
+| 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
+| 📅 Período académico | 2018-C3 |
+| 🎯 Tipo de proyecto | Proyecto final |
+| 👥 Modalidad | Proyecto grupal |
+| 🛠️ Reconstrucción | 2026 |
 
-## 🔗 Continuidad académica con el profesor
-
-AdminGest forma parte de una continuidad académica con el profesor **Juan Martínez López**:
-
-1. **Diseño Centrado en el Usuario (SOF-010)** — período **2018-C1**  
-   Proyecto final: [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora)
-
-2. **Administración de Proyectos de Software** — período **2018-C3**  
-   Proyecto final: **GestorAdministrativo**, reconstruido actualmente como **AdminGest**.
+> Este fue el segundo proyecto final cursado por **Francis Jairo Matías Rosario** con el profesor **Juan Martínez López**. El primero fue [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora), desarrollado para la asignatura **Diseño Centrado en el Usuario (SOF-010)** durante el período **2018-C1**.
 
 ---
 
