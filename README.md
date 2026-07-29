@@ -29,7 +29,7 @@ La solución está diseñada con una arquitectura modular y escalable para evolu
 
 ## 🎓 Origen del proyecto
 
-AdminGest surge como una reconstrucción independiente del proyecto final **GestorAdministrativo**, desarrollado originalmente para la asignatura **Administración de Proyectos de Software** del **Instituto Tecnológico de Las Américas (ITLA)** durante el período académico **2018-C3**.
+AdminGest surge como una reconstrucción independiente del proyecto final **GestorAdministrativo**, desarrollado originalmente para la asignatura **Administración de Proyectos de Software (SOF-013)** del **Instituto Tecnológico de Las Américas (ITLA)** durante el período académico **2018-C3**.
 
 El repositorio original de `GestorAdministrativo` fue eliminado posteriormente y el código fuente dejó de estar disponible. Por esa razón, esta versión se diseña y desarrolla completamente desde cero, conservando el contexto académico del proyecto, pero aplicando una arquitectura moderna, buenas prácticas de desarrollo y una visión de producto más profesional.
 
@@ -356,7 +356,7 @@ Las credenciales reales y los secretos no deben incluirse en el repositorio.
 
 | Información | Detalle |
 |-------------|---------|
-| 📖 Asignatura | Administración de Proyectos de Software |
+| 📖 Asignatura | Administración de Proyectos de Software (SOF-013) |
 | 👨‍🏫 Profesor | Juan Martínez López |
 | 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
 | 📅 Período académico | 2018-C3 |
