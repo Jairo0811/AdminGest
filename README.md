@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/branding-reference.png" alt="AdminGest" width="920" />
+  <img src="docs/branding-reference.png" alt="AdminGest" width="720" />
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
