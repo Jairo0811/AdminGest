@@ -1,19 +1,15 @@
 <p align="center">
   <img src="docs/branding-reference.png" alt="AdminGest" width="460" />
 </p>
-
-<h1 align="center">AdminGest</h1>
-
 <p align="center">
-  <strong>La gestión inteligente para tu empresa.</strong>
+  <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
 </p>
-
 <p align="center">
   Plataforma web modular para CRM, administración empresarial y gestión de proyectos.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
+
   <img src="https://img.shields.io/badge/estado-en%20desarrollo-2563EB?style=for-the-badge" alt="Estado en desarrollo" />
   <img src="https://img.shields.io/badge/arquitectura-monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
   <img src="https://img.shields.io/badge/licencia-no%20definida-64748B?style=for-the-badge" alt="Licencia no definida" />
