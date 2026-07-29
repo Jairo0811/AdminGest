@@ -1,0 +1,19 @@
+{
+  "name": "admingest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma modular de gestión empresarial y CRM.",
+  "packageManager": "pnpm@10.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./apps/* dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "db:generate": "pnpm --filter @admingest/api prisma:generate",
+    "db:migrate": "pnpm --filter @admingest/api prisma:migrate"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}
