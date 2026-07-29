@@ -364,7 +364,16 @@ Las credenciales reales y los secretos no deben incluirse en el repositorio.
 | 👥 Modalidad | Proyecto grupal |
 | 🛠️ Reconstrucción | 2026 |
 
-> Este fue el segundo proyecto final cursado por **Francis Jairo Matías Rosario** con el profesor **Juan Martínez López**. El primero fue [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora), desarrollado para la asignatura **Diseño Centrado en el Usuario (SOF-010)** durante el período **2018-C1**.
+---
+
+## 🔗 Continuidad académica
+
+Este fue el segundo proyecto final cursado por **Francis Jairo Matías Rosario** con el profesor **Juan Martínez López**.
+
+| Orden | Asignatura | Período | Proyecto final |
+|---|---|---|---|
+| 1 | Diseño Centrado en el Usuario (SOF-010) | 2018-C1 | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) |
+| 2 | Administración de Proyectos de Software (SOF-013) | 2018-C3 | GestorAdministrativo, reconstruido actualmente como **AdminGest** |
 
 ---
 
@@ -380,4 +389,7 @@ Este repositorio es actualmente privado y no posee una licencia de distribución
 
 ---
 
-
+<p align="center">
+  <strong>AdminGest</strong><br />
+  La gestión inteligente para tu empresa.
+</p>
