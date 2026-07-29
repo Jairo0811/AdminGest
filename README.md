@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/branding-reference.png" alt="AdminGest" width="720" />
+  <img src="docs/branding-reference.png" alt="AdminGest" width="420" />
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
@@ -366,14 +366,16 @@ Las credenciales reales y los secretos no deben incluirse en el repositorio.
 
 ---
 
-## 🔗 Continuidad académica
+## 🧭 Continuidad académica
 
-Este fue el segundo proyecto final cursado por **Francis Jairo Matías Rosario** con el profesor **Juan Martínez López**.
+Administración de Proyectos de Software fue la segunda asignatura cursada con el profesor **Juan Martínez López**, como parte de una evolución progresiva en el diseño de interfaces y la gestión de proyectos de software:
 
-| Orden | Asignatura | Período | Proyecto final |
-|---|---|---|---|
-| 1 | Diseño Centrado en el Usuario (SOF-010) | 2018-C1 | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) |
-| 2 | Administración de Proyectos de Software (SOF-013) | 2018-C3 | GestorAdministrativo, reconstruido actualmente como **AdminGest** |
+| Orden | Asignatura | Proyecto | Período |
+|---:|---|---|---|
+| 1 | Diseño Centrado en el Usuario (SOF-010) | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) | 2018-C1 |
+| 2 | Administración de Proyectos de Software (SOF-013) | **GestorAdministrativo**, reconstruido actualmente como **AdminGest** | 2018-C3 |
+
+Estos proyectos representan una secuencia académica enfocada en experiencia de usuario, planificación, gestión y desarrollo de software. Actualmente están siendo preservados y modernizados como parte del portafolio profesional.
 
 ---
 
