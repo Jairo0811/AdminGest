@@ -373,7 +373,7 @@ Administración de Proyectos de Software fue la segunda asignatura cursada con e
 | Orden | Asignatura | Proyecto | Período |
 |---:|---|---|---|
 | 1 | Diseño Centrado en el Usuario (SOF-010) | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) | 2018-C1 |
-| 2 | Administración de Proyectos de Software (SOF-013) | **GestorAdministrativo**, reconstruido actualmente como **AdminGest** | 2018-C3 |
+| 2 | Administración de Proyectos de Software (SOF-013) |  **AdminGest** | 2018-C3 |
 
 Estos proyectos representan una secuencia académica enfocada en experiencia de usuario, planificación, gestión y desarrollo de software. Actualmente están siendo preservados y modernizados como parte del portafolio profesional.
 
