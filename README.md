@@ -380,7 +380,4 @@ Este repositorio es actualmente privado y no posee una licencia de distribución
 
 ---
 
-<p align="center">
-  <strong>AdminGest</strong><br />
-  La gestión inteligente para tu empresa.
-</p>
+
