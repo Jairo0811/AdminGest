@@ -1,21 +1,26 @@
 services:
-  postgres:
-    image: postgres:17-alpine
-    container_name: admingest-postgres
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: admingest-sqlserver
     restart: unless-stopped
     environment:
-      POSTGRES_DB: admingest
-      POSTGRES_USER: admingest
-      POSTGRES_PASSWORD: admingest_dev
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "AdminGest_Dev2026!"
     ports:
-      - "5432:5432"
+      - "1433:1433"
     volumes:
-      - admingest_postgres_data:/var/lib/postgresql/data
+      - admingest_sqlserver_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admingest -d admingest"]
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'AdminGest_Dev2026!' -C -Q 'SELECT 1' || exit 1"
+        ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
 
 volumes:
-  admingest_postgres_data:
+  admingest_sqlserver_data:
