@@ -281,9 +281,9 @@ AdminGest/
 | Asignatura | Administración de Proyectos de Software (SOF-013) |
 | Profesor | Juan Martínez López |
 | Institución | Instituto Tecnológico de Las Américas (ITLA) |
-| Período | 2018-C3 |
-| Tipo | Proyecto final grupal |
-| Reconstrucción | 2026 |
+| Período Academico | 2018-C3 |
+| Tipo | Proyecto Final Grupal |
+| Reconstrucción | Julio 2026 |
 
 El trabajo académico original fue grupal. La reconstrucción actual fue desarrollada desde cero por **Jairo Matías**, conservando el contexto de la asignatura y aplicando una arquitectura moderna.
 
