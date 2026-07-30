@@ -87,9 +87,8 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 ### Calidad e infraestructura
 
 <p>
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" width="42" alt="Docker" title="Docker" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" width="42" alt="Git" title="Git" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" width="42" alt="GitHub" title="GitHub" />
+    <img src="https://skillicons.dev/icons?i=docker,git,github" alt="Git, Github y Docker" />
+ 
 </p>
 
 - Docker Compose
