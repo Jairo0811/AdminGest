@@ -14,7 +14,7 @@
 
 ## Descripción
 
-**AdminGest** es una plataforma web multiempresa que centraliza CRM, cotizaciones, agenda comercial y gestión de proyectos. La versión 1.0 convierte la maqueta inicial en un MVP funcional con API segura, persistencia SQL Server e interfaz responsive.
+**AdminGest** es una plataforma web multiempresa que centraliza CRM, cotizaciones, agenda comercial y gestión de proyectos. La versión 1.0 convierte la maqueta inicial en un MVP funcional con API segura, persistencia en SQL Server e interfaz responsive.
 
 El proyecto reconstruye de forma independiente el trabajo final **GestorAdministrativo**, realizado para **Administración de Proyectos de Software (SOF-013)** en el ITLA durante **2018-C3**.
 
@@ -36,13 +36,66 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 
 ## Stack tecnológico
 
-| Capa | Tecnologías |
-|---|---|
-| Frontend | React 19, TypeScript, Vite, React Router, TanStack Query, Lucide |
-| Backend | Node.js 24, NestJS 11, Passport, JWT, Swagger |
-| Persistencia | Microsoft SQL Server 2022, Prisma ORM |
-| Calidad | ESLint, Prettier, Jest, Vitest, Testing Library |
-| Infraestructura | Docker Compose, npm workspaces, GitHub Actions |
+### Frontend
+
+<p>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="42" alt="React" title="React" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="42" alt="TypeScript" title="TypeScript" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg" width="42" alt="Vite" title="Vite" />
+</p>
+
+- React 19
+- TypeScript
+- Vite
+- React Router
+- TanStack Query
+- Lucide React
+
+### Backend
+
+<p>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" width="42" alt="Node.js" title="Node.js" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-original.svg" width="42" alt="NestJS" title="NestJS" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="42" alt="TypeScript" title="TypeScript" />
+</p>
+
+- Node.js 22 o 24 LTS
+- NestJS 11
+- Passport
+- JWT
+- Swagger/OpenAPI
+- `class-validator`
+- Helmet
+- Rate limiting
+
+### Base de datos y persistencia
+
+<p>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" width="42" alt="Microsoft SQL Server" title="Microsoft SQL Server" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg" width="42" alt="Prisma ORM" title="Prisma ORM" />
+</p>
+
+- Microsoft SQL Server 2022
+- Prisma ORM
+- Migraciones versionadas
+- Modelo relacional multiempresa
+
+### Calidad e infraestructura
+
+<p>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" width="42" alt="Docker" title="Docker" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" width="42" alt="Git" title="Git" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" width="42" alt="GitHub" title="GitHub" />
+</p>
+
+- Docker Compose
+- npm workspaces
+- ESLint
+- Prettier
+- Jest
+- Vitest
+- Testing Library
+- GitHub Actions
 
 ## Arquitectura
 
@@ -64,19 +117,42 @@ Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones y lím
 
 ## Requisitos
 
+Antes de clonar el proyecto, instala:
+
+- Git.
 - Node.js 22 o 24 LTS.
 - npm 11.
-- Docker Desktop o SQL Server 2019+.
+- Docker Desktop con contenedores Linux habilitados, o una instancia local de SQL Server 2019+.
 
-## Instalación
+Comprueba las herramientas:
+
+```bash
+git --version
+node --version
+npm --version
+docker --version
+```
+
+## Clonar y probar el proyecto
+
+### 1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/Jairo0811/AdminGest.git
 cd AdminGest
-npm install
 ```
 
-Crea los archivos de entorno:
+### 2. Instalar las dependencias
+
+```bash
+npm ci
+```
+
+Usa `npm install` únicamente cuando necesites actualizar dependencias o regenerar el `package-lock.json`.
+
+### 3. Crear los archivos de entorno
+
+Linux y macOS:
 
 ```bash
 cp .env.example .env
@@ -84,7 +160,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-En Windows PowerShell:
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
@@ -92,17 +168,39 @@ Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env
 ```
 
-Define una contraseña segura para SQL Server en `.env`, actualiza `DATABASE_URL` con ese mismo valor y genera un secreto JWT de al menos 32 caracteres.
+### 4. Configurar variables sensibles
 
-## Base de datos
+En `.env` define una contraseña segura para SQL Server:
 
-Inicia SQL Server:
+```env
+MSSQL_SA_PASSWORD=TU_CONTRASENA_SEGURA
+```
+
+En `apps/api/.env` configura la conexión y los secretos:
+
+```env
+DATABASE_URL="sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=TU_CONTRASENA_SEGURA;encrypt=true;trustServerCertificate=true"
+JWT_SECRET=UNA_CLAVE_ALEATORIA_DE_AL_MENOS_32_CARACTERES
+SEED_ADMIN_PASSWORD=UNA_CONTRASENA_LOCAL_SEGURA
+```
+
+No subas estos archivos al repositorio.
+
+### 5. Levantar SQL Server
 
 ```bash
 docker compose up -d
 ```
 
-Prepara la base y los datos iniciales:
+Comprueba el estado del contenedor:
+
+```bash
+docker compose ps
+```
+
+Si Docker Desktop todavía está iniciando, espera hasta que `docker info` muestre correctamente las secciones `Client` y `Server`.
+
+### 6. Preparar Prisma y la base de datos
 
 ```bash
 npm run db:generate
@@ -110,19 +208,22 @@ npm run db:migrate
 npm run db:seed
 ```
 
-El seed crea el usuario local `admin@example.test`. Si `SEED_ADMIN_PASSWORD` está vacío, genera una contraseña aleatoria y la muestra una sola vez en la consola.
+El seed crea el usuario local:
 
 ```text
 Correo: admin@example.test
+Contraseña: valor definido en SEED_ADMIN_PASSWORD
 ```
 
-Estas credenciales son únicamente para desarrollo.
+Si `SEED_ADMIN_PASSWORD` queda vacío, el proceso genera una contraseña aleatoria y la muestra una sola vez en la consola.
 
-## Ejecución
+### 7. Iniciar el proyecto
 
 ```bash
 npm run dev
 ```
+
+### 8. Abrir los servicios
 
 | Servicio | URL |
 |---|---|
@@ -131,7 +232,7 @@ npm run dev
 | Swagger | http://localhost:3000/docs |
 | Health check | http://localhost:3000/api/health |
 
-## Validación
+### 9. Validar la instalación
 
 ```bash
 npm run db:validate
@@ -160,15 +261,15 @@ AdminGest/
 
 ## Equipo académico original
 
-| Integrante |
-|---|
-| Francis Jairo Matías Rosario |
-| Isaías Pérez Moya |
-| Enmanuel Avilez Valoy |
-| Diana Caroline Mejía Encarnación |
-| Andrés Eudoro Pujols |
-| Alexander Dionicio Mercedes |
-| Raymundo Eduardo Peña Sánchez |
+| Integrante | Matrícula |
+|---|---|
+| Francis Jairo Matías Rosario | 2015-2984 |
+| Isaías Pérez Moya | 2016-3595 |
+| Enmanuel Avilez Valoy | 2016-3789 |
+| Diana Caroline Mejía Encarnación | 2016-3796 |
+| Andrés Eudoro Pujols | 2016-3917 |
+| Alexander Dionicio Mercedes | 2016-3962 |
+| Raymundo Eduardo Peña Sánchez | 2016-4276 |
 
 ## Información académica
 
@@ -182,6 +283,17 @@ AdminGest/
 | Reconstrucción | 2026 |
 
 El trabajo académico original fue grupal. La reconstrucción actual fue desarrollada desde cero por **Jairo Matías**, conservando el contexto de la asignatura y aplicando una arquitectura moderna.
+
+## 🧭 Continuidad académica
+
+AdminGest forma parte de una continuidad de proyectos realizados con el profesor **Juan Martínez López** en el ITLA:
+
+| Orden | Asignatura | Proyecto | Período |
+|---:|---|---|---|
+| 1 | Diseño Centrado en el Usuario (SOF-010) | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) | 2018-C1 |
+| 2 | Administración de Proyectos de Software (SOF-013) | AdminGest / GestorAdministrativo | 2018-C3 |
+
+Esta continuidad refleja la evolución desde una aplicación centrada en experiencia de usuario hacia una plataforma empresarial con arquitectura modular, seguridad, persistencia y gestión de procesos comerciales.
 
 ## Licencia
 
