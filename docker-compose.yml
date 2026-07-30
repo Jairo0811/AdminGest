@@ -6,7 +6,7 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
-      MSSQL_SA_PASSWORD: "AdminGest_Dev2026!"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD before starting AdminGest}"
     ports:
       - "1433:1433"
     volumes:
@@ -15,12 +15,27 @@ services:
       test:
         [
           "CMD-SHELL",
-          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'AdminGest_Dev2026!' -C -Q 'SELECT 1' || exit 1"
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '$${MSSQL_SA_PASSWORD}' -C -Q 'SELECT 1' || exit 1"
         ]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 12
       start_period: 30s
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: "no"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD before starting AdminGest}"
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P '$${MSSQL_SA_PASSWORD}' -C -Q \"IF DB_ID(N'AdminGestDb') IS NULL CREATE DATABASE [AdminGestDb]\""
+      ]
 
 volumes:
   admingest_sqlserver_data:

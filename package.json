@@ -1,17 +1,23 @@
 {
   "name": "admingest",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Plataforma modular de gestión empresarial y CRM.",
-  "packageManager": "pnpm@10.15.0",
+  "description": "Plataforma modular de CRM, ventas y gestión de proyectos.",
+  "packageManager": "npm@11.9.0",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "pnpm --parallel --filter ./apps/* dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "test": "pnpm -r test",
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run db:generate && npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
     "format": "prettier --write .",
-    "db:generate": "pnpm --filter @admingest/api prisma:generate",
-    "db:migrate": "pnpm --filter @admingest/api prisma:migrate"
+    "format:check": "prettier --check .",
+    "db:generate": "npm run prisma:generate --workspace @admingest/api",
+    "db:migrate": "npm run prisma:migrate --workspace @admingest/api",
+    "db:deploy": "npm run prisma:deploy --workspace @admingest/api",
+    "db:seed": "npm run prisma:seed --workspace @admingest/api"
   },
   "devDependencies": {
     "prettier": "^3.6.2"

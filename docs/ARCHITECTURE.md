@@ -1,21 +1,42 @@
-# Arquitectura inicial
+# Arquitectura de AdminGest
 
-AdminGest utiliza un monorepositorio con separación estricta entre interfaz, API y persistencia.
+## Principios
 
-## Decisiones
+- Monorepositorio con frontend y API independientes.
+- Módulos de dominio con controladores, servicios y DTO propios.
+- SQL Server como fuente transaccional única.
+- Prisma como capa de persistencia tipada y migraciones versionadas.
+- Aislamiento multiempresa aplicado en los servicios, no recibido desde el cliente.
+- Auditoría transversal para las mutaciones principales.
 
-1. **React + TypeScript** para una interfaz modular y tipada.
-2. **NestJS** para organizar la API por módulos, controladores, servicios y dependencias.
-3. **PostgreSQL** como fuente principal de verdad por sus transacciones y relaciones.
-4. **Prisma ORM** para migraciones y acceso tipado a datos.
-5. **Firebase** se reservará para identidad, archivos y notificaciones; no será la base transaccional principal.
-6. Toda entidad empresarial incluye `companyId` para preparar aislamiento multiempresa.
+## Capas
 
-## Módulos iniciales del dominio
+### `apps/web`
 
-- Identity
-- Companies
-- CRM
-- Projects
-- Tasks
-- Audit
+React consume la API mediante un cliente centralizado que adjunta el token JWT. TanStack Query administra caché, revalidación y estados asíncronos. Las páginas se organizan por área funcional.
+
+### `apps/api`
+
+- `common`: decoradores, guardias y tipos transversales.
+- `infrastructure`: Prisma y acceso a datos.
+- `modules/auth`: autenticación y emisión de JWT.
+- `modules/*`: casos de uso de CRM, ventas, proyectos y operaciones.
+- `modules/audit`: trazabilidad de acciones.
+
+### Persistencia
+
+Todos los identificadores utilizan `UNIQUEIDENTIFIER`. Los campos indexados definen longitudes compatibles con SQL Server y las relaciones usan `NoAction` para evitar rutas múltiples de cascada.
+
+## Seguridad multiempresa
+
+1. El usuario inicia sesión.
+2. La API firma un JWT con `sub` y `companyId`.
+3. La estrategia JWT vuelve a validar que el usuario y la empresa estén activos.
+4. El controlador recibe un `AuthUser`.
+5. El servicio filtra la entidad principal y valida sus relaciones con `user.companyId`.
+
+Un cliente nunca puede seleccionar arbitrariamente la empresa mediante un encabezado.
+
+## Decisiones de alcance
+
+La versión 1.0 cubre el núcleo operativo completo. Funciones especializadas como facturación fiscal electrónica, conciliación bancaria, nómina o integraciones externas requieren proyectos propios por sus reglas regulatorias y no forman parte del MVP.
