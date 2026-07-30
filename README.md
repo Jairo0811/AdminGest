@@ -3,81 +3,35 @@
 </p>
 
 <p align="center">
+  <strong>La gestión inteligente para tu empresa.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/versión-1.0.0-18A66F?style=for-the-badge" alt="Versión 1.0.0" />
+  <img src="https://img.shields.io/badge/estado-MVP%20completo-1677E8?style=for-the-badge" alt="MVP completo" />
   <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
 </p>
 
-<p align="center">
-  Plataforma web modular para CRM, administración empresarial y gestión de proyectos.
-</p>
+## Descripción
 
-<p align="center">
-  <img src="https://img.shields.io/badge/estado-en%20desarrollo-2563EB?style=for-the-badge" alt="Estado en desarrollo" />
-  <img src="https://img.shields.io/badge/arquitectura-monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
-  <img src="https://img.shields.io/badge/licencia-no%20definida-64748B?style=for-the-badge" alt="Licencia no definida" />
-</p>
+**AdminGest** es una plataforma web multiempresa que integra CRM, ventas, proyectos y operaciones administrativas. Esta versión reconstruye desde cero el antiguo proyecto académico **GestorAdministrativo** con una arquitectura moderna, seguridad JWT, Microsoft SQL Server y una interfaz responsive.
 
----
+La versión 1.0 ofrece un flujo funcional de extremo a extremo: una empresa puede registrarse, invitar usuarios, captar y convertir prospectos, administrar clientes, mover oportunidades por el pipeline, programar actividades, emitir cotizaciones, gestionar proyectos y controlar compras, inventario y gastos.
 
-## 📌 Descripción
+## Funcionalidades
 
-**AdminGest** es una plataforma de gestión empresarial concebida para centralizar, en un solo sistema, la relación con clientes, la planificación de proyectos y las operaciones administrativas de una pequeña o mediana empresa.
-
-La solución está diseñada con una arquitectura modular y escalable para evolucionar progresivamente hacia módulos de CRM, proyectos, tareas, ventas, compras, inventario, gastos, reportes, auditoría y notificaciones.
-
-> El proyecto se encuentra actualmente en **Fase 0: inicialización técnica y arquitectura base**. La estructura principal ya está creada, pero los módulos funcionales todavía están en desarrollo.
-
----
-
-## 🎓 Origen del proyecto
-
-AdminGest surge como una reconstrucción independiente del proyecto final **GestorAdministrativo**, desarrollado originalmente para la asignatura **Administración de Proyectos de Software (SOF-013)** del **Instituto Tecnológico de Las Américas (ITLA)** durante el período académico **2018-C3**.
-
-El repositorio original de `GestorAdministrativo` fue eliminado posteriormente y el código fuente dejó de estar disponible. Por esa razón, esta versión se diseña y desarrolla completamente desde cero, conservando el contexto académico del proyecto, pero aplicando una arquitectura moderna, buenas prácticas de desarrollo y una visión de producto más profesional.
-
-La identidad visual y el módulo de proyectos también hacen referencia a la asignatura original mediante conceptos como planificación, cronogramas, costos, recursos, tareas, hitos y diagramas de Gantt inspirados en Microsoft Project.
-
----
-
-## 🎯 Objetivo general
-
-Desarrollar una plataforma web moderna, segura, modular y escalable que permita a las empresas administrar sus clientes, prospectos, proyectos, tareas y operaciones internas desde una única solución.
-
----
-
-## 🧩 Módulos previstos
-
-| Módulo | Alcance |
+| Área | Funcionalidades |
 |---|---|
-| 👥 CRM | Prospectos, clientes, contactos, seguimiento y oportunidades |
-| 📁 Proyectos | Alcance, cronograma, recursos, presupuesto, riesgos e hitos |
-| ✅ Tareas | Responsables, prioridades, estados, fechas y progreso |
-| 🧾 Ventas | Cotizaciones, facturas, pagos y seguimiento comercial |
-| 🛒 Compras | Proveedores, órdenes de compra, recepción y pagos |
-| 📦 Inventario | Productos, servicios, almacenes y movimientos |
-| 💳 Finanzas administrativas | Gastos, cuentas por cobrar y cuentas por pagar |
-| 📊 Reportes | Indicadores, gráficas, análisis y exportaciones |
-| 🔐 Seguridad | Usuarios, roles, permisos y control de acceso |
-| 🧾 Auditoría | Registro de acciones, cambios y trazabilidad |
-| 🔔 Notificaciones | Alertas, recordatorios y eventos del sistema |
+| Seguridad | Registro de empresas, inicio de sesión JWT, hash bcrypt, roles, rate limiting y sesiones con vencimiento |
+| Multiempresa | Aislamiento de datos mediante el `companyId` del usuario autenticado; no depende de encabezados manipulables |
+| CRM | CRUD de prospectos, estados, prioridades, conversión a cliente, clientes y contactos |
+| Ventas | Pipeline configurable, oportunidades, actividades de seguimiento y cotizaciones con ITBIS |
+| Proyectos | Proyectos, responsables, tareas jerárquicas, progreso automático, fechas y presupuesto |
+| Operaciones | Catálogo, inventario, movimientos, proveedores, órdenes de compra, recepción y gastos |
+| Gestión | Dashboard ejecutivo, reportes exportables, usuarios, empresa, notificaciones y auditoría |
+| Calidad | Validación de DTO, Swagger, migración SQL versionada, datos demo, pruebas y CI |
 
----
-
-## ✅ Funcionalidades disponibles actualmente
-
-- Monorepositorio con `pnpm workspaces`.
-- Aplicación web inicial con React, TypeScript y Vite.
-- API REST inicial con NestJS.
-- Endpoint de estado de la API.
-- Documentación Swagger/OpenAPI.
-- Prisma ORM con entidades iniciales.
-- Base multiempresa mediante `companyId`.
-- Entidades iniciales para empresas, usuarios, prospectos, proyectos y tareas.
-- Interfaz responsive con identidad visual azul y verde.
-- Flujo básico de integración continua con GitHub Actions.
-
----
-
-## 🛠️ Stack tecnológico
+## Stack tecnológico
 
 ### Frontend
 
@@ -85,340 +39,169 @@ Desarrollar una plataforma web moderna, segura, modular y escalable que permita 
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="42" alt="React" title="React" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="42" alt="TypeScript" title="TypeScript" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg" width="42" alt="Vite" title="Vite" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg" width="42" alt="Tailwind CSS" title="Tailwind CSS" />
 </p>
 
-- React
-- TypeScript
-- Vite
-- React Router
-- TanStack Query
-- React Hook Form
-- Zod
-- Tailwind CSS
-- Lucide React
-- Recharts
-- FullCalendar
+- React 19, TypeScript y Vite.
+- React Router, TanStack Query y Lucide React.
+- CSS responsive con identidad visual azul y verde.
 
-### Backend
+### Backend y datos
 
 <p>
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" width="42" alt="Node.js" title="Node.js" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-original.svg" width="42" alt="NestJS" title="NestJS" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="42" alt="TypeScript" title="TypeScript" />
-</p>
-
-- Node.js
-- NestJS
-- TypeScript
-- REST API
-- Swagger / OpenAPI
-- `class-validator`
-- `class-transformer`
-- Passport
-- Helmet
-- Rate limiting
-- Pino
-
-### Base de datos y persistencia
-
-<p>
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" width="42" alt="Microsoft SQL Server" title="Microsoft SQL Server" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" width="42" alt="SQL Server" title="SQL Server" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg" width="42" alt="Prisma" title="Prisma" />
-</p>
-
-- Microsoft SQL Server
-- Prisma ORM
-- Migraciones versionadas
-- Modelo relacional preparado para multiempresa
-- SQL Server Management Studio
-
-> **Nota técnica:** la migración del código de persistencia desde PostgreSQL hacia SQL Server todavía está pendiente. Antes de ejecutar migraciones, debe actualizarse `apps/api/prisma/schema.prisma`, `apps/api/.env.example` y `docker-compose.yml`.
-
-### Servicios complementarios
-
-<p>
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg" width="42" alt="Firebase" title="Firebase" />
-</p>
-
-- Firebase Authentication
-- Firebase Storage
-- Firebase Cloud Messaging
-
-### Reportes y documentos
-
-- ExcelJS
-- Puppeteer
-- Handlebars
-
-### Pruebas
-
-- Vitest
-- React Testing Library
-- Jest
-- Supertest
-- Playwright
-
-### Calidad de código
-
-- ESLint
-- Prettier
-- Husky
-- lint-staged
-- Commitlint
-
-### Infraestructura y herramientas
-
-<p>
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" width="42" alt="Docker" title="Docker" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" width="42" alt="GitHub" title="GitHub" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" width="42" alt="Git" title="Git" />
 </p>
 
-- Docker
-- Docker Compose
-- pnpm Workspaces
-- Git
-- GitHub
-- GitHub Actions
-- Turborepo en una fase posterior
+- Node.js 24, NestJS y Prisma ORM.
+- Microsoft SQL Server 2022.
+- Passport JWT, bcrypt, Helmet y throttling.
+- Swagger/OpenAPI, class-validator y Vitest.
 
----
-
-## 🏗️ Arquitectura
+## Arquitectura
 
 ```text
 React + TypeScript
         │
-        │ HTTPS / REST
+        │ HTTPS / REST + JWT
         ▼
-NestJS + Node.js
+NestJS modular
         │
-        ├── Microsoft SQL Server
-        ├── Prisma ORM
-        ├── Firebase Authentication
-        ├── Firebase Storage
-        └── Firebase Cloud Messaging
+        ├── autenticación y autorización
+        ├── servicios de dominio
+        ├── auditoría
+        └── Prisma ORM
+                 │
+                 ▼
+        Microsoft SQL Server
 ```
 
-La solución utiliza un enfoque de monorepositorio con separación entre frontend, backend, persistencia, documentación y paquetes compartidos.
+El token identifica al usuario y su empresa. Todos los servicios filtran y validan entidades relacionadas con ese `companyId`, evitando que un identificador de otra empresa pueda utilizarse en consultas o mutaciones.
 
-Cada entidad empresarial se prepara con `companyId` para facilitar el aislamiento de datos y una futura evolución multiempresa.
+## Requisitos
 
----
-
-## 📂 Estructura del repositorio
-
-```text
-AdminGest/
-├── apps/
-│   ├── web/                     # Frontend React
-│   │   └── src/
-│   └── api/                     # Backend NestJS
-│       ├── src/
-│       └── prisma/
-├── packages/                    # Código compartido futuro
-├── docs/                        # Arquitectura y material visual
-├── .github/
-│   └── workflows/               # Integración continua
-├── docker-compose.yml
-├── package.json
-├── pnpm-workspace.yaml
-└── README.md
-```
-
----
-
-## 📋 Requisitos previos
-
+- Node.js 24 LTS y npm 11.
+- Docker Desktop, o una instancia de SQL Server 2019 o superior.
 - Git.
-- Node.js 24 LTS.
-- Corepack habilitado.
-- pnpm 10.15.0.
-- Microsoft SQL Server 2019 o superior.
-- SQL Server Management Studio.
-- Docker Desktop, únicamente cuando la configuración de contenedores sea migrada oficialmente a SQL Server.
 
-Comprueba las herramientas instaladas:
+## Instalación local
 
-```bash
-git --version
-node --version
-corepack --version
-pnpm --version
-```
-
----
-
-## ⚙️ Instalación local
-
-### 1. Clonar el repositorio
+### 1. Instalar dependencias
 
 ```bash
 git clone https://github.com/Jairo0811/AdminGest.git
 cd AdminGest
+npm ci
 ```
 
-### 2. Habilitar pnpm con Corepack
+### 2. Preparar las variables
 
-El proyecto declara `pnpm@10.15.0` en el `package.json` raíz. Desde la carpeta `AdminGest`, ejecuta:
-
-```bash
-corepack enable
-corepack prepare pnpm@10.15.0 --activate
-pnpm --version
-```
-
-En Windows, si `corepack enable` devuelve un error de permisos, abre PowerShell como administrador y repite únicamente ese comando.
-
-### 3. Instalar las dependencias del monorepositorio
-
-Ejecuta la instalación una sola vez desde la raíz:
-
-```bash
-pnpm install
-```
-
-No es necesario ejecutar `npm install` ni entrar manualmente en `apps/web` o `apps/api`. `pnpm` detecta `pnpm-workspace.yaml` e instala las dependencias de todos los paquetes del monorepositorio.
-
-### 4. Crear los archivos de entorno
-
-#### Windows PowerShell
+En PowerShell:
 
 ```powershell
 Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env
 ```
 
-#### Linux / macOS
+En Linux o macOS:
 
 ```bash
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-### 5. Configurar la base de datos
+Sustituye `JWT_SECRET` por un valor aleatorio de al menos 32 caracteres antes de usar el sistema fuera de desarrollo.
 
-El motor definitivo será **Microsoft SQL Server**, pero el repositorio todavía conserva temporalmente la configuración técnica de PostgreSQL en Prisma, `.env.example` y Docker Compose.
+Configura también:
 
-Por ese motivo, en el estado actual del proyecto:
+- `DATABASE_URL` con la contraseña local de SQL Server.
+- `SEED_ADMIN_PASSWORD` con una contraseña temporal segura.
+- `MSSQL_SA_PASSWORD` en tu terminal antes de iniciar Docker.
 
-- Puedes instalar dependencias, compilar y ejecutar la base técnica.
-- No debes ejecutar todavía las migraciones de Prisma contra SQL Server.
-- No debes usar todavía `docker compose up -d` esperando que levante SQL Server.
+Ejemplo en PowerShell:
 
-Cuando la migración a SQL Server sea aplicada, la cadena de conexión tendrá una estructura similar a:
-
-```env
-DATABASE_URL="sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=TuClaveSegura;trustServerCertificate=true"
+```powershell
+$env:MSSQL_SA_PASSWORD = Read-Host "Contraseña de SQL Server"
 ```
 
-Las credenciales reales nunca deben subirse al repositorio.
-
-### 6. Generar el cliente de Prisma
-
-Mientras se completa la migración a SQL Server, puedes generar el cliente Prisma usando la configuración existente:
+### 3. Iniciar SQL Server
 
 ```bash
-pnpm db:generate
+docker compose up -d
 ```
 
-No ejecutes `pnpm db:migrate` hasta que el proveedor de Prisma y la cadena de conexión hayan sido actualizados oficialmente a SQL Server.
+El contenedor auxiliar crea automáticamente la base `AdminGestDb` cuando SQL Server está saludable.
 
-### 7. Ejecutar el proyecto en desarrollo
+### 4. Migrar y cargar datos demo
 
 ```bash
-pnpm dev
+npm run db:generate
+npm run db:deploy
+npm run db:seed
 ```
 
-El comando ejecuta en paralelo las aplicaciones ubicadas en `apps/*`.
+Usuario demo predeterminado:
 
-También puedes iniciar cada aplicación por separado:
+```text
+Correo: admin@admingest.local
+Contraseña: el valor local de SEED_ADMIN_PASSWORD
+```
+
+El correo puede modificarse mediante `SEED_ADMIN_EMAIL`. La contraseña no posee un valor predeterminado y nunca se versiona.
+
+### 5. Ejecutar
 
 ```bash
-pnpm --filter @admingest/web dev
-pnpm --filter @admingest/api dev
+npm run dev
 ```
-
-### 8. Validar el proyecto
-
-```bash
-pnpm lint
-pnpm build
-pnpm test
-```
-
-En esta fase inicial algunas suites de pruebas pueden no existir todavía. El objetivo es que lint y build permanezcan estables mientras se desarrollan los módulos funcionales.
-
----
-
-## 🌐 Servicios locales
 
 | Servicio | Dirección |
 |---|---|
-| Frontend | `http://localhost:5173` |
+| Aplicación web | `http://localhost:5173` |
 | API | `http://localhost:3000/api` |
 | Swagger | `http://localhost:3000/docs` |
-| Health Check | `http://localhost:3000/api/health` |
+| Health check | `http://localhost:3000/api/health` |
 
----
-
-## 🔐 Variables de entorno
-
-### API
-
-```env
-NODE_ENV=development
-PORT=3000
-DATABASE_URL=
-CORS_ORIGIN=http://localhost:5173
-```
-
-### Frontend
-
-```env
-VITE_API_URL=http://localhost:3000/api
-```
-
-Los archivos `.env` contienen configuración local y no deben incluirse en Git.
-
----
-
-## 📜 Scripts disponibles
+## Scripts
 
 | Comando | Descripción |
 |---|---|
-| `pnpm install` | Instala las dependencias de todo el monorepositorio |
-| `pnpm dev` | Ejecuta frontend y backend en paralelo |
-| `pnpm build` | Compila todos los paquetes |
-| `pnpm lint` | Ejecuta las validaciones de ESLint |
-| `pnpm test` | Ejecuta las pruebas configuradas |
-| `pnpm format` | Formatea el repositorio con Prettier |
-| `pnpm db:generate` | Genera Prisma Client para la API |
-| `pnpm db:migrate` | Ejecuta migraciones de Prisma; no usar hasta finalizar la migración a SQL Server |
+| `npm run dev` | Inicia frontend y backend |
+| `npm run build` | Genera Prisma Client y compila el monorepositorio |
+| `npm run lint` | Ejecuta las reglas de calidad |
+| `npm run test` | Ejecuta pruebas de API y frontend |
+| `npm run db:generate` | Genera Prisma Client |
+| `npm run db:migrate` | Crea una migración durante desarrollo |
+| `npm run db:deploy` | Aplica migraciones versionadas |
+| `npm run db:seed` | Crea empresa, usuario y datos demo |
 
----
+## Seguridad
 
-## 🗺️ Roadmap
+- Las contraseñas se almacenan con bcrypt y nunca se exponen en respuestas.
+- Los secretos y credenciales locales permanecen fuera de Git.
+- Todas las rutas empresariales requieren JWT.
+- Los roles administrativos protegen la gestión de empresa y usuarios.
+- La API aplica validación estricta, lista blanca de propiedades, Helmet, CORS y límite de solicitudes.
+- Las operaciones relevantes se registran en auditoría.
 
-- [x] Fase 0 — Arquitectura inicial y monorepositorio
-- [x] Fase 0 — Frontend y backend base
-- [ ] Fase 0 — Migración oficial a SQL Server
-- [ ] Fase 1 — Autenticación con Firebase
-- [ ] Fase 1 — Usuarios, roles y permisos
-- [ ] Fase 2 — Empresas y sucursales
-- [ ] Fase 3 — CRM: prospectos, clientes y contactos
-- [ ] Fase 4 — Proyectos, tareas, hitos y Gantt
-- [ ] Fase 5 — Cotizaciones, ventas y facturación
-- [ ] Fase 6 — Compras, inventario y gastos
-- [ ] Fase 7 — Reportes, auditoría y notificaciones
-- [ ] Fase 8 — Pruebas, seguridad y despliegue
+## Validación del proyecto
 
----
+```bash
+npm run db:generate
+npm run lint
+npm run test
+npm run build
+```
 
-## 👨‍🎓 Equipo académico original
+GitHub Actions ejecuta estas verificaciones en cada `push` y pull request.
 
-| Integrante | Matrícula |
+## Origen académico
+
+AdminGest conserva el concepto del proyecto final **GestorAdministrativo**, realizado para **Administración de Proyectos de Software (SOF-013)** en el **Instituto Tecnológico de Las Américas (ITLA)**, período **2018-C3**, con el profesor **Juan Martínez López**.
+
+| Integrante original | Matrícula |
 |---|---|
 | Francis Jairo Matías Rosario | 2015-2984 |
 | Isaías Pérez Moya | 2016-3595 |
@@ -428,46 +211,8 @@ Los archivos `.env` contienen configuración local y no deben incluirse en Git.
 | Alexander Dionicio Mercedes | 2016-3962 |
 | Raymundo Eduardo Peña Sánchez | 2016-4276 |
 
-### 📌 Información académica
+El repositorio original fue eliminado. La implementación actual fue reconstruida completamente por **Jairo Matías** en 2026 como proyecto de portafolio.
 
-| Información | Detalle |
-|-------------|---------|
-| 📖 Asignatura | Administración de Proyectos de Software (SOF-013) |
-| 👨‍🏫 Profesor | Juan Martínez López |
-| 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
-| 📅 Período académico | 2018-C3 |
-| 🎯 Tipo de proyecto | Proyecto final |
-| 👥 Modalidad | Proyecto grupal |
-| 🛠️ Reconstrucción | 2026 |
+## Licencia
 
----
-
-## 🧭 Continuidad académica
-
-Administración de Proyectos de Software fue la segunda asignatura cursada con el profesor **Juan Martínez López**, como parte de una evolución progresiva en el diseño de interfaces y la gestión de proyectos de software:
-
-| Orden | Asignatura | Proyecto | Período |
-|---:|---|---|---|
-| 1 | Diseño Centrado en el Usuario (SOF-010) | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) | 2018-C1 |
-| 2 | Administración de Proyectos de Software (SOF-013) | **GestorAdministrativo**, reconstruido actualmente como **AdminGest** | 2018-C3 |
-
-Estos proyectos representan una secuencia académica enfocada en experiencia de usuario, planificación, gestión y desarrollo de software. Actualmente están siendo preservados y modernizados como parte del portafolio profesional.
-
----
-
-## 👨‍💻 Reconstrucción actual
-
-La versión actual de AdminGest es una implementación completamente nueva, diseñada y desarrollada desde cero por **Jairo Matías**, tomando como referencia únicamente el contexto académico y la idea general del proyecto original.
-
----
-
-## 📄 Licencia
-
-Este repositorio es actualmente privado y no posee una licencia de distribución pública definida.
-
----
-
-<p align="center">
-  <strong>AdminGest</strong><br />
-  La gestión inteligente para tu empresa.
-</p>
+Repositorio privado sin licencia pública de distribución.

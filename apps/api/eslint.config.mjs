@@ -3,16 +3,18 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
+  { ignores: ['dist', 'coverage'] },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.ts', 'prisma/**/*.ts'],
     languageOptions: {
       globals: globals.node,
-      parserOptions: { project: './tsconfig.json' }
+      parserOptions: { project: './tsconfig.json', tsconfigRootDir: import.meta.dirname }
     },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'error'
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
     }
   }
 );

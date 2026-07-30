@@ -9,4 +9,5 @@ coverage/
 .idea/
 .DS_Store
 *.log
-apps/api/prisma/dev.db
+playwright-report/
+test-results/
