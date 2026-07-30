@@ -12,9 +12,12 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/versión-1.0.0-18A96F?style=for-the-badge" alt="Versión 1.0.0" />
-  <img src="https://img.shields.io/badge/estado-MVP%20completo-1677DF?style=for-the-badge" alt="MVP completo" />
+  <img src="https://img.shields.io/badge/estado-Finalizado-2EA44F?style=for-the-badge" alt="Estado finalizado" />
+  <img src="https://img.shields.io/badge/alcance-MVP%20completo-1677DF?style=for-the-badge" alt="MVP completo" />
   <img src="https://img.shields.io/badge/arquitectura-npm%20workspaces-0F172A?style=for-the-badge" alt="npm workspaces" />
 </p>
+
+> Estado actual: **Proyecto finalizado en su versión 1.0.0. El MVP funcional, la persistencia, la seguridad, las pruebas y la integración continua están implementados; futuras incorporaciones se consideran evolución posterior del producto.**
 
 ## Descripción
 
@@ -43,9 +46,13 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 ### Frontend
 
 <p>
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="42" alt="React" title="React" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="42" alt="TypeScript" title="TypeScript" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg" width="42" alt="Vite" title="Vite" />
+  <img src="https://skillicons.dev/icons?i=react,ts,vite,html,css" alt="React, TypeScript, Vite, HTML y CSS" />
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/React%20Router-7-CA4245?style=flat-square&logo=reactrouter&logoColor=white" alt="React Router" />
+  <img src="https://img.shields.io/badge/TanStack%20Query-5-FF4154?style=flat-square&logo=reactquery&logoColor=white" alt="TanStack Query" />
+  <img src="https://img.shields.io/badge/Lucide-React-F56565?style=flat-square" alt="Lucide React" />
 </p>
 
 - React 19
@@ -58,9 +65,14 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 ### Backend
 
 <p>
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" width="42" alt="Node.js" title="Node.js" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-original.svg" width="42" alt="NestJS" title="NestJS" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="42" alt="TypeScript" title="TypeScript" />
+  <img src="https://skillicons.dev/icons?i=nodejs,nestjs,ts" alt="Node.js, NestJS y TypeScript" />
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/Passport-JWT-34E27A?style=flat-square&logo=passport&logoColor=white" alt="Passport JWT" />
+  <img src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=flat-square&logo=swagger&logoColor=black" alt="Swagger OpenAPI" />
+  <img src="https://img.shields.io/badge/Helmet-Seguridad-111827?style=flat-square" alt="Helmet" />
+  <img src="https://img.shields.io/badge/Rate%20Limiting-NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white" alt="Rate limiting" />
 </p>
 
 - Node.js 22 o 24 LTS
@@ -79,6 +91,11 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg" width="42" alt="Prisma ORM" title="Prisma ORM" />
 </p>
 
+<p>
+  <img src="https://img.shields.io/badge/Migraciones-Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white" alt="Migraciones Prisma" />
+  <img src="https://img.shields.io/badge/Modelo-Multiempresa-1677DF?style=flat-square" alt="Modelo multiempresa" />
+</p>
+
 - Microsoft SQL Server 2022
 - Prisma ORM
 - Migraciones versionadas
@@ -87,8 +104,15 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 ### Calidad e infraestructura
 
 <p>
-    <img src="https://skillicons.dev/icons?i=docker,git,github" alt="Git, Github y Docker" />
- 
+  <img src="https://skillicons.dev/icons?i=docker,npm,git,github,githubactions" alt="Docker, npm, Git, GitHub y GitHub Actions" />
+</p>
+
+<p>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/eslint/eslint-original.svg" width="42" alt="ESLint" title="ESLint" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jest/jest-plain.svg" width="42" alt="Jest" title="Jest" />
+  <img src="https://img.shields.io/badge/Prettier-Formato-F7B93E?style=flat-square&logo=prettier&logoColor=black" alt="Prettier" />
+  <img src="https://img.shields.io/badge/Vitest-Pruebas-6E9F18?style=flat-square&logo=vitest&logoColor=white" alt="Vitest" />
+  <img src="https://img.shields.io/badge/Testing%20Library-React-E33332?style=flat-square&logo=testinglibrary&logoColor=white" alt="Testing Library" />
 </p>
 
 - Docker Compose
@@ -117,6 +141,23 @@ Prisma ORM ── Microsoft SQL Server 2022
 ```
 
 Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones y límites entre capas.
+
+## Estado del proyecto
+
+| Área | Estado |
+|---|---|
+| Arquitectura monorepo | ✅ Completada |
+| Frontend React | ✅ Completado |
+| API NestJS | ✅ Completada |
+| Autenticación y autorización | ✅ Completadas |
+| Persistencia SQL Server y Prisma | ✅ Completada |
+| CRM y pipeline comercial | ✅ Completados |
+| Cotizaciones | ✅ Completadas |
+| Proyectos y tareas | ✅ Completados |
+| Dashboard, reportes y auditoría | ✅ Completados |
+| Pruebas automatizadas | ✅ Implementadas |
+| GitHub Actions | ✅ Configurado |
+| MVP 1.0.0 | ✅ Finalizado |
 
 ## Requisitos
 
@@ -201,8 +242,6 @@ Comprueba el estado del contenedor:
 docker compose ps
 ```
 
-Si Docker Desktop todavía está iniciando, espera hasta que `docker info` muestre correctamente las secciones `Client` y `Server`.
-
 ### 6. Preparar Prisma y la base de datos
 
 ```bash
@@ -281,7 +320,7 @@ AdminGest/
 | Asignatura | Administración de Proyectos de Software (SOF-013) |
 | Profesor | Juan Martínez López |
 | Institución | Instituto Tecnológico de Las Américas (ITLA) |
-| Período Academico | 2018-C3 |
+| Período académico | 2018-C3 |
 | Tipo | Proyecto Final Grupal |
 | Reconstrucción | Julio 2026 |
 
