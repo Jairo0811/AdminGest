@@ -158,11 +158,24 @@ AdminGest/
 └── package-lock.json
 ```
 
+## Equipo académico original
+
+| Integrante |
+|---|
+| Francis Jairo Matías Rosario |
+| Isaías Pérez Moya |
+| Enmanuel Avilez Valoy |
+| Diana Caroline Mejía Encarnación |
+| Andrés Eudoro Pujols |
+| Alexander Dionicio Mercedes |
+| Raymundo Eduardo Peña Sánchez |
+
 ## Información académica
 
 | Información | Detalle |
 |---|---|
 | Asignatura | Administración de Proyectos de Software (SOF-013) |
+| Profesor | Juan Martínez López |
 | Institución | Instituto Tecnológico de Las Américas (ITLA) |
 | Período | 2018-C3 |
 | Tipo | Proyecto final grupal |
