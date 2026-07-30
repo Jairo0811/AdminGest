@@ -1,38 +1,57 @@
-import { Body, Controller, Get, Headers, Param, Patch, Post } from '@nestjs/common';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthUser } from '../../common/auth-user.interface';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CreateLeadDto } from './dto/create-lead.dto';
-import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
+import { UpdateLeadDto } from './dto/update-lead.dto';
 import { LeadsService } from './leads.service';
 
-@ApiTags('leads')
-@ApiHeader({
-  name: 'x-company-id',
-  description: 'Identificador temporal de empresa hasta integrar JWT multiempresa.',
-  required: true,
-})
+@ApiTags('Leads')
+@ApiBearerAuth()
 @Controller('leads')
 export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
 
   @Get()
-  findAll(@Headers('x-company-id') companyId: string) {
-    return this.leadsService.findAll(companyId);
+  findAll(
+    @CurrentUser() user: AuthUser,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.leadsService.findAll(user.companyId, search, status);
+  }
+
+  @Get(':id')
+  findOne(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.leadsService.findOne(user.companyId, id);
   }
 
   @Post()
-  create(
-    @Headers('x-company-id') companyId: string,
-    @Body() dto: CreateLeadDto,
-  ) {
-    return this.leadsService.create(companyId, dto);
+  create(@CurrentUser() user: AuthUser, @Body() dto: CreateLeadDto) {
+    return this.leadsService.create(user.companyId, user.id, dto);
   }
 
-  @Patch(':id/status')
-  updateStatus(
-    @Headers('x-company-id') companyId: string,
+  @Patch(':id')
+  update(
+    @CurrentUser() user: AuthUser,
     @Param('id') id: string,
-    @Body() dto: UpdateLeadStatusDto,
+    @Body() dto: UpdateLeadDto,
   ) {
-    return this.leadsService.updateStatus(companyId, id, dto.status);
+    return this.leadsService.update(user.companyId, user.id, id, dto);
+  }
+
+  @Delete(':id')
+  remove(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.leadsService.remove(user.companyId, user.id, id);
   }
 }
+

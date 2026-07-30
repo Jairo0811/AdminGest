@@ -8,15 +8,15 @@ datasource db {
 }
 
 model Company {
-  id             String          @id @default(uuid())
-  name           String
-  taxId          String?         @unique
-  email          String?
-  phone          String?
-  address        String?
-  logoUrl        String?
-  currency       String          @default("DOP")
-  timezone       String          @default("America/Santo_Domingo")
+  id             String          @id @default(uuid()) @db.NVarChar(36)
+  name           String          @db.NVarChar(150)
+  taxId          String?         @unique @db.NVarChar(30)
+  email          String?         @db.NVarChar(254)
+  phone          String?         @db.NVarChar(30)
+  address        String?         @db.NVarChar(500)
+  logoUrl        String?         @db.NVarChar(500)
+  currency       String          @default("DOP") @db.NVarChar(3)
+  timezone       String          @default("America/Santo_Domingo") @db.NVarChar(64)
   isActive       Boolean         @default(true)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -33,14 +33,14 @@ model Company {
 }
 
 model User {
-  id                    String        @id @default(uuid())
-  companyId             String
-  email                 String        @unique
-  passwordHash          String
-  firstName             String
-  lastName              String
-  role                   String        @default("SALES_REP")
-  status                 String        @default("ACTIVE")
+  id                    String        @id @default(uuid()) @db.NVarChar(36)
+  companyId             String        @db.NVarChar(36)
+  email                 String        @unique @db.NVarChar(254)
+  passwordHash          String        @db.NVarChar(100)
+  firstName             String        @db.NVarChar(60)
+  lastName              String        @db.NVarChar(60)
+  role                   String        @default("SALES_REP") @db.NVarChar(32)
+  status                 String        @default("ACTIVE") @db.NVarChar(20)
   lastLoginAt            DateTime?
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
@@ -57,19 +57,19 @@ model User {
 }
 
 model Lead {
-  id          String   @id @default(uuid())
-  companyId   String
-  ownerId     String?
-  firstName   String
-  lastName    String?
-  companyName String?
-  jobTitle    String?
-  email       String?
-  phone       String?
-  source      String?
-  status      String   @default("NEW")
+  id          String   @id @default(uuid()) @db.NVarChar(36)
+  companyId   String   @db.NVarChar(36)
+  ownerId     String?  @db.NVarChar(36)
+  firstName   String   @db.NVarChar(60)
+  lastName    String?  @db.NVarChar(60)
+  companyName String?  @db.NVarChar(150)
+  jobTitle    String?  @db.NVarChar(100)
+  email       String?  @db.NVarChar(254)
+  phone       String?  @db.NVarChar(30)
+  source      String?  @db.NVarChar(80)
+  status      String   @default("NEW") @db.NVarChar(24)
   priority    Int      @default(2)
-  notes       String?
+  notes       String?  @db.NVarChar(2000)
   convertedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -81,14 +81,14 @@ model Lead {
 }
 
 model Customer {
-  id            String        @id @default(uuid())
-  companyId     String
-  name          String
-  taxId         String?
-  email         String?
-  phone         String?
-  address       String?
-  website       String?
+  id            String        @id @default(uuid()) @db.NVarChar(36)
+  companyId     String        @db.NVarChar(36)
+  name          String        @db.NVarChar(150)
+  taxId         String?       @db.NVarChar(30)
+  email         String?       @db.NVarChar(254)
+  phone         String?       @db.NVarChar(30)
+  address       String?       @db.NVarChar(500)
+  website       String?       @db.NVarChar(500)
   isActive      Boolean       @default(true)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -100,16 +100,17 @@ model Customer {
   projects      Project[]
 
   @@index([companyId, name])
+  @@unique([companyId, taxId])
 }
 
 model Contact {
-  id         String   @id @default(uuid())
-  customerId String
-  firstName  String
-  lastName   String?
-  jobTitle   String?
-  email      String?
-  phone      String?
+  id         String   @id @default(uuid()) @db.NVarChar(36)
+  customerId String   @db.NVarChar(36)
+  firstName  String   @db.NVarChar(60)
+  lastName   String?  @db.NVarChar(60)
+  jobTitle   String?  @db.NVarChar(100)
+  email      String?  @db.NVarChar(254)
+  phone      String?  @db.NVarChar(30)
   isPrimary  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -119,9 +120,9 @@ model Contact {
 }
 
 model PipelineStage {
-  id            String        @id @default(uuid())
-  companyId     String
-  name          String
+  id            String        @id @default(uuid()) @db.NVarChar(36)
+  companyId     String        @db.NVarChar(36)
+  name          String        @db.NVarChar(80)
   position      Int
   probability   Int           @default(0)
   isWon         Boolean       @default(false)
@@ -136,18 +137,18 @@ model PipelineStage {
 }
 
 model Opportunity {
-  id                String        @id @default(uuid())
-  companyId         String
-  customerId        String
-  ownerId           String?
-  pipelineStageId   String
-  name              String
-  description       String?
+  id                String        @id @default(uuid()) @db.NVarChar(36)
+  companyId         String        @db.NVarChar(36)
+  customerId        String        @db.NVarChar(36)
+  ownerId           String?       @db.NVarChar(36)
+  pipelineStageId   String        @db.NVarChar(36)
+  name              String        @db.NVarChar(150)
+  description       String?       @db.NVarChar(2000)
   estimatedValue    Decimal       @default(0) @db.Decimal(18, 2)
   probability       Int           @default(0)
   expectedCloseDate DateTime?
-  status            String        @default("OPEN")
-  lostReason        String?
+  status            String        @default("OPEN") @db.NVarChar(20)
+  lostReason        String?       @db.NVarChar(500)
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   company           Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -165,15 +166,15 @@ model Opportunity {
 }
 
 model Activity {
-  id            String       @id @default(uuid())
-  companyId     String
-  customerId    String?
-  opportunityId String?
-  ownerId       String?
-  type          String
-  status        String       @default("PENDING")
-  subject       String
-  description   String?
+  id            String       @id @default(uuid()) @db.NVarChar(36)
+  companyId     String       @db.NVarChar(36)
+  customerId    String?      @db.NVarChar(36)
+  opportunityId String?      @db.NVarChar(36)
+  ownerId       String?      @db.NVarChar(36)
+  type          String       @db.NVarChar(24)
+  status        String       @default("PENDING") @db.NVarChar(20)
+  subject       String       @db.NVarChar(150)
+  description   String?      @db.NVarChar(2000)
   scheduledAt   DateTime
   completedAt   DateTime?
   createdAt     DateTime     @default(now())
@@ -188,11 +189,11 @@ model Activity {
 }
 
 model CatalogItem {
-  id          String      @id @default(uuid())
-  companyId   String
-  name        String
-  description String?
-  type        String
+  id          String      @id @default(uuid()) @db.NVarChar(36)
+  companyId   String      @db.NVarChar(36)
+  name        String      @db.NVarChar(150)
+  description String?     @db.NVarChar(2000)
+  type        String      @db.NVarChar(20)
   unitPrice   Decimal     @db.Decimal(18, 2)
   taxRate     Decimal     @default(18) @db.Decimal(5, 2)
   isActive    Boolean     @default(true)
@@ -205,19 +206,19 @@ model CatalogItem {
 }
 
 model Quote {
-  id            String       @id @default(uuid())
-  companyId     String
-  customerId    String
-  opportunityId String?
-  number        String
-  status        String       @default("DRAFT")
+  id            String       @id @default(uuid()) @db.NVarChar(36)
+  companyId     String       @db.NVarChar(36)
+  customerId    String       @db.NVarChar(36)
+  opportunityId String?      @db.NVarChar(36)
+  number        String       @db.NVarChar(30)
+  status        String       @default("DRAFT") @db.NVarChar(20)
   issueDate     DateTime     @default(now())
   validUntil    DateTime?
   subtotal      Decimal      @default(0) @db.Decimal(18, 2)
   discount      Decimal      @default(0) @db.Decimal(18, 2)
   tax           Decimal      @default(0) @db.Decimal(18, 2)
   total         Decimal      @default(0) @db.Decimal(18, 2)
-  notes         String?
+  notes         String?      @db.NVarChar(2000)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   company       Company      @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -230,10 +231,10 @@ model Quote {
 }
 
 model QuoteItem {
-  id            String       @id @default(uuid())
-  quoteId       String
-  catalogItemId String?
-  description   String
+  id            String       @id @default(uuid()) @db.NVarChar(36)
+  quoteId       String       @db.NVarChar(36)
+  catalogItemId String?      @db.NVarChar(36)
+  description   String       @db.NVarChar(500)
   quantity      Decimal      @default(1) @db.Decimal(18, 2)
   unitPrice     Decimal      @db.Decimal(18, 2)
   taxRate       Decimal      @default(18) @db.Decimal(5, 2)
@@ -245,14 +246,14 @@ model QuoteItem {
 }
 
 model Project {
-  id            String        @id @default(uuid())
-  companyId     String
-  customerId    String
-  opportunityId String?       @unique
-  managerId     String?
-  name          String
-  description   String?
-  status        String        @default("PLANNED")
+  id            String        @id @default(uuid()) @db.NVarChar(36)
+  companyId     String        @db.NVarChar(36)
+  customerId    String        @db.NVarChar(36)
+  opportunityId String?       @unique @db.NVarChar(36)
+  managerId     String?       @db.NVarChar(36)
+  name          String        @db.NVarChar(150)
+  description   String?       @db.NVarChar(2000)
+  status        String        @default("PLANNED") @db.NVarChar(20)
   startDate     DateTime?
   endDate       DateTime?
   budget        Decimal?      @db.Decimal(18, 2)
@@ -270,13 +271,13 @@ model Project {
 }
 
 model ProjectTask {
-  id          String        @id @default(uuid())
-  projectId   String
-  assigneeId  String?
-  parentId    String?
-  title       String
-  description String?
-  status      String        @default("PENDING")
+  id          String        @id @default(uuid()) @db.NVarChar(36)
+  projectId   String        @db.NVarChar(36)
+  assigneeId  String?       @db.NVarChar(36)
+  parentId    String?       @db.NVarChar(36)
+  title       String        @db.NVarChar(150)
+  description String?       @db.NVarChar(2000)
+  status      String        @default("PENDING") @db.NVarChar(20)
   priority    Int           @default(2)
   startDate   DateTime?
   dueDate     DateTime?
@@ -294,15 +295,15 @@ model ProjectTask {
 }
 
 model AuditLog {
-  id         String   @id @default(uuid())
-  companyId  String
-  userId     String?
-  action     String
-  entity     String
-  entityId   String?
-  oldValues  String?
-  newValues  String?
-  ipAddress  String?
+  id         String   @id @default(uuid()) @db.NVarChar(36)
+  companyId  String   @db.NVarChar(36)
+  userId     String?  @db.NVarChar(36)
+  action     String   @db.NVarChar(40)
+  entity     String   @db.NVarChar(80)
+  entityId   String?  @db.NVarChar(36)
+  oldValues  String?  @db.NVarChar(4000)
+  newValues  String?  @db.NVarChar(4000)
+  ipAddress  String?  @db.NVarChar(64)
   createdAt  DateTime @default(now())
   company    Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user       User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
