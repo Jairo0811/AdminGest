@@ -1,15 +1,16 @@
 <p align="center">
   <img src="docs/branding-reference.png" alt="AdminGest" width="720" />
 </p>
+
 <p align="center">
   <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
 </p>
+
 <p align="center">
   Plataforma web modular para CRM, administración empresarial y gestión de proyectos.
 </p>
 
 <p align="center">
-
   <img src="https://img.shields.io/badge/estado-en%20desarrollo-2563EB?style=for-the-badge" alt="Estado en desarrollo" />
   <img src="https://img.shields.io/badge/arquitectura-monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
   <img src="https://img.shields.io/badge/licencia-no%20definida-64748B?style=for-the-badge" alt="Licencia no definida" />
@@ -132,6 +133,8 @@ Desarrollar una plataforma web moderna, segura, modular y escalable que permita 
 - Modelo relacional preparado para multiempresa
 - SQL Server Management Studio
 
+> **Nota técnica:** la migración del código de persistencia desde PostgreSQL hacia SQL Server todavía está pendiente. Antes de ejecutar migraciones, debe actualizarse `apps/api/prisma/schema.prisma`, `apps/api/.env.example` y `docker-compose.yml`.
+
 ### Servicios complementarios
 
 <p>
@@ -226,18 +229,28 @@ AdminGest/
 
 ---
 
-## 📋 Requisitos
+## 📋 Requisitos previos
 
-- Node.js 24 LTS
-- pnpm 10 o superior
-- Microsoft SQL Server 2019 o superior
-- SQL Server Management Studio
-- Docker Desktop
-- Git
+- Git.
+- Node.js 24 LTS.
+- Corepack habilitado.
+- pnpm 10.15.0.
+- Microsoft SQL Server 2019 o superior.
+- SQL Server Management Studio.
+- Docker Desktop, únicamente cuando la configuración de contenedores sea migrada oficialmente a SQL Server.
+
+Comprueba las herramientas instaladas:
+
+```bash
+git --version
+node --version
+corepack --version
+pnpm --version
+```
 
 ---
 
-## ⚙️ Configuración inicial
+## ⚙️ Instalación local
 
 ### 1. Clonar el repositorio
 
@@ -246,7 +259,29 @@ git clone https://github.com/Jairo0811/AdminGest.git
 cd AdminGest
 ```
 
-### 2. Crear los archivos de entorno
+### 2. Habilitar pnpm con Corepack
+
+El proyecto declara `pnpm@10.15.0` en el `package.json` raíz. Desde la carpeta `AdminGest`, ejecuta:
+
+```bash
+corepack enable
+corepack prepare pnpm@10.15.0 --activate
+pnpm --version
+```
+
+En Windows, si `corepack enable` devuelve un error de permisos, abre PowerShell como administrador y repite únicamente ese comando.
+
+### 3. Instalar las dependencias del monorepositorio
+
+Ejecuta la instalación una sola vez desde la raíz:
+
+```bash
+pnpm install
+```
+
+No es necesario ejecutar `npm install` ni entrar manualmente en `apps/web` o `apps/api`. `pnpm` detecta `pnpm-workspace.yaml` e instala las dependencias de todos los paquetes del monorepositorio.
+
+### 4. Crear los archivos de entorno
 
 #### Windows PowerShell
 
@@ -262,32 +297,58 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-### 3. Instalar dependencias
+### 5. Configurar la base de datos
 
-```bash
-pnpm install
-```
+El motor definitivo será **Microsoft SQL Server**, pero el repositorio todavía conserva temporalmente la configuración técnica de PostgreSQL en Prisma, `.env.example` y Docker Compose.
 
-### 4. Configurar SQL Server
+Por ese motivo, en el estado actual del proyecto:
 
-Crea una base de datos llamada `AdminGestDb` y ajusta la cadena de conexión en `apps/api/.env`.
+- Puedes instalar dependencias, compilar y ejecutar la base técnica.
+- No debes ejecutar todavía las migraciones de Prisma contra SQL Server.
+- No debes usar todavía `docker compose up -d` esperando que levante SQL Server.
+
+Cuando la migración a SQL Server sea aplicada, la cadena de conexión tendrá una estructura similar a:
 
 ```env
 DATABASE_URL="sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=TuClaveSegura;trustServerCertificate=true"
 ```
 
-### 5. Preparar Prisma
+Las credenciales reales nunca deben subirse al repositorio.
+
+### 6. Generar el cliente de Prisma
+
+Mientras se completa la migración a SQL Server, puedes generar el cliente Prisma usando la configuración existente:
 
 ```bash
 pnpm db:generate
-pnpm db:migrate
 ```
 
-### 6. Ejecutar el proyecto
+No ejecutes `pnpm db:migrate` hasta que el proveedor de Prisma y la cadena de conexión hayan sido actualizados oficialmente a SQL Server.
+
+### 7. Ejecutar el proyecto en desarrollo
 
 ```bash
 pnpm dev
 ```
+
+El comando ejecuta en paralelo las aplicaciones ubicadas en `apps/*`.
+
+También puedes iniciar cada aplicación por separado:
+
+```bash
+pnpm --filter @admingest/web dev
+pnpm --filter @admingest/api dev
+```
+
+### 8. Validar el proyecto
+
+```bash
+pnpm lint
+pnpm build
+pnpm test
+```
+
+En esta fase inicial algunas suites de pruebas pueden no existir todavía. El objetivo es que lint y build permanezcan estables mientras se desarrollan los módulos funcionales.
 
 ---
 
@@ -309,7 +370,7 @@ pnpm dev
 ```env
 NODE_ENV=development
 PORT=3000
-DATABASE_URL="sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=TuClaveSegura;trustServerCertificate=true"
+DATABASE_URL=
 CORS_ORIGIN=http://localhost:5173
 ```
 
@@ -319,7 +380,22 @@ CORS_ORIGIN=http://localhost:5173
 VITE_API_URL=http://localhost:3000/api
 ```
 
-Las credenciales reales y los secretos no deben incluirse en el repositorio.
+Los archivos `.env` contienen configuración local y no deben incluirse en Git.
+
+---
+
+## 📜 Scripts disponibles
+
+| Comando | Descripción |
+|---|---|
+| `pnpm install` | Instala las dependencias de todo el monorepositorio |
+| `pnpm dev` | Ejecuta frontend y backend en paralelo |
+| `pnpm build` | Compila todos los paquetes |
+| `pnpm lint` | Ejecuta las validaciones de ESLint |
+| `pnpm test` | Ejecuta las pruebas configuradas |
+| `pnpm format` | Formatea el repositorio con Prettier |
+| `pnpm db:generate` | Genera Prisma Client para la API |
+| `pnpm db:migrate` | Ejecuta migraciones de Prisma; no usar hasta finalizar la migración a SQL Server |
 
 ---
 
@@ -373,7 +449,7 @@ Administración de Proyectos de Software fue la segunda asignatura cursada con e
 | Orden | Asignatura | Proyecto | Período |
 |---:|---|---|---|
 | 1 | Diseño Centrado en el Usuario (SOF-010) | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) | 2018-C1 |
-| 2 | Administración de Proyectos de Software (SOF-013) |  **AdminGest** | 2018-C3 |
+| 2 | Administración de Proyectos de Software (SOF-013) | **GestorAdministrativo**, reconstruido actualmente como **AdminGest** | 2018-C3 |
 
 Estos proyectos representan una secuencia académica enfocada en experiencia de usuario, planificación, gestión y desarrollo de software. Actualmente están siendo preservados y modernizados como parte del portafolio profesional.
 
