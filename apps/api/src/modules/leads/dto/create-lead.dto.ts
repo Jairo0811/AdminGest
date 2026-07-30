@@ -1,15 +1,27 @@
-import { IsEmail, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsEmail,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class CreateLeadDto {
   @IsString()
+  @Length(2, 60)
   firstName!: string;
 
   @IsOptional()
   @IsString()
+  @Length(1, 60)
   lastName?: string;
 
   @IsOptional()
   @IsString()
+  @Length(2, 120)
   companyName?: string;
 
   @IsOptional()
@@ -29,6 +41,10 @@ export class CreateLeadDto {
   source?: string;
 
   @IsOptional()
+  @IsUUID()
+  ownerId?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(3)
@@ -38,3 +54,4 @@ export class CreateLeadDto {
   @IsString()
   notes?: string;
 }
+
