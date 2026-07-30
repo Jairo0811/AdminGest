@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Headers, Param, Patch, Post } from '@nestjs/common';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
-import { LeadStatus } from '@prisma/client';
 import { CreateLeadDto } from './dto/create-lead.dto';
+import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 import { LeadsService } from './leads.service';
 
 @ApiTags('leads')
@@ -31,8 +31,8 @@ export class LeadsController {
   updateStatus(
     @Headers('x-company-id') companyId: string,
     @Param('id') id: string,
-    @Body('status') status: LeadStatus,
+    @Body() dto: UpdateLeadStatusDto,
   ) {
-    return this.leadsService.updateStatus(companyId, id, status);
+    return this.leadsService.updateStatus(companyId, id, dto.status);
   }
 }

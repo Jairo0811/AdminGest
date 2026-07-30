@@ -7,95 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  BLOCKED
-}
-
-enum UserRole {
-  SUPER_ADMIN
-  ADMIN
-  SALES_MANAGER
-  SALES_REP
-  PROJECT_MANAGER
-  VIEWER
-}
-
-enum LeadStatus {
-  NEW
-  CONTACTED
-  QUALIFIED
-  DISQUALIFIED
-  CONVERTED
-}
-
-enum OpportunityStatus {
-  OPEN
-  WON
-  LOST
-}
-
-enum ActivityType {
-  CALL
-  EMAIL
-  MEETING
-  VISIT
-  TASK
-  FOLLOW_UP
-}
-
-enum ActivityStatus {
-  PENDING
-  COMPLETED
-  CANCELLED
-}
-
-enum QuoteStatus {
-  DRAFT
-  SENT
-  ACCEPTED
-  REJECTED
-  EXPIRED
-}
-
-enum ProjectStatus {
-  PLANNED
-  ACTIVE
-  ON_HOLD
-  COMPLETED
-  CANCELLED
-}
-
-enum TaskStatus {
-  PENDING
-  IN_PROGRESS
-  BLOCKED
-  COMPLETED
-}
-
 model Company {
-  id            String         @id @default(uuid())
-  name          String
-  taxId         String?        @unique
-  email         String?
-  phone         String?
-  address       String?
-  logoUrl       String?
-  currency      String         @default("DOP")
-  timezone      String         @default("America/Santo_Domingo")
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  users         User[]
-  leads         Lead[]
-  customers     Customer[]
-  opportunities Opportunity[]
-  activities    Activity[]
-  catalogItems  CatalogItem[]
-  quotes        Quote[]
-  projects      Project[]
-  auditLogs     AuditLog[]
+  id             String          @id @default(uuid())
+  name           String
+  taxId          String?         @unique
+  email          String?
+  phone          String?
+  address        String?
+  logoUrl        String?
+  currency       String          @default("DOP")
+  timezone       String          @default("America/Santo_Domingo")
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  users          User[]
+  leads          Lead[]
+  customers      Customer[]
+  pipelineStages PipelineStage[]
+  opportunities  Opportunity[]
+  activities     Activity[]
+  catalogItems   CatalogItem[]
+  quotes         Quote[]
+  projects       Project[]
+  auditLogs      AuditLog[]
 }
 
 model User {
@@ -105,12 +39,12 @@ model User {
   passwordHash          String
   firstName             String
   lastName              String
-  role                   UserRole      @default(SALES_REP)
-  status                 UserStatus    @default(ACTIVE)
+  role                   String        @default("SALES_REP")
+  status                 String        @default("ACTIVE")
   lastLoginAt            DateTime?
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
-  company                Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company                Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   assignedLeads          Lead[]        @relation("LeadOwner")
   assignedOpportunities Opportunity[] @relation("OpportunityOwner")
   assignedActivities    Activity[]    @relation("ActivityOwner")
@@ -123,7 +57,7 @@ model User {
 }
 
 model Lead {
-  id          String     @id @default(uuid())
+  id          String   @id @default(uuid())
   companyId   String
   ownerId     String?
   firstName   String
@@ -133,21 +67,21 @@ model Lead {
   email       String?
   phone       String?
   source      String?
-  status      LeadStatus @default(NEW)
-  priority    Int        @default(2)
+  status      String   @default("NEW")
+  priority    Int      @default(2)
   notes       String?
   convertedAt DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  owner       User?      @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: NoAction)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  owner       User?    @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([companyId, status])
   @@index([ownerId])
 }
 
 model Customer {
-  id            String         @id @default(uuid())
+  id            String        @id @default(uuid())
   companyId     String
   name          String
   taxId         String?
@@ -155,10 +89,10 @@ model Customer {
   phone         String?
   address       String?
   website       String?
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   contacts      Contact[]
   opportunities Opportunity[]
   activities    Activity[]
@@ -179,7 +113,7 @@ model Contact {
   isPrimary  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([customerId])
 }
@@ -194,6 +128,7 @@ model PipelineStage {
   isLost        Boolean       @default(false)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   opportunities Opportunity[]
 
   @@unique([companyId, position])
@@ -201,24 +136,24 @@ model PipelineStage {
 }
 
 model Opportunity {
-  id                String            @id @default(uuid())
+  id                String        @id @default(uuid())
   companyId         String
   customerId        String
   ownerId           String?
   pipelineStageId   String
   name              String
   description       String?
-  estimatedValue    Decimal           @default(0) @db.Decimal(18, 2)
-  probability       Int               @default(0)
+  estimatedValue    Decimal       @default(0) @db.Decimal(18, 2)
+  probability       Int           @default(0)
   expectedCloseDate DateTime?
-  status            OpportunityStatus @default(OPEN)
+  status            String        @default("OPEN")
   lostReason        String?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  customer          Customer          @relation(fields: [customerId], references: [id], onDelete: NoAction)
-  owner             User?             @relation("OpportunityOwner", fields: [ownerId], references: [id], onDelete: NoAction)
-  pipelineStage     PipelineStage     @relation(fields: [pipelineStageId], references: [id], onDelete: NoAction)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer          Customer      @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  owner             User?         @relation("OpportunityOwner", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  pipelineStage     PipelineStage @relation(fields: [pipelineStageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   activities        Activity[]
   quotes            Quote[]
   project           Project?
@@ -230,23 +165,23 @@ model Opportunity {
 }
 
 model Activity {
-  id            String         @id @default(uuid())
+  id            String       @id @default(uuid())
   companyId     String
   customerId    String?
   opportunityId String?
   ownerId       String?
-  type          ActivityType
-  status        ActivityStatus @default(PENDING)
+  type          String
+  status        String       @default("PENDING")
   subject       String
   description   String?
   scheduledAt   DateTime
   completedAt   DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  customer      Customer?      @relation(fields: [customerId], references: [id], onDelete: NoAction)
-  opportunity   Opportunity?   @relation(fields: [opportunityId], references: [id], onDelete: NoAction)
-  owner         User?          @relation("ActivityOwner", fields: [ownerId], references: [id], onDelete: NoAction)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer      Customer?    @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  owner         User?        @relation("ActivityOwner", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([companyId, scheduledAt])
   @@index([ownerId, status])
@@ -263,31 +198,31 @@ model CatalogItem {
   isActive    Boolean     @default(true)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company     Company     @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   quoteItems  QuoteItem[]
 
   @@index([companyId, isActive])
 }
 
 model Quote {
-  id            String      @id @default(uuid())
+  id            String       @id @default(uuid())
   companyId     String
   customerId    String
   opportunityId String?
   number        String
-  status        QuoteStatus @default(DRAFT)
-  issueDate     DateTime    @default(now())
+  status        String       @default("DRAFT")
+  issueDate     DateTime     @default(now())
   validUntil    DateTime?
-  subtotal      Decimal     @default(0) @db.Decimal(18, 2)
-  discount      Decimal     @default(0) @db.Decimal(18, 2)
-  tax           Decimal     @default(0) @db.Decimal(18, 2)
-  total         Decimal     @default(0) @db.Decimal(18, 2)
+  subtotal      Decimal      @default(0) @db.Decimal(18, 2)
+  discount      Decimal      @default(0) @db.Decimal(18, 2)
+  tax           Decimal      @default(0) @db.Decimal(18, 2)
+  total         Decimal      @default(0) @db.Decimal(18, 2)
   notes         String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  customer      Customer    @relation(fields: [customerId], references: [id], onDelete: NoAction)
-  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: NoAction)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer      Customer     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   items         QuoteItem[]
 
   @@unique([companyId, number])
@@ -295,16 +230,16 @@ model Quote {
 }
 
 model QuoteItem {
-  id            String      @id @default(uuid())
+  id            String       @id @default(uuid())
   quoteId       String
   catalogItemId String?
   description   String
-  quantity      Decimal     @default(1) @db.Decimal(18, 2)
-  unitPrice     Decimal     @db.Decimal(18, 2)
-  taxRate       Decimal     @default(18) @db.Decimal(5, 2)
-  lineTotal     Decimal     @db.Decimal(18, 2)
-  quote         Quote       @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  catalogItem   CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: NoAction)
+  quantity      Decimal      @default(1) @db.Decimal(18, 2)
+  unitPrice     Decimal      @db.Decimal(18, 2)
+  taxRate       Decimal      @default(18) @db.Decimal(5, 2)
+  lineTotal     Decimal      @db.Decimal(18, 2)
+  quote         Quote        @relation(fields: [quoteId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  catalogItem   CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([quoteId])
 }
@@ -317,17 +252,17 @@ model Project {
   managerId     String?
   name          String
   description   String?
-  status        ProjectStatus @default(PLANNED)
+  status        String        @default("PLANNED")
   startDate     DateTime?
   endDate       DateTime?
   budget        Decimal?      @db.Decimal(18, 2)
   progress      Int           @default(0)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  customer      Customer      @relation(fields: [customerId], references: [id], onDelete: NoAction)
-  opportunity   Opportunity?  @relation(fields: [opportunityId], references: [id], onDelete: NoAction)
-  manager       User?         @relation("ProjectManager", fields: [managerId], references: [id], onDelete: NoAction)
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer      Customer      @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  opportunity   Opportunity?  @relation(fields: [opportunityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  manager       User?         @relation("ProjectManager", fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tasks         ProjectTask[]
 
   @@index([companyId, status])
@@ -335,26 +270,27 @@ model Project {
 }
 
 model ProjectTask {
-  id          String     @id @default(uuid())
+  id          String        @id @default(uuid())
   projectId   String
   assigneeId  String?
   parentId    String?
   title       String
   description String?
-  status      TaskStatus @default(PENDING)
-  priority    Int        @default(2)
+  status      String        @default("PENDING")
+  priority    Int           @default(2)
   startDate   DateTime?
   dueDate     DateTime?
-  progress    Int        @default(0)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignee    User?      @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: NoAction)
-  parent      ProjectTask? @relation("TaskHierarchy", fields: [parentId], references: [id], onDelete: NoAction)
+  progress    Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignee    User?         @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parent      ProjectTask?  @relation("TaskHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children    ProjectTask[] @relation("TaskHierarchy")
 
   @@index([projectId, status])
   @@index([assigneeId])
+  @@index([parentId])
 }
 
 model AuditLog {
@@ -368,8 +304,8 @@ model AuditLog {
   newValues  String?
   ipAddress  String?
   createdAt  DateTime @default(now())
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  user       User?    @relation(fields: [userId], references: [id], onDelete: NoAction)
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([companyId, createdAt])
   @@index([userId])
