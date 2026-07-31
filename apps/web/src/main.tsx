@@ -6,6 +6,7 @@ import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import './styles.css';
 import './brand.css';
+import './dashboard.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
