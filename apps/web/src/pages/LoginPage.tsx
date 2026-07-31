@@ -9,6 +9,11 @@ import {
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { BrandLogo } from "../components/BrandLogo";
+import {
+  formatDominicanTaxId,
+  normalizeDominicanTaxId,
+  validateDominicanTaxId,
+} from "../utils/dominican-tax-id";
 
 export function LoginPage() {
   const { user, login, register } = useAuth();
@@ -29,9 +34,13 @@ export function LoginPage() {
       if (mode === "login") {
         await login(String(form.get("email")), String(form.get("password")));
       } else {
+        const taxId = String(form.get("taxId") ?? "");
+        const taxIdError = validateDominicanTaxId(taxId);
+        if (taxIdError) throw new Error(taxIdError);
+
         await register({
           companyName: String(form.get("companyName")),
-          taxId: String(form.get("taxId")) || undefined,
+          taxId: taxId ? normalizeDominicanTaxId(taxId) : undefined,
           firstName: String(form.get("firstName")),
           lastName: String(form.get("lastName")),
           email: String(form.get("email")),
@@ -59,9 +68,7 @@ export function LoginPage() {
         <div className="auth-copy">
           <p className="eyebrow">Gestión sin fricción</p>
           <h1>La gestión inteligente para tu empresa</h1>
-          <p>
-           CRM, Proyectos, y Gestion Inteligente para tu empresa.
-          </p>
+          <p>CRM, Proyectos, y Gestion Inteligente para tu empresa.</p>
         </div>
 
         <div className="feature-grid">
@@ -125,8 +132,18 @@ export function LoginPage() {
                 />
               </label>
               <label className="form-field full">
-                <span>RNC o identificación</span>
-                <input name="taxId" placeholder="Opcional" />
+                <span>Cédula o RNC</span>
+                <input
+                  inputMode="numeric"
+                  maxLength={13}
+                  name="taxId"
+                  onInput={(event) => {
+                    event.currentTarget.value = formatDominicanTaxId(
+                      event.currentTarget.value,
+                    );
+                  }}
+                  placeholder="001-0000000-0 o 130-00000-0"
+                />
               </label>
               <div className="form-grid">
                 <label className="form-field">
