@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { ArrowRight, BarChart3, CheckCircle2, FolderKanban, ShieldCheck } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { BrandLogo } from '../components/BrandLogo';
 
 export function LoginPage() {
   const { user, login, register } = useAuth();
@@ -40,8 +41,7 @@ export function LoginPage() {
     <div className="auth-page">
       <section className="auth-showcase">
         <div className="auth-brand">
-          <span className="brand-mark">AG</span>
-          <span>Admin<span>Gest</span></span>
+          <BrandLogo inverse />
         </div>
         <div className="auth-copy">
           <p className="eyebrow">Gestión sin fricción</p>
@@ -130,4 +130,3 @@ export function LoginPage() {
     </div>
   );
 }
-
