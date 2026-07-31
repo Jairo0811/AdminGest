@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { useTheme } from "../theme/ThemeContext";
+import { useTheme } from "../theme/useTheme";
 import { BrandLogo } from "./BrandLogo";
 
 const navigation = [
