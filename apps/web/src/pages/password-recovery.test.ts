@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-
-function isStrongPassword(password: string) {
-  return password.length >= 10 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password);
-}
+import { isStrongPassword } from '../utils/password-policy';
 
 describe('password recovery validation', () => {
   it('acepta una contraseña que cumple la política', () => {
