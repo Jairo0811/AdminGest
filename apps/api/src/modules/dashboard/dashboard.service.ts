@@ -6,6 +6,8 @@ type TrendMetric = {
   variation: number | null;
 };
 
+type TrendModel = 'lead' | 'customer' | 'opportunity' | 'quote' | 'project';
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -108,7 +110,7 @@ export class DashboardService {
         pendingQuotes: this.metric(pendingQuotes, quoteTrend),
         activeProjects: this.metric(activeProjects, projectTrend),
       },
-      salesEvolution: this.buildMonthlySeries(chartOpportunities, chartStart, now),
+      salesEvolution: this.buildMonthlySeries(chartOpportunities, chartStart),
       opportunitiesByStage: stages.map((stage) => ({
         id: stage.id,
         name: stage.name,
@@ -129,26 +131,68 @@ export class DashboardService {
   }
 
   private async periodCount(
-    model: 'lead' | 'customer' | 'opportunity' | 'quote' | 'project',
+    model: TrendModel,
     companyId: string,
     currentStart: Date,
     currentEnd: Date,
     previousStart: Date,
   ): Promise<TrendMetric> {
-    const repository = this.prisma[model] as unknown as {
-      count(args: { where: Record<string, unknown> }): Promise<number>;
+    const currentWhere = {
+      companyId,
+      createdAt: { gte: currentStart, lte: currentEnd },
+    };
+    const previousWhere = {
+      companyId,
+      createdAt: { gte: previousStart, lt: currentStart },
     };
 
-    const [current, previous] = await Promise.all([
-      repository.count({
-        where: { companyId, createdAt: { gte: currentStart, lte: currentEnd } },
-      }),
-      repository.count({
-        where: { companyId, createdAt: { gte: previousStart, lt: currentStart } },
-      }),
-    ]);
+    const [current, previous] = await this.countByModel(
+      model,
+      currentWhere,
+      previousWhere,
+    );
 
     return { value: current, variation: this.variation(current, previous) };
+  }
+
+  private countByModel(
+    model: TrendModel,
+    currentWhere: {
+      companyId: string;
+      createdAt: { gte: Date; lte: Date };
+    },
+    previousWhere: {
+      companyId: string;
+      createdAt: { gte: Date; lt: Date };
+    },
+  ): Promise<[number, number]> {
+    switch (model) {
+      case 'lead':
+        return Promise.all([
+          this.prisma.lead.count({ where: currentWhere }),
+          this.prisma.lead.count({ where: previousWhere }),
+        ]);
+      case 'customer':
+        return Promise.all([
+          this.prisma.customer.count({ where: currentWhere }),
+          this.prisma.customer.count({ where: previousWhere }),
+        ]);
+      case 'opportunity':
+        return Promise.all([
+          this.prisma.opportunity.count({ where: currentWhere }),
+          this.prisma.opportunity.count({ where: previousWhere }),
+        ]);
+      case 'quote':
+        return Promise.all([
+          this.prisma.quote.count({ where: currentWhere }),
+          this.prisma.quote.count({ where: previousWhere }),
+        ]);
+      case 'project':
+        return Promise.all([
+          this.prisma.project.count({ where: currentWhere }),
+          this.prisma.project.count({ where: previousWhere }),
+        ]);
+    }
   }
 
   private async periodPipeline(
@@ -195,7 +239,6 @@ export class DashboardService {
       status: string;
     }>,
     start: Date,
-    now: Date,
   ) {
     const formatter = new Intl.DateTimeFormat('es-DO', { month: 'short' });
     const months = Array.from({ length: 6 }, (_, index) => {
@@ -222,6 +265,6 @@ export class DashboardService {
       if (opportunity.status === 'WON') month.wonValue += value;
     }
 
-    return months.filter((month, index) => index < 5 || now >= start);
+    return months;
   }
 }
