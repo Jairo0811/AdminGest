@@ -24,10 +24,9 @@ export function ProfilePage() {
   });
 
   useEffect(() => {
-    if (notice) {
-      const timeout = window.setTimeout(() => setNotice(''), 3200);
-      return () => window.clearTimeout(timeout);
-    }
+    if (!notice) return;
+    const timeout = window.setTimeout(() => setNotice(''), 3200);
+    return () => window.clearTimeout(timeout);
   }, [notice]);
 
   const updateProfile = useMutation({
@@ -45,7 +44,7 @@ export function ProfilePage() {
   const changePassword = useMutation({
     mutationFn: (payload: Record<string, string>) =>
       api('/users/me/change-password', { method: 'POST', body: JSON.stringify(payload) }),
-    onSuccess: (_, __, context) => {
+    onSuccess: () => {
       setError('');
       setNotice('Contraseña actualizada correctamente.');
     },
@@ -71,11 +70,15 @@ export function ProfilePage() {
       setError('La confirmación de contraseña no coincide.');
       return;
     }
-    changePassword.mutate({
-      currentPassword: String(data.get('currentPassword')),
-      newPassword,
-    }, { onSuccess: () => form.reset() });
+    changePassword.mutate(
+      { currentPassword: String(data.get('currentPassword')), newPassword },
+      { onSuccess: () => form.reset() },
+    );
   };
+
+  if (profileQuery.isLoading) {
+    return <section className="page"><div className="panel">Cargando perfil…</div></section>;
+  }
 
   const profile = profileQuery.data;
 
@@ -85,7 +88,7 @@ export function ProfilePage() {
       <div className="page-heading">
         <div><p className="eyebrow">Cuenta personal</p><h1>Mi perfil</h1><p>Actualiza tus datos personales y protege tu acceso.</p></div>
       </div>
-      {error && <div className="alert error">{error}</div>}
+      {(error || profileQuery.error) && <div className="alert error">{error || (profileQuery.error as Error).message}</div>}
       <div className="settings-grid">
         <form className="panel settings-form" onSubmit={submitProfile}>
           <div className="settings-title"><UserCircle /><div><h2>Información personal</h2><p>Datos visibles dentro de tu empresa.</p></div></div>
