@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=ReleaseOnly_2026!;encrypt=true;trustServerCertificate=true"
+      JWT_SECRET: "release-only-jwt-secret-with-at-least-32-characters"
+      CORS_ORIGIN: "http://localhost:5173"
+      PASSWORD_RESET_URL: "http://localhost:5173/reset-password"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: Validate
+        run: |
+          npm run db:validate
+          npm run lint
+          npm run test
+          npm run build
+
+      - name: Package artifacts
+        run: |
+          tar -czf admingest-api-${{ github.ref_name }}.tar.gz -C apps/api dist prisma package.json
+          tar -czf admingest-web-${{ github.ref_name }}.tar.gz -C apps/web dist package.json
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body_path: CHANGELOG.md
+          files: |
+            admingest-api-${{ github.ref_name }}.tar.gz
+            admingest-web-${{ github.ref_name }}.tar.gz
