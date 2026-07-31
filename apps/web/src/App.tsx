@@ -10,6 +10,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { LeadsPage } from "./pages/LeadsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { OpportunitiesPage } from "./pages/OpportunitiesPage";
+import { ProfilePage } from "./pages/ProfilePage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { QuotesPage } from "./pages/QuotesPage";
 import { ReportsPage } from "./pages/ReportsPage";
@@ -53,6 +54,7 @@ export default function App() {
         <Route element={<ProjectsPage />} path="projects" />
         <Route element={<ReportsPage />} path="reports" />
         <Route element={<AdminRoute><UsersPage /></AdminRoute>} path="users" />
+        <Route element={<ProfilePage />} path="profile" />
         <Route element={<SettingsPage />} path="settings" />
       </Route>
       <Route element={<Navigate replace to="/" />} path="*" />
