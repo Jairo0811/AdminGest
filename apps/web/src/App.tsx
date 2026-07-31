@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./auth/AuthContext";
 import { AppLayout } from "./components/AppLayout";
@@ -30,7 +31,7 @@ function ProtectedLayout() {
   return user ? <AppLayout /> : <Navigate replace to="/login" />;
 }
 
-function AdminRoute({ children }: { children: React.ReactNode }) {
+function AdminRoute({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   return user && ["SUPER_ADMIN", "ADMIN"].includes(user.role)
     ? children
