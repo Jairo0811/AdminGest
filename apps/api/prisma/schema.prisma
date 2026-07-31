@@ -226,6 +226,7 @@ model Quote {
   customerId    String       @db.NVarChar(36)
   opportunityId String?      @db.NVarChar(36)
   number        String       @db.NVarChar(30)
+  publicCode    String       @unique @default(uuid()) @db.NVarChar(36)
   status        String       @default("DRAFT") @db.NVarChar(20)
   issueDate     DateTime     @default(now())
   validUntil    DateTime?
@@ -326,3 +327,4 @@ model AuditLog {
   @@index([companyId, createdAt])
   @@index([userId])
 }
+
