@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./auth/AuthContext";
 import { AppLayout } from "./components/AppLayout";
@@ -9,10 +10,12 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { LeadsPage } from "./pages/LeadsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { OpportunitiesPage } from "./pages/OpportunitiesPage";
+import { ProfilePage } from "./pages/ProfilePage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { QuotesPage } from "./pages/QuotesPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { UsersPage } from "./pages/UsersPage";
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
@@ -29,6 +32,13 @@ function ProtectedLayout() {
   return user ? <AppLayout /> : <Navigate replace to="/login" />;
 }
 
+function AdminRoute({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  return user && ["SUPER_ADMIN", "ADMIN"].includes(user.role)
+    ? children
+    : <Navigate replace to="/" />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -43,6 +53,8 @@ export default function App() {
         <Route element={<QuotesPage />} path="quotes" />
         <Route element={<ProjectsPage />} path="projects" />
         <Route element={<ReportsPage />} path="reports" />
+        <Route element={<AdminRoute><UsersPage /></AdminRoute>} path="users" />
+        <Route element={<ProfilePage />} path="profile" />
         <Route element={<SettingsPage />} path="settings" />
       </Route>
       <Route element={<Navigate replace to="/" />} path="*" />

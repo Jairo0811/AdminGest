@@ -51,6 +51,7 @@ interface EntityPageProps {
   fields: Field[];
   canEdit?: boolean;
   canDelete?: boolean;
+  headerActions?: ReactNode;
   buildPayload?(values: Record<string, string | number>): unknown;
   itemActions?: (item: Entity) => ReactNode;
 }
@@ -70,6 +71,7 @@ export function EntityPage({
   fields,
   canEdit = true,
   canDelete = true,
+  headerActions,
   buildPayload,
   itemActions,
 }: EntityPageProps) {
@@ -204,9 +206,12 @@ export function EntityPage({
           <h1>{title}</h1>
           <p>{description}</p>
         </div>
-        <button className="primary-button" onClick={() => setEditing(null)} type="button">
-          <Plus size={18} /> Nuevo {singular}
-        </button>
+        <div className="page-heading-actions">
+          {headerActions}
+          <button className="primary-button" onClick={() => setEditing(null)} type="button">
+            <Plus size={18} /> Nuevo {singular}
+          </button>
+        </div>
       </div>
 
       <div className="toolbar entity-toolbar">
