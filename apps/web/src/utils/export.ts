@@ -80,23 +80,26 @@ export function printTable<T>(
   body{font-family:Arial,sans-serif;color:#17263a;margin:32px}
   header{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}
   h1{margin:0;font-size:24px} small{color:#66788d}
+  button{padding:9px 14px;border:0;border-radius:8px;color:#fff;background:#1677df;font-weight:700;cursor:pointer}
   table{width:100%;border-collapse:collapse;font-size:12px}
   th,td{border:1px solid #dce4ed;padding:8px;text-align:left;vertical-align:top}
   th{background:#edf5ff;color:#153452}
-  @media print{body{margin:12mm}button{display:none}}
+  @page{size:landscape;margin:12mm}
+  @media print{body{margin:0}button{display:none}}
 </style>
 </head>
 <body>
-<header><div><h1>${escapeXml(title)}</h1><small>AdminGest · ${new Date().toLocaleString('es-DO')}</small></div><button onclick="window.print()">Guardar como PDF</button></header>
+<header><div><h1>${escapeXml(title)}</h1><small>AdminGest · ${new Date().toLocaleString('es-DO')}</small></div><button type="button" onclick="window.print()">Guardar como PDF</button></header>
 <table><thead><tr>${columns.map((column) => `<th>${escapeXml(column.label)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
-<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150));</script>
+<script>
+  window.addEventListener('load', () => {
+    window.focus();
+    window.setTimeout(() => window.print(), 300);
+  });
+</script>
 </body></html>`;
 
-  const printWindow = window.open('', '_blank', 'noopener,noreferrer');
-  if (!printWindow) throw new Error('El navegador bloqueó la ventana de impresión.');
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  openPrintWindow(html);
 }
 
 export function printDocument(title: string, body: string) {
@@ -106,10 +109,28 @@ export function printDocument(title: string, body: string) {
   .brand span{color:#18a96f}.muted{color:#66788d}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px 0}
   .summary div{border:1px solid #dce4ed;border-radius:8px;padding:12px}table{width:100%;border-collapse:collapse;margin-top:20px}
   th,td{border:1px solid #dce4ed;padding:9px;text-align:left}th{background:#edf5ff}.totals{margin-left:auto;width:320px;margin-top:20px}
-  @media print{body{margin:12mm}.no-print{display:none}}
-  </style></head><body><div class="document"><button class="no-print" onclick="window.print()">Guardar como PDF</button>${body}</div><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150));</script></body></html>`;
-  const printWindow = window.open('', '_blank', 'noopener,noreferrer');
-  if (!printWindow) throw new Error('El navegador bloqueó la ventana de impresión.');
+  .no-print{padding:9px 14px;border:0;border-radius:8px;color:#fff;background:#1677df;font-weight:700;cursor:pointer}
+  @page{margin:12mm}
+  @media print{body{margin:0}.no-print{display:none}}
+  </style></head><body><div class="document"><button class="no-print" type="button" onclick="window.print()">Guardar como PDF</button>${body}</div><script>
+  window.addEventListener('load', () => {
+    window.focus();
+    window.setTimeout(() => window.print(), 300);
+  });
+  </script></body></html>`;
+
+  openPrintWindow(html);
+}
+
+function openPrintWindow(html: string) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    throw new Error(
+      'El navegador bloqueó la ventana de impresión. Habilita las ventanas emergentes para AdminGest e inténtalo nuevamente.',
+    );
+  }
+
+  printWindow.opener = null;
   printWindow.document.open();
   printWindow.document.write(html);
   printWindow.document.close();
