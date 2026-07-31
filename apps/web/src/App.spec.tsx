@@ -24,7 +24,12 @@ describe('AdminGest', () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByRole('heading', { name: 'Inicia sesión' })).toBeInTheDocument();
-    expect(screen.getByText('Todo tu negocio, en un solo lugar.')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Inicia sesión' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'AdminGest' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Correo electrónico')).toBeInTheDocument();
+    expect(screen.getByLabelText('Contraseña')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /entrar/i })).toBeInTheDocument();
   });
 });
