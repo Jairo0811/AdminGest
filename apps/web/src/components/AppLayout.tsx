@@ -10,13 +10,16 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Moon,
   Settings,
+  Sun,
   Target,
   UsersRound,
   X,
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useTheme } from "../theme/ThemeContext";
 import { BrandLogo } from "./BrandLogo";
 
 const navigation = [
@@ -33,6 +36,7 @@ const navigation = [
 
 export function AppLayout() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -107,6 +111,18 @@ export function AppLayout() {
           </button>
 
           <div className="topbar-spacer" />
+
+          <button
+            aria-label={
+              theme === "dark" ? "Activar tema claro" : "Activar tema oscuro"
+            }
+            className="icon-button"
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Tema claro" : "Tema oscuro"}
+            type="button"
+          >
+            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
 
           <button
             aria-label="Notificaciones"
