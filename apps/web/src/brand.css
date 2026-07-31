@@ -20,7 +20,9 @@
 
 /* Sidebar: logo completo, proporcionado al ancho de 260 px */
 .brand-logo--sidebar {
-  width: 138px;
+  width: 145px;
+  display: block;
+  margin: 0 auto;
 }
 
 /* Pantalla de carga */
@@ -54,7 +56,8 @@
   }
 
   .brand-logo--sidebar {
-    width: 128px;
+    width: 132px;
+    margin: 0 auto;
   }
 }
 
