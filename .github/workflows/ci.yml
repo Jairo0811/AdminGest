@@ -9,10 +9,37 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: test
+  DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
+  JWT_SECRET: "ci-only-jwt-secret-with-at-least-32-characters"
+  CORS_ORIGIN: "http://localhost:5173"
+  PASSWORD_RESET_URL: "http://localhost:5173/reset-password"
+
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: AdminGest_CI_2026!
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'AdminGest_CI_2026!' -C -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+          --health-start-period 30s
 
     steps:
       - name: Checkout
@@ -29,13 +56,20 @@ jobs:
 
       - name: Generate Prisma Client
         run: npm run db:generate
-        env:
-          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
 
       - name: Validate Prisma schema
         run: npm run db:validate
-        env:
-          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
+
+      - name: Create CI database
+        shell: bash
+        run: |
+          CONTAINER_ID=$(docker ps --filter ancestor=mcr.microsoft.com/mssql/server:2022-latest --format '{{.ID}}' | head -n 1)
+          docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd \
+            -S localhost -U sa -P 'AdminGest_CI_2026!' -C \
+            -Q "IF DB_ID('AdminGestDb') IS NULL CREATE DATABASE AdminGestDb"
+
+      - name: Deploy Prisma migrations
+        run: npm run db:deploy
 
       - name: Lint
         run: npm run lint
@@ -45,3 +79,22 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Dependency audit
+        run: npm audit --audit-level=critical
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: admingest-web
+          path: apps/web/dist
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload API build
+        uses: actions/upload-artifact@v4
+        with:
+          name: admingest-api
+          path: apps/api/dist
+          if-no-files-found: error
+          retention-days: 7
