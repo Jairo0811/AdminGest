@@ -40,7 +40,7 @@ export function AppLayout() {
       <aside className={menuOpen ? 'sidebar open' : 'sidebar'}>
         <div className="brand-row">
           <div className="brand">
-            <BrandLogo inverse />
+            <BrandLogo compact />
           </div>
           <button className="mobile-close" onClick={() => setMenuOpen(false)} type="button">
             <X size={20} />
