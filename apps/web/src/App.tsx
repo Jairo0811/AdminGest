@@ -7,6 +7,7 @@ import { ActivitiesPage } from "./pages/ActivitiesPage";
 import { CatalogPage } from "./pages/CatalogPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LeadsPage } from "./pages/LeadsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { OpportunitiesPage } from "./pages/OpportunitiesPage";
@@ -14,6 +15,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { QuotesPage } from "./pages/QuotesPage";
 import { ReportsPage } from "./pages/ReportsPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { UsersPage } from "./pages/UsersPage";
 
@@ -43,6 +45,8 @@ export default function App() {
   return (
     <Routes>
       <Route element={<LoginPage />} path="/login" />
+      <Route element={<ForgotPasswordPage />} path="/forgot-password" />
+      <Route element={<ResetPasswordPage />} path="/reset-password" />
       <Route element={<ProtectedLayout />}>
         <Route element={<DashboardPage />} index />
         <Route element={<LeadsPage />} path="leads" />
