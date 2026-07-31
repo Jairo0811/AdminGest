@@ -4,9 +4,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { api } from '../api/client';
+import { getTokenExpiration, isTokenExpired } from './token-expiration';
 
 export interface SessionUser {
   id: string;
@@ -50,11 +52,35 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const expirationTimer = useRef<number | null>(null);
+
+  const clearExpirationTimer = useCallback(() => {
+    if (expirationTimer.current !== null) {
+      window.clearTimeout(expirationTimer.current);
+      expirationTimer.current = null;
+    }
+  }, []);
 
   const logout = useCallback(() => {
+    clearExpirationTimer();
     localStorage.removeItem('admingest_token');
     setUser(null);
-  }, []);
+  }, [clearExpirationTimer]);
+
+  const scheduleLogout = useCallback(
+    (token: string) => {
+      clearExpirationTimer();
+      const expiration = getTokenExpiration(token);
+      if (expiration === null || expiration <= Date.now()) {
+        logout();
+        return;
+      }
+
+      const delay = Math.min(expiration - Date.now(), 2_147_483_647);
+      expirationTimer.current = window.setTimeout(logout, delay);
+    },
+    [clearExpirationTimer, logout],
+  );
 
   const refreshUser = useCallback(async () => {
     setUser(await api<SessionUser>('/auth/me'));
@@ -62,22 +88,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('admingest_token');
-    if (!token) {
+    if (!token || isTokenExpired(token)) {
+      logout();
       setLoading(false);
       return;
     }
+
+    scheduleLogout(token);
     refreshUser()
       .catch(logout)
       .finally(() => setLoading(false));
-  }, [logout, refreshUser]);
+  }, [logout, refreshUser, scheduleLogout]);
 
   useEffect(() => {
     window.addEventListener('admingest:unauthorized', logout);
     return () => window.removeEventListener('admingest:unauthorized', logout);
   }, [logout]);
 
+  useEffect(() => clearExpirationTimer, [clearExpirationTimer]);
+
   const establishSession = (session: SessionResponse) => {
     localStorage.setItem('admingest_token', session.accessToken);
+    scheduleLogout(session.accessToken);
     setUser(session.user);
   };
 
