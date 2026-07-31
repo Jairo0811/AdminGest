@@ -33,27 +33,42 @@ model Company {
 }
 
 model User {
-  id                    String        @id @default(uuid()) @db.NVarChar(36)
-  companyId             String        @db.NVarChar(36)
-  email                 String        @unique @db.NVarChar(254)
-  passwordHash          String        @db.NVarChar(100)
-  firstName             String        @db.NVarChar(60)
-  lastName              String        @db.NVarChar(60)
-  role                   String        @default("SALES_REP") @db.NVarChar(32)
-  status                 String        @default("ACTIVE") @db.NVarChar(20)
+  id                    String               @id @default(uuid()) @db.NVarChar(36)
+  companyId             String               @db.NVarChar(36)
+  email                 String               @unique @db.NVarChar(254)
+  passwordHash          String               @db.NVarChar(100)
+  firstName             String               @db.NVarChar(60)
+  lastName              String               @db.NVarChar(60)
+  role                   String               @default("SALES_REP") @db.NVarChar(32)
+  status                 String               @default("ACTIVE") @db.NVarChar(20)
   lastLoginAt            DateTime?
-  createdAt              DateTime      @default(now())
-  updatedAt              DateTime      @updatedAt
-  company                Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  assignedLeads          Lead[]        @relation("LeadOwner")
-  assignedOpportunities Opportunity[] @relation("OpportunityOwner")
-  assignedActivities    Activity[]    @relation("ActivityOwner")
-  managedProjects       Project[]     @relation("ProjectManager")
-  assignedTasks         ProjectTask[] @relation("TaskAssignee")
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  company                Company              @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignedLeads          Lead[]               @relation("LeadOwner")
+  assignedOpportunities Opportunity[]        @relation("OpportunityOwner")
+  assignedActivities    Activity[]           @relation("ActivityOwner")
+  managedProjects       Project[]            @relation("ProjectManager")
+  assignedTasks         ProjectTask[]        @relation("TaskAssignee")
   auditLogs              AuditLog[]
+  passwordResetTokens   PasswordResetToken[]
 
   @@index([companyId, status])
   @@index([companyId, role])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.NVarChar(36)
+  userId    String    @db.NVarChar(36)
+  tokenHash String    @unique @db.NVarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  createdIp String?   @db.NVarChar(64)
+  userAgent String?   @db.NVarChar(500)
+  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId, expiresAt])
 }
 
 model Lead {
