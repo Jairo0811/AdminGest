@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { normalizeDominicanTaxId } from '../../common/validation/dominican-tax-id';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateContactDto, CreateCustomerDto } from './dto/create-customer.dto';
@@ -48,11 +49,13 @@ export class CustomersService {
   }
 
   async create(companyId: string, userId: string, dto: CreateCustomerDto) {
+    const taxId = dto.taxId ? normalizeDominicanTaxId(dto.taxId) : undefined;
+
     if (
-      dto.taxId &&
-      (await this.prisma.customer.findFirst({ where: { companyId, taxId: dto.taxId } }))
+      taxId &&
+      (await this.prisma.customer.findFirst({ where: { companyId, taxId } }))
     ) {
-      throw new ConflictException('Ya existe un cliente con este RNC o identificación.');
+      throw new ConflictException('Ya existe un cliente con esta cédula o RNC.');
     }
 
     const { primaryContact, ...data } = dto;
@@ -60,6 +63,7 @@ export class CustomersService {
       data: {
         companyId,
         ...data,
+        taxId,
         contacts: primaryContact
           ? { create: { ...primaryContact, isPrimary: true } }
           : undefined,
@@ -72,7 +76,7 @@ export class CustomersService {
       action: 'CREATE',
       entity: 'Customer',
       entityId: customer.id,
-      newValues: dto,
+      newValues: { ...dto, taxId },
     });
     return customer;
   }
@@ -84,9 +88,20 @@ export class CustomersService {
     dto: UpdateCustomerDto,
   ) {
     const existing = await this.findOne(companyId, id);
+    const taxId = dto.taxId ? normalizeDominicanTaxId(dto.taxId) : dto.taxId;
+
+    if (
+      taxId &&
+      (await this.prisma.customer.findFirst({
+        where: { companyId, taxId, id: { not: id } },
+      }))
+    ) {
+      throw new ConflictException('Ya existe un cliente con esta cédula o RNC.');
+    }
+
     const customer = await this.prisma.customer.update({
       where: { id },
-      data: dto,
+      data: { ...dto, taxId },
       include: { contacts: true },
     });
     await this.audit.record({
@@ -96,7 +111,7 @@ export class CustomersService {
       entity: 'Customer',
       entityId: id,
       oldValues: existing,
-      newValues: dto,
+      newValues: { ...dto, taxId },
     });
     return customer;
   }
@@ -125,4 +140,3 @@ export class CustomersService {
     return { archived: true };
   }
 }
-
