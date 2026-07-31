@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { BrandLogo } from './BrandLogo';
 
 const navigation = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/' },
@@ -39,8 +40,7 @@ export function AppLayout() {
       <aside className={menuOpen ? 'sidebar open' : 'sidebar'}>
         <div className="brand-row">
           <div className="brand">
-            <span className="brand-mark">AG</span>
-            <span>Admin<span>Gest</span></span>
+            <BrandLogo inverse />
           </div>
           <button className="mobile-close" onClick={() => setMenuOpen(false)} type="button">
             <X size={20} />
@@ -102,4 +102,3 @@ export function AppLayout() {
     </div>
   );
 }
-
