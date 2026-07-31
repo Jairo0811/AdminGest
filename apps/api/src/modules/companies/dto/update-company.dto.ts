@@ -1,4 +1,5 @@
 import { IsEmail, IsOptional, IsString, IsUrl, Length } from 'class-validator';
+import { IsDominicanTaxId } from '../../../common/validation/is-dominican-tax-id.decorator';
 
 export class UpdateCompanyDto {
   @IsOptional()
@@ -8,7 +9,7 @@ export class UpdateCompanyDto {
 
   @IsOptional()
   @IsString()
-  @Length(9, 20)
+  @IsDominicanTaxId()
   taxId?: string;
 
   @IsOptional()
@@ -36,4 +37,3 @@ export class UpdateCompanyDto {
   @IsString()
   timezone?: string;
 }
-
