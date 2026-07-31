@@ -365,22 +365,23 @@ Resultados validados:
 
 | 👤 Integrante | 🆔 Matrícula |
 |---|---|
-| Francis Jairo Matías Rosario | 2015-2984 |
-| Isaías Pérez Moya | 2016-3595 |
-| Enmanuel Avilez Valoy | 2016-3789 |
-| Diana Caroline Mejía Encarnación | 2016-3796 |
-| Andrés Eudoro Pujols | 2016-3917 |
-| Alexander Dionicio Mercedes | 2016-3962 |
-| Raymundo Eduardo Peña Sánchez | 2016-4276 |
+| 👨🏻‍💻 Francis Jairo Matías Rosario | 2015-2984 |
+| 👨🏻‍💻 Isaías Pérez Moya | 2016-3595 |
+| 👨🏻‍💻 Enmanuel Avilez Valoy | 2016-3789 |
+| 👩🏻‍💻 Diana Caroline Mejía Encarnación | 2016-3796 |
+| 👨🏻‍💻 Andrés Eudoro Pujols | 2016-3917 |
+| 👨🏻‍💻 Alexander Dionicio Mercedes | 2016-3962 |
+| 👨🏻‍💻 Raymundo Eduardo Peña Sánchez | 2016-4276 |
 
 ## 🎓 Información académica
 
 | Información | Detalle |
 |---|---|
-| Asignatura | Administración de Proyectos de Software (SOF-013) |
-| Institución | Instituto Tecnológico de Las Américas (ITLA) |
-| Período académico | 2018-C3 |
-| Tipo de entrega | Proyecto final |
+| 📖 Asignatura | Administración de Proyectos de Software (SOF-013) |
+| 👨‍🏫 Profesor | Juan Pablo Valdez Reyes |
+| 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
+| 📅 Período académico | 2018-C3 |
+| 📁 Tipo de entrega | Proyecto final |
 
 ## 📄 Licencia
 
