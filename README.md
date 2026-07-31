@@ -132,7 +132,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Jest
 - Vitest
 - GitHub Actions
-- Docker Compose
+- Docker Compose opcional
 
 ## Arquitectura
 
@@ -152,8 +152,8 @@ NestJS modular
         ▼
 Prisma ORM
         │
-        ▼
-Microsoft SQL Server 2022
+        ├── SQL Server Express 2022 (recomendado)
+        └── SQL Server en Docker Compose (opcional)
 ```
 
 La solución usa un monorepo con npm workspaces:
@@ -192,7 +192,7 @@ Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones de arq
 | Validación de cédula y RNC | ✅ Completada |
 | Pruebas automatizadas | 🟡 Implementadas; cobertura en ampliación |
 | Seguridad y dependencias | 🟡 Endurecimiento pendiente |
-| Docker y despliegue | 🟡 Preparación final pendiente |
+| Docker y despliegue | 🟡 Soporte disponible; documentación final pendiente |
 | Documentación de release | 🟡 En progreso |
 | Release `v1.0.0` | ⏳ Pendiente |
 
@@ -201,7 +201,8 @@ Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones de arq
 - Git
 - Node.js 22 LTS recomendado
 - npm compatible con el `package-lock.json`
-- Microsoft SQL Server 2019 o superior, o Docker Desktop
+- SQL Server Express 2022 recomendado para desarrollo local
+- Docker Desktop opcional, solo para el entorno reproducible con Docker Compose
 
 Comprueba las herramientas:
 
@@ -211,7 +212,18 @@ node --version
 npm --version
 ```
 
-## Instalación local
+## Modalidades de ejecución
+
+AdminGest mantiene dos modalidades soportadas:
+
+| Modalidad | Recomendación | Uso principal |
+|---|---|---|
+| SQL Server Express 2022 | ✅ Recomendada | Desarrollo diario, depuración y trabajo con SSMS |
+| Docker Compose | Opcional | Entornos reproducibles, incorporación de nuevos desarrolladores y validaciones controladas |
+
+El entorno utilizado principalmente durante el desarrollo de AdminGest es **Windows 11 + SQL Server Express 2022 + Prisma ORM**. Docker se conserva como alternativa compatible, pero no es un requisito obligatorio.
+
+## Instalación local recomendada
 
 ### 1. Clonar el repositorio
 
@@ -244,7 +256,16 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-### 4. Configurar la API
+### 4. Crear la base de datos
+
+En SQL Server Management Studio o Azure Data Studio:
+
+```sql
+CREATE DATABASE AdminGestDb;
+GO
+```
+
+### 5. Configurar la API
 
 Ejemplo con SQL Server y autenticación SQL:
 
@@ -258,7 +279,7 @@ JWT_EXPIRES_IN=8h
 SEED_ADMIN_PASSWORD=UNA_CONTRASENA_LOCAL_SEGURA
 ```
 
-En un entorno Windows local también puede utilizarse autenticación integrada si la instalación y el controlador lo permiten:
+En Windows también puede utilizarse autenticación integrada si la instalación y el controlador lo permiten:
 
 ```env
 DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
@@ -266,7 +287,7 @@ DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;integratedSecurity
 
 No subas archivos `.env` ni credenciales reales al repositorio.
 
-### 5. Preparar Prisma y la base de datos
+### 6. Preparar Prisma y la base de datos
 
 ```bash
 npm run db:generate
@@ -276,7 +297,7 @@ npm run db:seed
 
 El seed público crea un usuario de demostración con el correo definido en el proyecto y la contraseña indicada en `SEED_ADMIN_PASSWORD`. Los datos institucionales o credenciales locales deben mantenerse fuera de Git.
 
-### 6. Iniciar el proyecto
+### 7. Iniciar el proyecto
 
 ```bash
 npm run dev
@@ -290,6 +311,53 @@ Servicios locales:
 | API | http://localhost:3000/api |
 | Swagger | http://localhost:3000/docs |
 | Health check | http://localhost:3000/api/health |
+
+## Desarrollo con Docker Compose (opcional)
+
+Docker permite levantar SQL Server de forma reproducible sin reemplazar la instalación local recomendada.
+
+### 1. Configurar la contraseña del contenedor
+
+En el archivo `.env` de la raíz:
+
+```env
+MSSQL_SA_PASSWORD=UNA_CONTRASENA_SEGURA_COMPATIBLE_CON_SQL_SERVER
+```
+
+### 2. Levantar SQL Server
+
+```bash
+docker compose up -d
+```
+
+Comprueba el contenedor:
+
+```bash
+docker compose ps
+```
+
+### 3. Configurar `apps/api/.env`
+
+```env
+DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;user=sa;password=UNA_CONTRASENA_SEGURA_COMPATIBLE_CON_SQL_SERVER;encrypt=true;trustServerCertificate=true"
+```
+
+### 4. Preparar y ejecutar AdminGest
+
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
+
+Para detener el contenedor:
+
+```bash
+docker compose down
+```
+
+Los datos persistidos en volúmenes no se eliminan con `docker compose down`. Evita usar `docker compose down -v` salvo que realmente quieras borrar el almacenamiento local del contenedor.
 
 ## Validación técnica
 
