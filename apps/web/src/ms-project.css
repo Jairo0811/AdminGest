@@ -1,0 +1,87 @@
+.ms-project-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.ms-project-toolbar .form-field {
+  min-width: min(420px, 100%);
+}
+
+.ms-project-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.file-button {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.file-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.file-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.task-gantt .timeline-project strong {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.task-gantt .task-late {
+  background: rgba(201, 52, 75, 0.045);
+}
+
+.task-gantt .task-late .timeline-project small {
+  color: #b52b42;
+  font-weight: 700;
+}
+
+.timeline-milestone {
+  min-width: 22px;
+  width: 22px !important;
+  border-radius: 4px;
+  transform: rotate(45deg);
+  background: #18a96f;
+}
+
+.timeline-milestone i {
+  display: none;
+}
+
+.timeline-milestone span {
+  transform: rotate(-45deg);
+  padding: 0.22rem 0;
+}
+
+[data-theme="dark"] .task-gantt .task-late {
+  background: rgba(255, 105, 130, 0.08);
+}
+
+[data-theme="dark"] .task-gantt .task-late .timeline-project small {
+  color: #ff8ea2;
+}
+
+@media (max-width: 850px) {
+  .ms-project-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ms-project-actions > * {
+    flex: 1 1 180px;
+  }
+}

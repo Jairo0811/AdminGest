@@ -1,0 +1,295 @@
+:root {
+  --surface-page: #f4f7fb;
+  --surface-panel: #ffffff;
+  --surface-subtle: #f8fafc;
+  --surface-input: #ffffff;
+  --surface-hover: #fbfdff;
+  --text-primary: #132238;
+  --text-secondary: #40546c;
+  --text-muted: #6e8095;
+  --border-theme: #e1e8f0;
+  --topbar-bg: rgba(244, 247, 251, 0.9);
+  --modal-bg: #ffffff;
+  --modal-header-bg: rgba(255, 255, 255, 0.96);
+  --shadow-theme: 0 14px 38px rgba(15, 33, 56, 0.07);
+}
+
+:root[data-theme="dark"] {
+  --surface-page: #08111f;
+  --surface-panel: #101c2d;
+  --surface-subtle: #152338;
+  --surface-input: #0d1929;
+  --surface-hover: #142238;
+  --text-primary: #edf4ff;
+  --text-secondary: #c5d2e2;
+  --text-muted: #91a4bb;
+  --border-theme: #25364b;
+  --topbar-bg: rgba(8, 17, 31, 0.9);
+  --modal-bg: #101c2d;
+  --modal-header-bg: rgba(16, 28, 45, 0.96);
+  --shadow-theme: 0 18px 45px rgba(0, 0, 0, 0.24);
+}
+
+html,
+body,
+#root {
+  background: var(--surface-page);
+  color: var(--text-primary);
+}
+
+body,
+.topbar,
+.workspace,
+.metric-card,
+.panel,
+.table-card,
+.report-card,
+.modal,
+.modal-header,
+.form-field input,
+.form-field select,
+.form-field textarea,
+.search-box,
+.icon-button,
+.menu-button,
+.secondary-button,
+.date-chip,
+.record-count,
+.table-action,
+.table-header,
+.table-row,
+.activity-item,
+.security-panel,
+.auth-form-panel,
+.app-loader {
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.topbar {
+  border-bottom-color: var(--border-theme);
+  background: var(--topbar-bg);
+}
+
+.workspace,
+.app-loader {
+  background: var(--surface-page);
+}
+
+h1,
+h2,
+h3,
+.page-heading h1,
+.panel-header h2,
+.metric-card strong,
+.report-card strong,
+.user-summary strong,
+.opportunity-main strong,
+.primary-cell strong,
+.activity-item strong,
+.settings-title h2,
+.security-panel h2 {
+  color: var(--text-primary);
+}
+
+.page-heading p:not(.eyebrow),
+.metric-card p,
+.opportunity-main span,
+.primary-cell small,
+.activity-item span,
+.report-card small,
+.settings-title p,
+.security-panel p,
+.progress-cell small,
+.empty-state,
+.user-summary small,
+.app-loader,
+.auth-form > div:first-child > p:last-child {
+  color: var(--text-muted);
+}
+
+.metric-card,
+.panel,
+.table-card,
+.report-card,
+.modal {
+  border-color: var(--border-theme);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-theme);
+}
+
+.panel-header,
+.table-row,
+.settings-title {
+  border-color: var(--border-theme);
+}
+
+.date-chip,
+.record-count,
+.icon-button,
+.menu-button,
+.secondary-button,
+.table-action,
+.search-box {
+  border-color: var(--border-theme);
+  color: var(--text-secondary);
+  background: var(--surface-panel);
+}
+
+.icon-button:hover,
+.menu-button:hover,
+.secondary-button:hover,
+.table-action:hover {
+  background: var(--surface-subtle);
+}
+
+.form-field > span {
+  color: var(--text-secondary);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  border-color: var(--border-theme);
+  color: var(--text-primary);
+  background: var(--surface-input);
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder,
+.search-box input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus,
+.search-box:focus-within {
+  border-color: #4d96e8;
+  box-shadow: 0 0 0 3px rgba(22, 119, 223, 0.18);
+}
+
+.search-box input {
+  color: var(--text-primary);
+}
+
+.table-header {
+  border-color: var(--border-theme);
+  color: var(--text-muted);
+  background: var(--surface-subtle);
+}
+
+.table-row {
+  color: var(--text-secondary);
+  background: var(--surface-panel);
+}
+
+.table-row:hover {
+  background: var(--surface-hover);
+}
+
+.modal-header {
+  border-color: var(--border-theme);
+  background: var(--modal-header-bg);
+}
+
+.activity-item {
+  color: #58a6ff;
+  background: var(--surface-subtle);
+}
+
+.progress-cell > span,
+.bar-row > div {
+  background: var(--surface-subtle);
+}
+
+.auth-page,
+.auth-form-panel {
+  background: var(--surface-panel);
+}
+
+:root[data-theme="dark"] .alert {
+  border-color: #275f4c;
+  color: #9be5c4;
+  background: #102d25;
+}
+
+:root[data-theme="dark"] .alert.error {
+  border-color: #6b3440;
+  color: #ffb4c0;
+  background: #321923;
+}
+
+:root[data-theme="dark"] .status-badge {
+  color: #8de0bc;
+  background: #14352b;
+}
+
+:root[data-theme="dark"] .status-badge.blue {
+  color: #9ecbff;
+  background: #152e4c;
+}
+
+:root[data-theme="dark"] .metric-icon {
+  color: #78b7ff;
+  background: #142f50;
+}
+
+:root[data-theme="dark"] .metric-card:nth-child(2n) .metric-icon {
+  color: #7ee1b5;
+  background: #15362d;
+}
+
+:root[data-theme="dark"] .notification-dot {
+  border-color: var(--surface-panel);
+}
+
+:root[data-theme="dark"] .chart-grid-line {
+  stroke: #293a50;
+}
+
+:root[data-theme="dark"] .chart-axis-label,
+:root[data-theme="dark"] .chart-legend,
+:root[data-theme="dark"] .funnel-stage-meta {
+  color: var(--text-muted);
+  fill: var(--text-muted);
+}
+
+:root[data-theme="dark"] .chart-tooltip,
+:root[data-theme="dark"] .funnel-stage {
+  border-color: var(--border-theme);
+  background: var(--surface-subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .topbar,
+  .workspace,
+  .metric-card,
+  .panel,
+  .table-card,
+  .report-card,
+  .modal,
+  .modal-header,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .search-box,
+  .icon-button,
+  .menu-button,
+  .secondary-button,
+  .date-chip,
+  .record-count,
+  .table-action,
+  .table-header,
+  .table-row,
+  .activity-item,
+  .security-panel,
+  .auth-form-panel,
+  .app-loader {
+    transition: none;
+  }
+}

@@ -1,0 +1,74 @@
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  line-height: 0;
+}
+
+.brand-logo__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Login: logo completo */
+.brand-logo--login {
+  width: clamp(150px, 14vw, 205px);
+}
+
+/* Sidebar: logo completo, proporcionado al ancho de 260 px */
+.brand-logo--sidebar {
+  width: 145px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Pantalla de carga */
+.brand-logo--loader {
+  width: 112px;
+}
+
+.brand-logo--compact {
+  justify-content: center;
+}
+
+.app-loader .brand-logo__image {
+  animation: brandLogoFloat 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 14px 22px rgba(18, 103, 213, 0.22));
+}
+
+@keyframes brandLogoFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (max-width: 900px) {
+  .brand-logo--login {
+    width: 190px;
+  }
+
+  .brand-logo--sidebar {
+    width: 132px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-logo--login {
+    width: 165px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-loader .brand-logo__image {
+    animation: none;
+  }
+}
