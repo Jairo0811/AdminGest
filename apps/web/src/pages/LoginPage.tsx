@@ -58,10 +58,9 @@ export function LoginPage() {
 
         <div className="auth-copy">
           <p className="eyebrow">Gestión sin fricción</p>
-          <h1>Todo tu negocio, en un solo lugar.</h1>
+          <h1>La gestión inteligente para tu empresa</h1>
           <p>
-            Centraliza clientes, oportunidades, cotizaciones y proyectos con una
-            vista clara de lo que necesita atención.
+           CRM, Proyectos, y Gestion Inteligente para tu empresa.
           </p>
         </div>
 

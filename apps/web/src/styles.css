@@ -32,11 +32,10 @@ body {
 
 .login-brand-logo {
   display: block;
-  width: 320px;
-  max-width: 72%;
-  height: 150px;
+  width: 250px;
+  max-width: 70%;
+  height: auto;
   object-fit: contain;
-  object-position: left center;
   margin-bottom: 1rem;
 }
 button,
@@ -66,7 +65,12 @@ h1,
 h2,
 h3,
 .brand {
-  font-family: "Manrope", sans-serif;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #fff;
 }
 h1 {
   margin-bottom: 0.45rem;
@@ -117,9 +121,10 @@ h2 {
 }
 
 .brand-row {
+  min-height: 110px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 .brand {
   display: flex;
@@ -130,24 +135,6 @@ h2 {
   font-weight: 800;
   color: #fff;
 }
-.brand > span:last-child > span,
-.auth-brand > span:last-child > span {
-  color: #31d68c;
-}
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  flex: 0 0 auto;
-  border-radius: 13px;
-  color: white;
-  background: linear-gradient(135deg, #1a83ff, #2bd88a);
-  box-shadow: 0 12px 30px rgba(20, 124, 245, 0.28);
-  font-family: "Manrope", sans-serif;
-  font-size: 0.88rem;
-  font-weight: 800;
-}
 .mobile-close {
   display: none;
   border: 0;
@@ -157,7 +144,7 @@ h2 {
 .company-chip {
   display: grid;
   gap: 0.2rem;
-  margin: 1.4rem 0.4rem 1rem;
+  margin: 0.65rem 0.4rem 1rem;
   padding: 0.8rem 0.9rem;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 12px;
