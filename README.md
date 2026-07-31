@@ -422,13 +422,13 @@ La implementación de cédula fue adaptada con atribución al proyecto público 
 
 | 👤 Integrante | 🆔 Matrícula |
 |---|---|
-| Francis Jairo Matías Rosario | 2015-2984 |
-| Isaías Pérez Moya | 2016-3595 |
-| Enmanuel Avilez Valoy | 2016-3789 |
-| Diana Caroline Mejía Encarnación | 2016-3796 |
-| Andrés Eudoro Pujols | 2016-3917 |
-| Alexander Dionicio Mercedes | 2016-3962 |
-| Raymundo Eduardo Peña Sánchez | 2016-4276 |
+| 🙎🏻‍♂️ Francis Jairo Matías Rosario | 2015-2984 |
+| 🙎🏻‍♂️ Isaías Pérez Moya | 2016-3595 |
+| 🙎🏻‍♂️ Enmanuel Avilez Valoy | 2016-3789 |
+| 🙎🏻‍♀️ Diana Caroline Mejía Encarnación | 2016-3796 |
+| 🙎🏻‍♂️ Andrés Eudoro Pujols | 2016-3917 |
+| 🙎🏻‍♂️ Alexander Dionicio Mercedes | 2016-3962 |
+| 🙎🏻‍♂️ Raymundo Eduardo Peña Sánchez | 2016-4276 |
 
 ## 🎓 Información académica
 
