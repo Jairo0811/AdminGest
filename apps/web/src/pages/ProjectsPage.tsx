@@ -188,24 +188,37 @@ export function ProjectsPage() {
     );
   };
 
+  const renderViewSwitcher = () => (
+    <div className="view-switcher" role="group" aria-label="Vista de proyectos">
+      <button
+        className={view === 'table' ? 'active' : ''}
+        onClick={() => setView('table')}
+        type="button"
+      >
+        <List size={17} /> Lista
+      </button>
+      <button
+        className={view === 'timeline' ? 'active' : ''}
+        onClick={() => setView('timeline')}
+        type="button"
+      >
+        <CalendarRange size={17} /> Cronograma
+      </button>
+      <button
+        className={view === 'interop' ? 'active' : ''}
+        onClick={() => setView('interop')}
+        type="button"
+      >
+        <Milestone size={17} /> MS Project
+      </button>
+    </div>
+  );
+
   return (
     <>
-      <div className="view-switcher-wrap">
-        <div className="view-switcher" role="group" aria-label="Vista de proyectos">
-          <button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')} type="button">
-            <List size={17} /> Lista
-          </button>
-          <button className={view === 'timeline' ? 'active' : ''} onClick={() => setView('timeline')} type="button">
-            <CalendarRange size={17} /> Cronograma
-          </button>
-          <button className={view === 'interop' ? 'active' : ''} onClick={() => setView('interop')} type="button">
-            <Milestone size={17} /> MS Project
-          </button>
-        </div>
-      </div>
-
       {view === 'table' ? (
         <EntityPage
+          headerActions={renderViewSwitcher()}
           columns={[
             {
               label: 'Proyecto',

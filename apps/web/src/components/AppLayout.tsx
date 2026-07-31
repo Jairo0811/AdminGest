@@ -28,6 +28,15 @@ type SearchResult = { id: string; type: string; title: string; subtitle: string;
 type NotificationItem = { id: string; title: string; description: string; occurredAt: string; path: string };
 const SIDEBAR_KEY = "admingest-sidebar-collapsed";
 
+const roleLabels: Record<string, string> = {
+  SUPER_ADMIN: "Superadministrador",
+  ADMIN: "Administrador",
+  SALES_MANAGER: "Gerente comercial",
+  SALES_REP: "Representante de ventas",
+  PROJECT_MANAGER: "Gerente de proyectos",
+  VIEWER: "Solo lectura",
+};
+
 export function AppLayout() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -94,7 +103,7 @@ export function AppLayout() {
           <div className="topbar-popover-anchor"><button aria-label="Notificaciones" className="icon-button" onClick={() => { setNotificationsOpen((value) => !value); setProfileOpen(false); }} type="button"><Bell size={20} />{!!notificationsQuery.data?.length && <span className="notification-dot" />}</button>
             {notificationsOpen && <div className="topbar-popover notifications-popover"><div className="popover-header"><strong>Notificaciones</strong><span>{notificationsQuery.data?.length ?? 0}</span></div>{notificationsQuery.isLoading ? <div className="popover-state">Cargando…</div> : notificationsQuery.data?.length ? notificationsQuery.data.map((item) => <button key={item.id} onClick={() => goTo(item.path)} type="button"><span><strong>{item.title}</strong><small>{item.description}</small><time>{new Date(item.occurredAt).toLocaleString("es-DO")}</time></span></button>) : <div className="popover-state">No tienes alertas próximas.</div>}</div>}
           </div>
-          <div className="topbar-popover-anchor"><button className="user-summary user-summary--button" onClick={() => { setProfileOpen((value) => !value); setNotificationsOpen(false); }} type="button"><div className="avatar">{user?.firstName[0]}{user?.lastName[0]}</div><div><strong>{user?.firstName} {user?.lastName}</strong><small>{user?.role.replaceAll("_", " ")}</small></div><ChevronDown size={16} /></button>
+          <div className="topbar-popover-anchor"><button className="user-summary user-summary--button" onClick={() => { setProfileOpen((value) => !value); setNotificationsOpen(false); }} type="button"><div className="avatar">{user?.firstName[0]}{user?.lastName[0]}</div><div className="user-summary-copy"><strong>{user?.firstName} {user?.lastName}</strong><small>{user ? roleLabels[user.role] ?? user.role : ""}</small></div><ChevronDown size={16} /></button>
             {profileOpen && <div className="topbar-popover profile-popover"><button onClick={() => goTo("/profile")} type="button"><UserCircle size={18} /> Mi perfil</button>{isAdmin && <button onClick={() => goTo("/users")} type="button"><UserCog size={18} /> Usuarios y roles</button>}<button onClick={toggleTheme} type="button">{theme === "dark" ? <Sun size={18} /> : <Moon size={18} />} Cambiar tema</button><button className="danger" onClick={logout} type="button"><LogOut size={18} /> Cerrar sesión</button></div>}
           </div>
         </header>

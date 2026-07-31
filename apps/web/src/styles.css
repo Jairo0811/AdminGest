@@ -261,17 +261,32 @@ h2 {
   gap: 0.7rem;
   padding-left: 0.2rem;
 }
-.user-summary > div:last-child {
-  display: grid;
+.user-summary-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
 }
-.user-summary strong {
-  font-size: 0.88rem;
+
+.user-summary-copy strong,
+.user-summary-copy small {
+  display: block;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-summary-copy strong {
   color: #1b2e45;
+  font-size: 0.88rem;
 }
-.user-summary small {
+
+.user-summary-copy small {
   color: var(--muted);
   font-size: 0.72rem;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .avatar {
   width: 40px;
@@ -299,6 +314,29 @@ h2 {
   justify-content: space-between;
   gap: 2rem;
   margin-bottom: 1.7rem;
+}
+
+.page-heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.page-heading-actions .primary-button,
+.page-heading-actions .view-switcher {
+  flex-shrink: 0;
+}
+
+.page-heading-actions .primary-button {
+  white-space: nowrap;
+}
+
+.page-heading-actions .view-switcher {
+  position: static;
+  inset: auto;
 }
 .page-heading p:not(.eyebrow) {
   max-width: 680px;
@@ -1015,6 +1053,42 @@ h2 {
   }
 }
 
+
+@media (max-width: 1100px) {
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-heading-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .page-heading-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-heading-actions .view-switcher {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .page-heading-actions .view-switcher button {
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .page-heading-actions .primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 700px) {
   .workspace {
     padding: 1.3rem 0.9rem 2rem;
@@ -1023,7 +1097,7 @@ h2 {
     min-height: 64px;
     padding: 0 0.9rem;
   }
-  .user-summary > div:last-child {
+  .user-summary-copy {
     display: none;
   }
   .page-heading {

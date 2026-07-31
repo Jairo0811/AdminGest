@@ -40,21 +40,30 @@ export function ActivitiesPage() {
     });
   }, [activities.data, month]);
 
+  const renderViewSwitcher = () => (
+    <div className="view-switcher" role="group" aria-label="Vista de actividades">
+      <button
+        className={view === 'table' ? 'active' : ''}
+        onClick={() => setView('table')}
+        type="button"
+      >
+        <List size={17} /> Lista
+      </button>
+      <button
+        className={view === 'calendar' ? 'active' : ''}
+        onClick={() => setView('calendar')}
+        type="button"
+      >
+        <CalendarDays size={17} /> Calendario
+      </button>
+    </div>
+  );
+
   return (
     <>
-      <div className="view-switcher-wrap">
-        <div className="view-switcher" role="group" aria-label="Vista de actividades">
-          <button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')} type="button">
-            <List size={17} /> Lista
-          </button>
-          <button className={view === 'calendar' ? 'active' : ''} onClick={() => setView('calendar')} type="button">
-            <CalendarDays size={17} /> Calendario
-          </button>
-        </div>
-      </div>
-
       {view === 'table' ? (
         <EntityPage
+          headerActions={renderViewSwitcher()}
           columns={[
             {
               label: 'Actividad',

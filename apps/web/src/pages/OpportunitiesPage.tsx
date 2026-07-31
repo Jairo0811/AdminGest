@@ -59,21 +59,30 @@ export function OpportunitiesPage() {
     move.mutate({ id, pipelineStageId: stage.id, probability: stage.probability });
   };
 
+  const renderViewSwitcher = () => (
+    <div className="view-switcher" role="group" aria-label="Vista de oportunidades">
+      <button
+        className={view === 'table' ? 'active' : ''}
+        onClick={() => setView('table')}
+        type="button"
+      >
+        <List size={17} /> Tabla
+      </button>
+      <button
+        className={view === 'kanban' ? 'active' : ''}
+        onClick={() => setView('kanban')}
+        type="button"
+      >
+        <KanbanSquare size={17} /> Kanban
+      </button>
+    </div>
+  );
+
   return (
     <>
-      <div className="view-switcher-wrap">
-        <div className="view-switcher" role="group" aria-label="Vista de oportunidades">
-          <button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')} type="button">
-            <List size={17} /> Tabla
-          </button>
-          <button className={view === 'kanban' ? 'active' : ''} onClick={() => setView('kanban')} type="button">
-            <KanbanSquare size={17} /> Kanban
-          </button>
-        </div>
-      </div>
-
       {view === 'table' ? (
         <EntityPage
+          headerActions={renderViewSwitcher()}
           columns={[
             {
               label: 'Oportunidad',
