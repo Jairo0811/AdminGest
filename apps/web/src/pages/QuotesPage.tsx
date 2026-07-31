@@ -46,6 +46,8 @@ const escapeHtml = (value: unknown) =>
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 
+const clampPercentage = (value: number) => Math.min(100, Math.max(0, value));
+
 export function QuotesPage() {
   const [printingId, setPrintingId] = useState<string | null>(null);
 
@@ -53,22 +55,33 @@ export function QuotesPage() {
     setPrintingId(id);
     try {
       const quote = await api<QuoteDetail>(`/quotes/${id}`);
+      const logoUrl = new URL('/brand/logo.png', window.location.origin).href;
+      const taxableSubtotal = Math.max(0, Number(quote.subtotal) - Number(quote.discount));
+      const discountPercentage = Number(quote.subtotal) > 0
+        ? (Number(quote.discount) / Number(quote.subtotal)) * 100
+        : 0;
+
       const rows = quote.items
-        .map(
-          (item) => `<tr>
+        .map((item) => {
+          const lineSubtotal = Number(item.lineTotal);
+          const lineTax = lineSubtotal * (Number(item.taxRate) / 100);
+          const lineTotalWithTax = lineSubtotal + lineTax;
+
+          return `<tr>
             <td>${escapeHtml(item.description)}</td>
             <td>${escapeHtml(item.quantity)}</td>
             <td>${escapeHtml(money.format(Number(item.unitPrice)))}</td>
+            <td>${escapeHtml(money.format(lineSubtotal))}</td>
             <td>${escapeHtml(item.taxRate)}%</td>
-            <td>${escapeHtml(money.format(Number(item.lineTotal)))}</td>
-          </tr>`,
-        )
+            <td>${escapeHtml(money.format(lineTotalWithTax))}</td>
+          </tr>`;
+        })
         .join('');
 
       printDocument(
         `Cotización ${quote.number}`,
-        `<header>
-          <div class="brand">Admin<span>Gest</span></div>
+        `<header style="align-items:center;gap:32px">
+          <div style="min-width:190px"><img src="${escapeHtml(logoUrl)}" alt="AdminGest" style="display:block;width:180px;max-height:90px;object-fit:contain" /></div>
           <div><h1>Cotización ${escapeHtml(quote.number)}</h1><p class="muted">Estado: ${escapeHtml(quote.status)}</p></div>
         </header>
         <section class="summary">
@@ -78,12 +91,13 @@ export function QuotesPage() {
           <div><strong>Válida hasta</strong><br/>${quote.validUntil ? new Date(quote.validUntil).toLocaleDateString('es-DO') : 'Sin vencimiento'}</div>
         </section>
         <table>
-          <thead><tr><th>Concepto</th><th>Cantidad</th><th>Precio</th><th>ITBIS</th><th>Total</th></tr></thead>
+          <thead><tr><th>Concepto</th><th>Cantidad</th><th>Precio unitario</th><th>Subtotal</th><th>ITBIS</th><th>Total con ITBIS</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
         <table class="totals">
           <tr><th>Subtotal</th><td>${escapeHtml(money.format(Number(quote.subtotal)))}</td></tr>
-          <tr><th>Descuento</th><td>${escapeHtml(money.format(Number(quote.discount)))}</td></tr>
+          <tr><th>Descuento (${escapeHtml(discountPercentage.toFixed(2))}%)</th><td>-${escapeHtml(money.format(Number(quote.discount)))}</td></tr>
+          <tr><th>Base imponible</th><td>${escapeHtml(money.format(taxableSubtotal))}</td></tr>
           <tr><th>ITBIS</th><td>${escapeHtml(money.format(Number(quote.tax)))}</td></tr>
           <tr><th>Total</th><td><strong>${escapeHtml(money.format(Number(quote.total)))}</strong></td></tr>
         </table>
@@ -96,20 +110,27 @@ export function QuotesPage() {
 
   return (
     <EntityPage
-      buildPayload={(values) => ({
-        customerId: values.customerId,
-        validUntil: values.validUntil,
-        discount: Number(values.discount || 0),
-        notes: values.notes,
-        items: [
-          {
-            description: values.itemDescription,
-            quantity: Number(values.quantity),
-            unitPrice: Number(values.unitPrice),
-            taxRate: Number(values.taxRate || 18),
-          },
-        ],
-      })}
+      buildPayload={(values) => {
+        const quantity = Number(values.quantity || 0);
+        const unitPrice = Number(values.unitPrice || 0);
+        const discountPercentage = clampPercentage(Number(values.discountPercentage || 0));
+        const subtotal = quantity * unitPrice;
+
+        return {
+          customerId: values.customerId,
+          validUntil: values.validUntil,
+          discount: Number((subtotal * (discountPercentage / 100)).toFixed(2)),
+          notes: values.notes,
+          items: [
+            {
+              description: values.itemDescription,
+              quantity,
+              unitPrice,
+              taxRate: clampPercentage(Number(values.taxRate || 18)),
+            },
+          ],
+        };
+      }}
       canEdit={false}
       columns={[
         {
@@ -155,7 +176,7 @@ export function QuotesPage() {
           optionLabel: (item) => String(item.name),
         },
         { name: 'validUntil', label: 'Válida hasta', type: 'date' },
-        { name: 'discount', label: 'Descuento', type: 'number', defaultValue: 0 },
+        { name: 'discountPercentage', label: 'Descuento (%)', type: 'number', defaultValue: 0 },
         { name: 'itemDescription', label: 'Concepto', required: true },
         { name: 'quantity', label: 'Cantidad', type: 'number', defaultValue: 1, required: true },
         { name: 'unitPrice', label: 'Precio unitario', type: 'number', required: true },
