@@ -20,7 +20,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify": "npm run db:validate && npm run lint && npm run test && npm run build",
-    "security:audit": "npm audit --audit-level=critical",
+    "security:audit": "npm audit --audit-level=high",
     "release:check": "npm run db:generate && npm run verify && npm run security:audit",
     "db:generate": "npm run prisma:generate --workspace @admingest/api",
     "db:validate": "npm run prisma:validate --workspace @admingest/api",
@@ -31,5 +31,9 @@
   "devDependencies": {
     "@rollup/rollup-win32-x64-msvc": "^4.62.3",
     "prettier": "^3.6.2"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8",
+    "js-yaml": "5.2.2"
   }
 }
