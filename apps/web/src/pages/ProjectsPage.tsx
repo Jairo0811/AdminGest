@@ -291,7 +291,14 @@ export function ProjectsPage() {
         />
       ) : view === 'timeline' ? (
         <section className="page timeline-page">
-          <div className="page-heading"><div><p className="eyebrow">Planificación ejecutiva</p><h1>Cronograma de proyectos</h1><p>Compara fechas, duración y avance de los proyectos activos en una sola vista.</p></div></div>
+          <div className="page-heading">
+            <div>
+              <p className="eyebrow">Planificación ejecutiva</p>
+              <h1>Cronograma de proyectos</h1>
+              <p>Compara fechas, duración y avance de los proyectos activos en una sola vista.</p>
+            </div>
+            {renderViewSwitcher()}
+          </div>
           {projects.isLoading ? <div className="board-skeleton">Cargando cronograma…</div> : !timeline ? (
             <div className="empty-state panel"><strong>No hay proyectos con fechas completas.</strong><p>Asigna inicio y finalización para mostrarlos en el cronograma.</p></div>
           ) : (
@@ -312,7 +319,12 @@ export function ProjectsPage() {
       ) : (
         <section className="page ms-project-page">
           <div className="page-heading">
-            <div><p className="eyebrow">Interoperabilidad</p><h1>Microsoft Project</h1><p>Importa y exporta cronogramas mediante CSV sin depender del formato propietario MPP.</p></div>
+            <div>
+              <p className="eyebrow">Interoperabilidad</p>
+              <h1>Microsoft Project</h1>
+              <p>Importa y exporta cronogramas mediante CSV sin depender del formato propietario MPP.</p>
+            </div>
+            {renderViewSwitcher()}
           </div>
 
           <div className="ms-project-toolbar panel">
