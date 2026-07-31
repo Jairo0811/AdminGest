@@ -13,6 +13,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { OpportunitiesPage } from "./pages/OpportunitiesPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ProjectsPage } from "./pages/ProjectsPage";
+import { QuoteVerificationPage } from "./pages/QuoteVerificationPage";
 import { QuotesPage } from "./pages/QuotesPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
@@ -47,6 +48,7 @@ export default function App() {
       <Route element={<LoginPage />} path="/login" />
       <Route element={<ForgotPasswordPage />} path="/forgot-password" />
       <Route element={<ResetPasswordPage />} path="/reset-password" />
+      <Route element={<QuoteVerificationPage />} path="/verify/quote/:publicCode" />
       <Route element={<ProtectedLayout />}>
         <Route element={<DashboardPage />} index />
         <Route element={<LeadsPage />} path="leads" />
