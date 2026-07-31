@@ -8,9 +8,11 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/auth-user.interface';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteStatusDto } from './dto/update-quote-status.dto';
 import { QuotesService } from './quotes.service';
@@ -20,6 +22,14 @@ import { QuotesService } from './quotes.service';
 @Controller('quotes')
 export class QuotesController {
   constructor(private readonly service: QuotesService) {}
+
+  @Get('verify/:publicCode')
+  @Public()
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Verifica públicamente la autenticidad de una cotización' })
+  verify(@Param('publicCode') publicCode: string) {
+    return this.service.findPublicVerification(publicCode);
+  }
 
   @Get()
   findAll(@CurrentUser() user: AuthUser, @Query('status') status?: string) {
@@ -50,4 +60,3 @@ export class QuotesController {
     return this.service.remove(user.companyId, user.id, id);
   }
 }
-

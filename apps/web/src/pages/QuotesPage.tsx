@@ -3,6 +3,10 @@ import { LoaderCircle, Printer } from 'lucide-react';
 import { api } from '../api/client';
 import { Entity, EntityPage } from '../components/EntityPage';
 import { printDocument } from '../utils/export';
+import {
+  buildQuoteVerificationUrl,
+  createQuoteVerificationQr,
+} from '../utils/quote-verification';
 
 const FIXED_ITBIS_RATE = 18;
 
@@ -36,6 +40,7 @@ interface QuoteItem {
 
 interface QuoteDetail extends Entity {
   number: string;
+  publicCode: string;
   status: string;
   issueDate: string;
   validUntil?: string;
@@ -86,6 +91,12 @@ export function QuotesPage() {
         api<Company>('/company'),
       ]);
 
+      if (!quote.publicCode) {
+        throw new Error('La cotización no tiene un código público de verificación.');
+      }
+
+      const verificationUrl = buildQuoteVerificationUrl(quote.publicCode);
+      const qrDataUrl = await createQuoteVerificationQr(verificationUrl);
       const logoUrl = new URL('/brand/logo.png', window.location.origin).href;
       const taxableSubtotal = Math.max(0, Number(quote.subtotal) - Number(quote.discount));
       const discountPercentage = Number(quote.subtotal) > 0
@@ -188,6 +199,15 @@ export function QuotesPage() {
           </table>
         </section>
 
+        <section style="display:grid;grid-template-columns:1fr 126px;gap:20px;align-items:center;margin-top:24px;padding:16px;border:1px solid #dce4ed;border-radius:14px;background:#f7fbf9;break-inside:avoid">
+          <div>
+            <h3 style="margin:0 0 6px;color:#16805c;font-size:12px;letter-spacing:.08em;text-transform:uppercase">Verificación de autenticidad</h3>
+            <strong style="display:block;margin-bottom:5px">Escanea este código QR para consultar la cotización en AdminGest.</strong>
+            <span style="display:block;color:#66788d;font-size:10px;word-break:break-all">${escapeHtml(verificationUrl)}</span>
+          </div>
+          <img src="${escapeHtml(qrDataUrl)}" alt="QR de verificación" style="display:block;width:126px;height:126px;padding:5px;border:1px solid #dce4ed;border-radius:10px;background:#fff" />
+        </section>
+
         <footer class="quote-footer">
           <div>
             <strong>Gracias por considerar nuestra propuesta.</strong><br/>
@@ -257,7 +277,7 @@ export function QuotesPage() {
           render: (item) => String((item._count as Entity)?.items ?? 0),
         },
       ]}
-      description="Genera propuestas comerciales con descuento configurable e ITBIS fijo del 18%."
+      description="Genera propuestas comerciales con descuento configurable, ITBIS fijo del 18% y verificación mediante QR."
       endpoint="/quotes"
       fields={[
         {
