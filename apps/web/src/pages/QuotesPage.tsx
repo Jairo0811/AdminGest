@@ -4,6 +4,8 @@ import { api } from '../api/client';
 import { Entity, EntityPage } from '../components/EntityPage';
 import { printDocument } from '../utils/export';
 
+const FIXED_ITBIS_RATE = 18;
+
 const money = new Intl.NumberFormat('es-DO', {
   style: 'currency',
   currency: 'DOP',
@@ -64,7 +66,7 @@ export function QuotesPage() {
       const rows = quote.items
         .map((item) => {
           const lineSubtotal = Number(item.lineTotal);
-          const lineTax = lineSubtotal * (Number(item.taxRate) / 100);
+          const lineTax = lineSubtotal * (FIXED_ITBIS_RATE / 100);
           const lineTotalWithTax = lineSubtotal + lineTax;
 
           return `<tr>
@@ -72,7 +74,7 @@ export function QuotesPage() {
             <td>${escapeHtml(item.quantity)}</td>
             <td>${escapeHtml(money.format(Number(item.unitPrice)))}</td>
             <td>${escapeHtml(money.format(lineSubtotal))}</td>
-            <td>${escapeHtml(item.taxRate)}%</td>
+            <td>${FIXED_ITBIS_RATE}%</td>
             <td>${escapeHtml(money.format(lineTotalWithTax))}</td>
           </tr>`;
         })
@@ -98,7 +100,7 @@ export function QuotesPage() {
           <tr><th>Subtotal</th><td>${escapeHtml(money.format(Number(quote.subtotal)))}</td></tr>
           <tr><th>Descuento (${escapeHtml(discountPercentage.toFixed(2))}%)</th><td>-${escapeHtml(money.format(Number(quote.discount)))}</td></tr>
           <tr><th>Base imponible</th><td>${escapeHtml(money.format(taxableSubtotal))}</td></tr>
-          <tr><th>ITBIS</th><td>${escapeHtml(money.format(Number(quote.tax)))}</td></tr>
+          <tr><th>ITBIS (${FIXED_ITBIS_RATE}%)</th><td>${escapeHtml(money.format(Number(quote.tax)))}</td></tr>
           <tr><th>Total</th><td><strong>${escapeHtml(money.format(Number(quote.total)))}</strong></td></tr>
         </table>
         ${quote.notes ? `<p><strong>Notas:</strong> ${escapeHtml(quote.notes)}</p>` : ''}`,
@@ -126,7 +128,7 @@ export function QuotesPage() {
               description: values.itemDescription,
               quantity,
               unitPrice,
-              taxRate: clampPercentage(Number(values.taxRate || 18)),
+              taxRate: FIXED_ITBIS_RATE,
             },
           ],
         };
@@ -164,7 +166,7 @@ export function QuotesPage() {
           render: (item) => String((item._count as Entity)?.items ?? 0),
         },
       ]}
-      description="Genera propuestas comerciales con cálculos automáticos de descuento e impuestos."
+      description="Genera propuestas comerciales con descuento configurable e ITBIS fijo del 18%."
       endpoint="/quotes"
       fields={[
         {
@@ -180,7 +182,6 @@ export function QuotesPage() {
         { name: 'itemDescription', label: 'Concepto', required: true },
         { name: 'quantity', label: 'Cantidad', type: 'number', defaultValue: 1, required: true },
         { name: 'unitPrice', label: 'Precio unitario', type: 'number', required: true },
-        { name: 'taxRate', label: 'ITBIS (%)', type: 'number', defaultValue: 18 },
         { name: 'notes', label: 'Notas', type: 'textarea' },
       ]}
       itemActions={(item) => (
