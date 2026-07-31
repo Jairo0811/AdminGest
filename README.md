@@ -5,7 +5,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
   <img src="https://img.shields.io/badge/estado-Estable-18A96F?style=for-the-badge" alt="Estado estable" />
-  <img src="https://img.shields.io/badge/versión-1.0.1-1677DF?style=for-the-badge" alt="Versión 1.0.1" />
   <img src="https://img.shields.io/badge/arquitectura-Monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
 </p>
 
@@ -17,15 +16,11 @@
   React · NestJS · Prisma · SQL Server · Docker · GitHub Actions
 </p>
 
-> **Estado actual:** AdminGest se encuentra en su versión estable `v1.0.1`. El núcleo funcional, la seguridad, las pruebas, la automatización de CI/CD, Docker, la documentación y la verificación pública de cotizaciones mediante QR están completados.
-
 ## 📘 Descripción
 
 **AdminGest** es una plataforma web multiempresa orientada a la gestión comercial, administrativa y de proyectos. Centraliza prospectos, clientes, oportunidades, actividades, cotizaciones, reportes, usuarios, roles y proyectos en una sola solución moderna.
 
 El proyecto reconstruye de forma independiente el trabajo final académico **GestorAdministrativo**, desarrollado para la asignatura **Administración de Proyectos de Software (SOF-013)** del Instituto Tecnológico de Las Américas (ITLA), período **2018-C3**.
-
-La versión actual transforma aquella propuesta académica en una aplicación funcional, modular, segura y preparada para despliegue profesional.
 
 ## ✨ Funcionalidades principales
 
@@ -84,13 +79,7 @@ La versión actual transforma aquella propuesta académica en una aplicación fu
 ### 👤 Usuarios, roles y perfil
 
 - Gestión de usuarios por empresa.
-- Roles disponibles:
-  - `SUPER_ADMIN`
-  - `ADMIN`
-  - `SALES_MANAGER`
-  - `SALES_REP`
-  - `PROJECT_MANAGER`
-  - `VIEWER`
+- Roles disponibles: `SUPER_ADMIN`, `ADMIN`, `SALES_MANAGER`, `SALES_REP`, `PROJECT_MANAGER` y `VIEWER`.
 - Activación y desactivación de cuentas.
 - Prevención de auto-desactivación.
 - Perfil personal.
@@ -101,38 +90,13 @@ La versión actual transforma aquella propuesta académica en una aplicación fu
 
 ## 🛡️ Seguridad
 
-AdminGest incorpora:
-
-- autenticación JWT;
-- contraseñas protegidas con bcrypt;
-- autorización basada en roles;
-- aislamiento multiempresa;
-- recuperación de contraseña con tokens aleatorios de un solo uso;
-- almacenamiento exclusivo del hash SHA-256 del token;
-- expiración automática de enlaces de recuperación;
-- invalidación de solicitudes anteriores;
-- rate limiting global y específico para autenticación y rutas públicas;
-- Helmet y encabezados HTTP endurecidos;
-- CORS configurable por entorno;
-- validación estricta de DTO;
-- rechazo de propiedades desconocidas;
-- eliminación de `X-Powered-By`;
-- Swagger deshabilitado por defecto en producción;
-- manejo global y uniforme de errores;
-- auditoría de operaciones sensibles;
-- secretos gestionados mediante variables de entorno.
+AdminGest incorpora autenticación JWT, contraseñas con bcrypt, autorización basada en roles, aislamiento multiempresa, recuperación de contraseña con tokens de un solo uso, rate limiting, Helmet, CORS configurable, validación estricta de DTO, auditoría de operaciones sensibles y gestión de secretos mediante variables de entorno.
 
 Consulta [SECURITY.md](SECURITY.md) para la política completa.
 
 ## 🇩🇴 Validación dominicana
 
-AdminGest valida:
-
-- cédula dominicana de 11 dígitos;
-- RNC de 9 dígitos;
-- máscara y formato automático;
-- validación en frontend y backend;
-- almacenamiento normalizado sin guiones.
+AdminGest valida cédula dominicana y RNC en frontend y backend, aplica formato automático y almacena los valores normalizados sin guiones.
 
 La implementación de cédula fue adaptada con atribución al proyecto público de OGTIC **Cuenta Única Registry**. Consulta [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
@@ -194,7 +158,6 @@ La implementación de cédula fue adaptada con atribución al proyecto público 
 - Vitest
 - GitHub Actions
 - Docker Compose
-- Workflows de CI y Release
 
 ## 🏗️ Arquitectura
 
@@ -238,30 +201,6 @@ AdminGest/
 
 Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones de arquitectura y separación de responsabilidades.
 
-## 🚦 Estado del proyecto
-
-| Área | Estado |
-|---|---|
-| Arquitectura monorepo | ✅ Completada |
-| Frontend React | ✅ Funcional |
-| API NestJS | ✅ Funcional |
-| SQL Server y Prisma | ✅ Funcionales |
-| CRM y pipeline | ✅ Completados |
-| Actividades y calendario | ✅ Completados |
-| Cotizaciones e ITBIS | ✅ Completados |
-| Verificación QR pública | ✅ Completada en `v1.0.1` |
-| Proyectos y Microsoft Project CSV | ✅ Completados |
-| Dashboard y reportes | ✅ Completados |
-| Usuarios, roles y perfil | ✅ Completados |
-| Recuperación de contraseña | ✅ Completada |
-| Validación de cédula y RNC | ✅ Completada |
-| Seguridad | ✅ Endurecida |
-| Pruebas automatizadas | ✅ Implementadas |
-| Docker | ✅ Compatible |
-| GitHub Actions | ✅ CI y release automatizados |
-| Documentación | ✅ Actualizada |
-| Release estable | ✅ `v1.0.1` |
-
 ## 📋 Requisitos
 
 - Git
@@ -269,23 +208,6 @@ Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones de arq
 - npm compatible con el `package-lock.json`
 - SQL Server Express 2022 recomendado para desarrollo local
 - Docker Desktop opcional para entornos reproducibles
-
-Comprueba las herramientas:
-
-```bash
-git --version
-node --version
-npm --version
-```
-
-## 🔀 Modalidades de ejecución
-
-| Modalidad | Recomendación | Uso principal |
-|---|---|---|
-| SQL Server Express 2022 | ✅ Recomendada | Desarrollo diario, depuración y trabajo con SSMS |
-| Docker Compose | Opcional | Entornos reproducibles, incorporación de desarrolladores y validación de infraestructura |
-
-El entorno principal utilizado durante el desarrollo fue **Windows 11 + SQL Server Express 2022 + Prisma ORM**. Docker se conserva como alternativa compatible.
 
 ## 🚀 Instalación local
 
@@ -322,8 +244,6 @@ cp apps/web/.env.example apps/web/.env
 
 ### 4. Crear la base de datos
 
-En SQL Server Management Studio o Azure Data Studio:
-
 ```sql
 CREATE DATABASE AdminGestDb;
 GO
@@ -331,26 +251,18 @@ GO
 
 ### 5. Configurar la API
 
-Ejemplo con autenticación SQL:
-
 ```env
 NODE_ENV=development
 PORT=3000
-DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;user=admingest_app;password=TU_CONTRASENA;encrypt=true;trustServerCertificate=true"
+DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
 CORS_ORIGIN=http://localhost:5173
 JWT_SECRET=UNA_CLAVE_ALEATORIA_DE_AL_MENOS_32_CARACTERES
 JWT_EXPIRES_IN=8h
 SWAGGER_ENABLED=true
-SEED_ADMIN_PASSWORD=UNA_CONTRASENA_LOCAL_SEGURA
+SEED_ADMIN_PASSWORD=AG2026AdminGest!
 PASSWORD_RESET_URL=http://localhost:5173/reset-password
 RESEND_API_KEY=
 MAIL_FROM=AdminGest <no-reply@tu-dominio.com>
-```
-
-En Windows también puede utilizarse autenticación integrada si la instalación y el controlador lo permiten:
-
-```env
-DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
 ```
 
 ### 6. Configurar el frontend
@@ -360,8 +272,6 @@ VITE_API_URL=http://localhost:3000/api
 VITE_PUBLIC_APP_URL=http://localhost:5173
 ```
 
-`VITE_PUBLIC_APP_URL` se utiliza para construir la URL del QR de verificación. En producción debe apuntar al dominio público real de AdminGest.
-
 ### 7. Preparar Prisma y la base de datos
 
 ```bash
@@ -370,7 +280,16 @@ npm run db:migrate
 npm run db:seed
 ```
 
-El seed público crea un usuario de demostración utilizando la contraseña indicada en `SEED_ADMIN_PASSWORD`. No subas credenciales reales ni archivos `.env` al repositorio.
+## 🔑 Credenciales de demostración
+
+Después de ejecutar el seed, puedes iniciar sesión con:
+
+| Campo | Valor |
+|---|---|
+| **Correo** | `admin@admingest.com.do` |
+| **Contraseña** | `AG2026AdminGest!` |
+
+> La contraseña se obtiene de `SEED_ADMIN_PASSWORD`. Si modificas esa variable antes de ejecutar el seed, la contraseña del administrador se actualizará con el nuevo valor.
 
 ### 8. Iniciar el proyecto
 
@@ -390,30 +309,12 @@ Servicios locales:
 
 ## 🐳 Docker Compose
 
-Docker permite levantar SQL Server de forma reproducible sin reemplazar la instalación local recomendada.
-
-### Configurar la contraseña
-
-En el `.env` de la raíz:
-
-```env
-MSSQL_SA_PASSWORD=UNA_CONTRASENA_SEGURA_COMPATIBLE_CON_SQL_SERVER
-```
-
-### Levantar el entorno
-
 ```bash
 docker compose up -d
 docker compose ps
 ```
 
-Configura `apps/api/.env`:
-
-```env
-DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;user=sa;password=UNA_CONTRASENA_SEGURA_COMPATIBLE_CON_SQL_SERVER;encrypt=true;trustServerCertificate=true"
-```
-
-Prepara y ejecuta:
+Configura `apps/api/.env` para conectarte al SQL Server del contenedor y luego ejecuta:
 
 ```bash
 npm run db:generate
@@ -422,17 +323,13 @@ npm run db:seed
 npm run dev
 ```
 
-Para detener el contenedor:
+Para detener el entorno:
 
 ```bash
 docker compose down
 ```
 
-Los volúmenes no se eliminan con `docker compose down`. Evita `docker compose down -v` salvo que realmente quieras borrar el almacenamiento local.
-
 ## ✅ Validación técnica
-
-Validación completa:
 
 ```bash
 npm run db:generate
@@ -442,110 +339,45 @@ npm run test
 npm run build
 ```
 
-Validación de release:
-
-```bash
-npm run release:check
-```
-
-Estado validado para `v1.0.1`:
+Resultados validados:
 
 - API: 6 suites y 17 pruebas aprobadas.
 - Web: 5 archivos y 12 pruebas aprobadas.
 - Total: 29 pruebas aprobadas.
-- Prisma generate y validate aprobados.
 - Migraciones SQL Server aplicadas correctamente.
 - Lint limpio.
 - Build de NestJS y Vite exitoso.
-- QR con logo escaneado correctamente.
-- Página pública de autenticidad validada manualmente.
-
-## 🔄 Integración continua y releases
-
-El workflow de CI ejecuta:
-
-- instalación reproducible con `npm ci`;
-- generación y validación de Prisma;
-- SQL Server 2022 real como servicio;
-- creación de base de datos;
-- despliegue de migraciones;
-- lint;
-- pruebas;
-- build;
-- auditoría de vulnerabilidades críticas;
-- publicación de artefactos.
-
-El workflow de Release se activa mediante tags `v*` y genera:
-
-- paquete compilado de la API;
-- paquete compilado del frontend;
-- GitHub Release con notas automáticas.
-
-## 📦 Versiones
-
-### `v1.0.1`
-
-- Verificación pública de cotizaciones.
-- Código QR dentro del PDF.
-- Logo oficial incrustado en el QR.
-- Código público único por cotización.
-- Endpoint público con rate limiting.
-- Página responsive de autenticidad.
-
-### `v1.0.0`
-
-- Primera versión estable completa.
-- CRM, proyectos, cotizaciones, reportes, seguridad, recuperación de contraseña, Docker, CI/CD y documentación.
-
-Consulta [CHANGELOG.md](CHANGELOG.md) para el historial detallado.
-
-## 🗺️ Roadmap completado
-
-- [x] RC1 — Experiencia visual, dashboard y navegación.
-- [x] RC2 — Exportaciones, Kanban, calendario y cronograma.
-- [x] RC3.1 — Usuarios, roles y perfil.
-- [x] RC3.2 — Recuperación de contraseña.
-- [x] RC3.3 — Seguridad y dependencias.
-- [x] RC3.4 — Testing, Docker y CI.
-- [x] RC3.5 — Documentación y release `v1.0.0`.
-- [x] `v1.0.1` — Verificación QR de cotizaciones.
-
-El MVP se considera completado. Las siguientes mejoras deberán desarrollarse en versiones evolutivas como `v1.1.0` o `v2.0.0`.
-
-## 👥 Equipo académico original
-
-| 👤 Integrante | 🆔 Matrícula |
-|---|---|
-| 👨🏻‍💻 Francis Jairo Matías Rosario | 2015-2984 |
-| 👨🏻‍💻 Isaías Pérez Moya | 2016-3595 |
-| 👨🏻‍💻 Enmanuel Avilez Valoy | 2016-3789 |
-| 👩🏻‍💻 Diana Caroline Mejía Encarnación | 2016-3796 |
-| 👨🏻‍💻 Andrés Eudoro Pujols | 2016-3917 |
-| 👨🏻‍💻 Alexander Dionicio Mercedes | 2016-3962 |
-| 👨🏻‍💻 Raymundo Eduardo Peña Sánchez | 2016-4276 |
-
-## 🎓 Información académica
-
-| Información | Detalle |
-|---|---|
-| 📖 Asignatura | Administración de Proyectos de Software (SOF-013) |
-| 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
-| 📅 Período académico | 2018-C3 |
-| 🧩 Proyecto original | GestorAdministrativo |
-| 🚀 Reconstrucción moderna | AdminGest |
 
 ## 📚 Documentación
 
 - [Arquitectura](docs/ARCHITECTURE.md)
 - [Despliegue](docs/DEPLOYMENT.md)
-- [Recuperación de contraseña](docs/RC3.2-PASSWORD-RECOVERY.md)
-- [Checklist de pruebas RC3.2](docs/RC3.2-TEST-CHECKLIST.md)
-- [Cierre de RC3](docs/RC3-COMPLETION.md)
-- [Checklist del release 1.0.0](docs/RELEASE-1.0.0-CHECKLIST.md)
+- [Recuperación de contraseña](docs/PASSWORD_RESET.md)
 - [Política de seguridad](SECURITY.md)
-- [Avisos de terceros](THIRD_PARTY_NOTICES.md)
+- [Componentes de terceros](THIRD_PARTY_NOTICES.md)
 - [Historial de cambios](CHANGELOG.md)
+
+## 👥 Equipo académico original
+
+| 👤 Integrante | 🆔 Matrícula |
+|---|---|
+| Francis Jairo Matías Rosario | 2015-2984 |
+| Isaías Pérez Moya | 2016-3595 |
+| Enmanuel Avilez Valoy | 2016-3789 |
+| Diana Caroline Mejía Encarnación | 2016-3796 |
+| Andrés Eudoro Pujols | 2016-3917 |
+| Alexander Dionicio Mercedes | 2016-3962 |
+| Raymundo Eduardo Peña Sánchez | 2016-4276 |
+
+## 🎓 Información académica
+
+| Información | Detalle |
+|---|---|
+| Asignatura | Administración de Proyectos de Software (SOF-013) |
+| Institución | Instituto Tecnológico de Las Américas (ITLA) |
+| Período académico | 2018-C3 |
+| Tipo de entrega | Proyecto final |
 
 ## 📄 Licencia
 
-Este repositorio conserva el contexto académico original y su reconstrucción moderna. Revisa la licencia y los avisos de terceros antes de reutilizar componentes fuera de este proyecto.
+Este proyecto se distribuye bajo los términos definidos en [LICENSE](LICENSE).
