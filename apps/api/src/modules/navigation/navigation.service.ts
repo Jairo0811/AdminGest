@@ -188,8 +188,8 @@ export class NavigationService {
     ]
       .sort(
         (left, right) =>
-          new Date(left.occurredAt ?? 0).getTime() -
-          new Date(right.occurredAt ?? 0).getTime(),
+          (left.occurredAt?.getTime() ?? 0) -
+          (right.occurredAt?.getTime() ?? 0),
       )
       .slice(0, 10);
   }
