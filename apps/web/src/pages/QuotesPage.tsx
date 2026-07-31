@@ -11,6 +11,20 @@ const money = new Intl.NumberFormat('es-DO', {
   currency: 'DOP',
 });
 
+const dateFormatter = new Intl.DateTimeFormat('es-DO', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+});
+
+interface Company {
+  name: string;
+  taxId?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
 interface QuoteItem {
   id: string;
   description: string;
@@ -40,6 +54,14 @@ interface QuoteDetail extends Entity {
   items: QuoteItem[];
 }
 
+const statusLabels: Record<string, string> = {
+  DRAFT: 'Borrador',
+  SENT: 'Enviada',
+  ACCEPTED: 'Aceptada',
+  REJECTED: 'Rechazada',
+  EXPIRED: 'Vencida',
+};
+
 const escapeHtml = (value: unknown) =>
   String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -50,18 +72,26 @@ const escapeHtml = (value: unknown) =>
 
 const clampPercentage = (value: number) => Math.min(100, Math.max(0, value));
 
+const optionalLine = (label: string, value?: string) =>
+  value ? `<p><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</p>` : '';
+
 export function QuotesPage() {
   const [printingId, setPrintingId] = useState<string | null>(null);
 
   const printQuote = async (id: string) => {
     setPrintingId(id);
     try {
-      const quote = await api<QuoteDetail>(`/quotes/${id}`);
+      const [quote, company] = await Promise.all([
+        api<QuoteDetail>(`/quotes/${id}`),
+        api<Company>('/company'),
+      ]);
+
       const logoUrl = new URL('/brand/logo.png', window.location.origin).href;
       const taxableSubtotal = Math.max(0, Number(quote.subtotal) - Number(quote.discount));
       const discountPercentage = Number(quote.subtotal) > 0
         ? (Number(quote.discount) / Number(quote.subtotal)) * 100
         : 0;
+      const statusLabel = statusLabels[quote.status] ?? quote.status;
 
       const rows = quote.items
         .map((item) => {
@@ -75,35 +105,96 @@ export function QuotesPage() {
             <td>${escapeHtml(money.format(Number(item.unitPrice)))}</td>
             <td>${escapeHtml(money.format(lineSubtotal))}</td>
             <td>${FIXED_ITBIS_RATE}%</td>
-            <td>${escapeHtml(money.format(lineTotalWithTax))}</td>
+            <td><strong>${escapeHtml(money.format(lineTotalWithTax))}</strong></td>
           </tr>`;
         })
         .join('');
 
       printDocument(
         `Cotización ${quote.number}`,
-        `<header style="align-items:center;gap:32px">
-          <div style="min-width:190px"><img src="${escapeHtml(logoUrl)}" alt="AdminGest" style="display:block;width:180px;max-height:90px;object-fit:contain" /></div>
-          <div><h1>Cotización ${escapeHtml(quote.number)}</h1><p class="muted">Estado: ${escapeHtml(quote.status)}</p></div>
-        </header>
-        <section class="summary">
-          <div><strong>Cliente</strong><br/>${escapeHtml(quote.customer.name)}<br/><span class="muted">${escapeHtml(quote.customer.taxId ?? '')}</span></div>
-          <div><strong>Contacto</strong><br/>${escapeHtml(quote.customer.email ?? '—')}<br/><span class="muted">${escapeHtml(quote.customer.phone ?? '')}</span></div>
-          <div><strong>Fecha de emisión</strong><br/>${new Date(quote.issueDate).toLocaleDateString('es-DO')}</div>
-          <div><strong>Válida hasta</strong><br/>${quote.validUntil ? new Date(quote.validUntil).toLocaleDateString('es-DO') : 'Sin vencimiento'}</div>
+        `<section class="quote-header">
+          <div class="quote-brand">
+            <img src="${escapeHtml(logoUrl)}" alt="AdminGest" />
+            <div class="quote-company">
+              <strong>${escapeHtml(company.name)}</strong>
+              ${company.taxId ? `<span>RNC: ${escapeHtml(company.taxId)}</span>` : ''}
+              ${company.address ? `<span>${escapeHtml(company.address)}</span>` : ''}
+              ${company.email || company.phone
+                ? `<span>${escapeHtml([company.email, company.phone].filter(Boolean).join(' · '))}</span>`
+                : ''}
+            </div>
+          </div>
+          <div class="quote-title">
+            <span class="label">Propuesta comercial</span>
+            <h1>${escapeHtml(quote.number)}</h1>
+            <span class="quote-status">${escapeHtml(statusLabel)}</span>
+          </div>
         </section>
-        <table>
-          <thead><tr><th>Concepto</th><th>Cantidad</th><th>Precio unitario</th><th>Subtotal</th><th>ITBIS</th><th>Total con ITBIS</th></tr></thead>
+
+        <section class="quote-meta">
+          <article class="quote-card">
+            <h3>Cotización preparada para</h3>
+            <strong>${escapeHtml(quote.customer.name)}</strong>
+            ${optionalLine('RNC/Cédula', quote.customer.taxId)}
+            ${optionalLine('Correo', quote.customer.email)}
+            ${optionalLine('Teléfono', quote.customer.phone)}
+            ${optionalLine('Dirección', quote.customer.address)}
+          </article>
+          <article class="quote-card">
+            <h3>Información del documento</h3>
+            <div class="quote-dates">
+              <div class="quote-date">
+                <small>Fecha de emisión</small>
+                <strong>${dateFormatter.format(new Date(quote.issueDate))}</strong>
+              </div>
+              <div class="quote-date">
+                <small>Válida hasta</small>
+                <strong>${quote.validUntil
+                  ? dateFormatter.format(new Date(quote.validUntil))
+                  : 'Sin vencimiento'}</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <table class="quote-table">
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th>Cantidad</th>
+              <th>Precio unitario</th>
+              <th>Subtotal</th>
+              <th>ITBIS</th>
+              <th>Total</th>
+            </tr>
+          </thead>
           <tbody>${rows}</tbody>
         </table>
-        <table class="totals">
-          <tr><th>Subtotal</th><td>${escapeHtml(money.format(Number(quote.subtotal)))}</td></tr>
-          <tr><th>Descuento (${escapeHtml(discountPercentage.toFixed(2))}%)</th><td>-${escapeHtml(money.format(Number(quote.discount)))}</td></tr>
-          <tr><th>Base imponible</th><td>${escapeHtml(money.format(taxableSubtotal))}</td></tr>
-          <tr><th>ITBIS (${FIXED_ITBIS_RATE}%)</th><td>${escapeHtml(money.format(Number(quote.tax)))}</td></tr>
-          <tr><th>Total</th><td><strong>${escapeHtml(money.format(Number(quote.total)))}</strong></td></tr>
-        </table>
-        ${quote.notes ? `<p><strong>Notas:</strong> ${escapeHtml(quote.notes)}</p>` : ''}`,
+
+        <section class="quote-financials">
+          <article class="quote-notes">
+            <h3>Notas y condiciones</h3>
+            <p>${escapeHtml(
+              quote.notes
+                ?? `Esta cotización es válida hasta la fecha indicada. Los precios están expresados en pesos dominicanos e incluyen ITBIS del ${FIXED_ITBIS_RATE}% según corresponda.`,
+            )}</p>
+          </article>
+          <table class="totals">
+            <tr><th>Subtotal</th><td>${escapeHtml(money.format(Number(quote.subtotal)))}</td></tr>
+            <tr><th>Descuento (${escapeHtml(discountPercentage.toFixed(2))}%)</th><td>-${escapeHtml(money.format(Number(quote.discount)))}</td></tr>
+            <tr><th>Base imponible</th><td>${escapeHtml(money.format(taxableSubtotal))}</td></tr>
+            <tr><th>ITBIS (${FIXED_ITBIS_RATE}%)</th><td>${escapeHtml(money.format(Number(quote.tax)))}</td></tr>
+            <tr class="grand-total"><th>Total</th><td><strong>${escapeHtml(money.format(Number(quote.total)))}</strong></td></tr>
+          </table>
+        </section>
+
+        <footer class="quote-footer">
+          <div>
+            <strong>Gracias por considerar nuestra propuesta.</strong><br/>
+            Documento generado por AdminGest el ${escapeHtml(new Date().toLocaleString('es-DO'))}.
+          </div>
+          <div class="signature">Firma autorizada</div>
+        </footer>`,
       );
     } finally {
       setPrintingId(null);
@@ -158,7 +249,7 @@ export function QuotesPage() {
         {
           label: 'Estado',
           exportValue: (item) => String(item.status),
-          render: (item) => <span className="status-badge">{String(item.status)}</span>,
+          render: (item) => <span className="status-badge">{statusLabels[String(item.status)] ?? String(item.status)}</span>,
         },
         {
           label: 'Líneas',
