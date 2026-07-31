@@ -3,27 +3,29 @@
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
+  <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
+  <img src="https://img.shields.io/badge/estado-Estable-18A96F?style=for-the-badge" alt="Estado estable" />
+  <img src="https://img.shields.io/badge/versión-1.0.1-1677DF?style=for-the-badge" alt="Versión 1.0.1" />
+  <img src="https://img.shields.io/badge/arquitectura-Monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
 </p>
 
 <p align="center">
-
-  <img src="https://img.shields.io/badge/estado-Release%20Candidate-1677DF?style=for-the-badge" alt="Estado Release Candidate" />
-  <img src="https://img.shields.io/badge/versión-próxima%201.0.0-18A96F?style=for-the-badge" alt="Próxima versión 1.0.0" />
-  <img src="https://img.shields.io/badge/arquitectura-npm%20workspaces-0F172A?style=for-the-badge" alt="npm workspaces" />
+  <strong>CRM, proyectos, cotizaciones y gestión empresarial en una plataforma web multiempresa.</strong>
 </p>
 
 <p align="center">
-  <strong>CRM, proyectos y gestión empresarial en una plataforma web multiempresa.</strong>
+  React · NestJS · Prisma · SQL Server · Docker · GitHub Actions
 </p>
 
-> Estado actual: **AdminGest se encuentra en fase RC3. El núcleo funcional está completo y estable; antes de publicar `v1.0.0` quedan el endurecimiento final de seguridad, la ampliación de pruebas, la revisión controlada de dependencias, la documentación de despliegue y la publicación formal del release.**
+> **Estado actual:** AdminGest se encuentra en su versión estable `v1.0.1`. El núcleo funcional, la seguridad, las pruebas, la automatización de CI/CD, Docker, la documentación y la verificación pública de cotizaciones mediante QR están completados.
 
 ## 📘 Descripción
 
-**AdminGest** es una plataforma web multiempresa para centralizar CRM, cotizaciones, agenda comercial, reportes, usuarios y gestión de proyectos. La reconstrucción moderna convierte la maqueta académica original en una aplicación funcional con API segura, persistencia en SQL Server, interfaz responsive y una arquitectura modular preparada para evolucionar.
+**AdminGest** es una plataforma web multiempresa orientada a la gestión comercial, administrativa y de proyectos. Centraliza prospectos, clientes, oportunidades, actividades, cotizaciones, reportes, usuarios, roles y proyectos en una sola solución moderna.
 
-El proyecto reconstruye de forma independiente el trabajo final **GestorAdministrativo**, realizado para **Administración de Proyectos de Software (SOF-013)** en el ITLA durante **2018-C3**.
+El proyecto reconstruye de forma independiente el trabajo final académico **GestorAdministrativo**, desarrollado para la asignatura **Administración de Proyectos de Software (SOF-013)** del Instituto Tecnológico de Las Américas (ITLA), período **2018-C3**.
+
+La versión actual transforma aquella propuesta académica en una aplicación funcional, modular, segura y preparada para despliegue profesional.
 
 ## ✨ Funcionalidades principales
 
@@ -31,40 +33,58 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 
 - Registro de empresa e inicio de sesión con JWT.
 - Aislamiento de datos por empresa.
-- Prospectos con origen, prioridad, responsable y ciclo de conversión.
-- Clientes y contactos.
-- Pipeline comercial y oportunidades.
-- Kanban de oportunidades.
-- Actividades: llamadas, correos, reuniones, visitas, tareas y seguimientos.
+- Gestión de prospectos con origen, prioridad, responsable y ciclo de conversión.
+- Gestión de clientes y contactos.
+- Pipeline comercial configurable.
+- Oportunidades con valor estimado, probabilidad y fecha esperada de cierre.
+- Vista Kanban de oportunidades.
+- Actividades comerciales: llamadas, correos, reuniones, visitas, tareas y seguimientos.
 - Calendario comercial.
 - Catálogo de productos y servicios.
-- Cotizaciones con descuento configurable e ITBIS fijo del 18%.
-- Generación de cotizaciones imprimibles con branding, datos empresariales y resumen financiero.
+
+### 🧾 Cotizaciones profesionales
+
+- Creación de cotizaciones con uno o varios conceptos.
+- Descuento configurable.
+- ITBIS fijo del 18 %.
+- Cálculo automático de subtotal, descuento, base imponible, impuesto y total.
+- Documento imprimible con branding corporativo.
+- Guardado como PDF desde el navegador.
+- Código QR de autenticidad dentro del documento.
+- Logo oficial de AdminGest incrustado dentro del QR.
+- Código público UUID único y no predecible por cotización.
+- Página pública de verificación sin necesidad de iniciar sesión.
+- Validación de estado, empresa emisora, cliente, fechas e importes.
+- URL pública configurable mediante `VITE_PUBLIC_APP_URL`.
 
 ### 📊 Proyectos y productividad
 
-- Proyectos con cliente, presupuesto, fechas, estado y progreso.
-- Tareas, responsables y seguimiento de avance.
+- Proyectos asociados a clientes y oportunidades.
+- Presupuesto, fechas, estado y progreso.
+- Gestión de tareas y responsables.
+- Jerarquía de tareas.
 - Cronograma visual.
-- Importación y exportación CSV compatible con Microsoft Project.
 - Impresión de cronograma tipo Gantt.
+- Importación y exportación CSV compatible con Microsoft Project.
 
 ### 🖥️ Administración y experiencia de usuario
 
-- Dashboard con indicadores, tendencias, gráficos y embudo comercial.
+- Dashboard ejecutivo con KPIs, tendencias, gráficos y embudo comercial.
 - Reportes ejecutivos.
 - Exportación de listados a Excel.
-- Impresión y guardado como PDF desde el navegador.
-- Navegación avanzada, breadcrumbs, buscador y notificaciones.
+- Impresión y exportación PDF desde el navegador.
+- Navegación avanzada con breadcrumbs.
+- Buscador y notificaciones.
 - Tema claro y oscuro.
-- Sidebar colapsable y diseño responsive.
+- Sidebar colapsable.
+- Diseño responsive.
 - Configuración de empresa.
-- Validación dominicana de cédula y RNC con formato automático.
+- Validación dominicana de cédula y RNC.
 
-### 👤 Usuarios, roles y seguridad funcional
+### 👤 Usuarios, roles y perfil
 
 - Gestión de usuarios por empresa.
-- Roles:
+- Roles disponibles:
   - `SUPER_ADMIN`
   - `ADMIN`
   - `SALES_MANAGER`
@@ -73,12 +93,48 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
   - `VIEWER`
 - Activación y desactivación de cuentas.
 - Prevención de auto-desactivación.
-- Restablecimiento administrativo de contraseña.
 - Perfil personal.
 - Cambio de contraseña verificando la contraseña actual.
-- Contraseñas protegidas con bcrypt.
-- Auditoría de operaciones sensibles.
-- Exclusión de hashes de contraseña de los registros de auditoría.
+- Restablecimiento administrativo de contraseña.
+- Recuperación de contraseña mediante enlace temporal.
+- Cierre automático de sesión al expirar el JWT.
+
+## 🛡️ Seguridad
+
+AdminGest incorpora:
+
+- autenticación JWT;
+- contraseñas protegidas con bcrypt;
+- autorización basada en roles;
+- aislamiento multiempresa;
+- recuperación de contraseña con tokens aleatorios de un solo uso;
+- almacenamiento exclusivo del hash SHA-256 del token;
+- expiración automática de enlaces de recuperación;
+- invalidación de solicitudes anteriores;
+- rate limiting global y específico para autenticación y rutas públicas;
+- Helmet y encabezados HTTP endurecidos;
+- CORS configurable por entorno;
+- validación estricta de DTO;
+- rechazo de propiedades desconocidas;
+- eliminación de `X-Powered-By`;
+- Swagger deshabilitado por defecto en producción;
+- manejo global y uniforme de errores;
+- auditoría de operaciones sensibles;
+- secretos gestionados mediante variables de entorno.
+
+Consulta [SECURITY.md](SECURITY.md) para la política completa.
+
+## 🇩🇴 Validación dominicana
+
+AdminGest valida:
+
+- cédula dominicana de 11 dígitos;
+- RNC de 9 dígitos;
+- máscara y formato automático;
+- validación en frontend y backend;
+- almacenamiento normalizado sin guiones.
+
+La implementación de cédula fue adaptada con atribución al proyecto público de OGTIC **Cuenta Única Registry**. Consulta [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## 🧰 Stack tecnológico
 
@@ -94,6 +150,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - React Router
 - TanStack Query
 - Lucide React
+- QRCode
 - Vitest
 - Testing Library
 
@@ -136,7 +193,8 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Jest
 - Vitest
 - GitHub Actions
-- Docker Compose (opcional)
+- Docker Compose
+- Workflows de CI y Release
 
 ## 🏗️ Arquitectura
 
@@ -149,6 +207,7 @@ NestJS modular
         │
         ├── Autenticación y autorización
         ├── CRM y operación comercial
+        ├── Cotizaciones y verificación pública
         ├── Proyectos y tareas
         ├── Usuarios y perfil
         ├── Auditoría
@@ -156,11 +215,11 @@ NestJS modular
         ▼
 Prisma ORM
         │
-        ├── SQL Server Express 2022 (recomendado)
-        └── SQL Server en Docker Compose (opcional)
+        ├── SQL Server Express 2022
+        └── SQL Server en Docker Compose
 ```
 
-La solución usa un monorepo con npm workspaces:
+La solución utiliza un monorepo con npm workspaces:
 
 ```text
 AdminGest/
@@ -190,23 +249,26 @@ Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones de arq
 | CRM y pipeline | ✅ Completados |
 | Actividades y calendario | ✅ Completados |
 | Cotizaciones e ITBIS | ✅ Completados |
+| Verificación QR pública | ✅ Completada en `v1.0.1` |
 | Proyectos y Microsoft Project CSV | ✅ Completados |
 | Dashboard y reportes | ✅ Completados |
-| Usuarios, roles y perfil | ✅ RC3.1 completado |
+| Usuarios, roles y perfil | ✅ Completados |
+| Recuperación de contraseña | ✅ Completada |
 | Validación de cédula y RNC | ✅ Completada |
-| Pruebas automatizadas | 🟡 Implementadas; cobertura en ampliación |
-| Seguridad y dependencias | 🟡 Endurecimiento pendiente |
-| Docker y despliegue | 🟡 Soporte disponible; documentación final pendiente |
-| Documentación de release | 🟡 En progreso |
-| Release `v1.0.0` | ⏳ Pendiente |
+| Seguridad | ✅ Endurecida |
+| Pruebas automatizadas | ✅ Implementadas |
+| Docker | ✅ Compatible |
+| GitHub Actions | ✅ CI y release automatizados |
+| Documentación | ✅ Actualizada |
+| Release estable | ✅ `v1.0.1` |
 
 ## 📋 Requisitos
 
 - Git
-- Node.js 22 LTS recomendado
+- Node.js 22 o superior
 - npm compatible con el `package-lock.json`
 - SQL Server Express 2022 recomendado para desarrollo local
-- Docker Desktop opcional, solo para el entorno reproducible con Docker Compose
+- Docker Desktop opcional para entornos reproducibles
 
 Comprueba las herramientas:
 
@@ -218,16 +280,14 @@ npm --version
 
 ## 🔀 Modalidades de ejecución
 
-AdminGest mantiene dos modalidades soportadas:
-
 | Modalidad | Recomendación | Uso principal |
 |---|---|---|
 | SQL Server Express 2022 | ✅ Recomendada | Desarrollo diario, depuración y trabajo con SSMS |
-| Docker Compose | Opcional | Entornos reproducibles, incorporación de nuevos desarrolladores y validaciones controladas |
+| Docker Compose | Opcional | Entornos reproducibles, incorporación de desarrolladores y validación de infraestructura |
 
-El entorno utilizado principalmente durante el desarrollo de AdminGest es **Windows 11 + SQL Server Express 2022 + Prisma ORM**. Docker se conserva como alternativa compatible, pero no es un requisito obligatorio.
+El entorno principal utilizado durante el desarrollo fue **Windows 11 + SQL Server Express 2022 + Prisma ORM**. Docker se conserva como alternativa compatible.
 
-## 🚀 Instalación local recomendada
+## 🚀 Instalación local
 
 ### 1. Clonar el repositorio
 
@@ -271,7 +331,7 @@ GO
 
 ### 5. Configurar la API
 
-Ejemplo con SQL Server y autenticación SQL:
+Ejemplo con autenticación SQL:
 
 ```env
 NODE_ENV=development
@@ -280,7 +340,11 @@ DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;user=admingest_app
 CORS_ORIGIN=http://localhost:5173
 JWT_SECRET=UNA_CLAVE_ALEATORIA_DE_AL_MENOS_32_CARACTERES
 JWT_EXPIRES_IN=8h
+SWAGGER_ENABLED=true
 SEED_ADMIN_PASSWORD=UNA_CONTRASENA_LOCAL_SEGURA
+PASSWORD_RESET_URL=http://localhost:5173/reset-password
+RESEND_API_KEY=
+MAIL_FROM=AdminGest <no-reply@tu-dominio.com>
 ```
 
 En Windows también puede utilizarse autenticación integrada si la instalación y el controlador lo permiten:
@@ -289,9 +353,16 @@ En Windows también puede utilizarse autenticación integrada si la instalación
 DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
 ```
 
-No subas archivos `.env` ni credenciales reales al repositorio.
+### 6. Configurar el frontend
 
-### 6. Preparar Prisma y la base de datos
+```env
+VITE_API_URL=http://localhost:3000/api
+VITE_PUBLIC_APP_URL=http://localhost:5173
+```
+
+`VITE_PUBLIC_APP_URL` se utiliza para construir la URL del QR de verificación. En producción debe apuntar al dominio público real de AdminGest.
+
+### 7. Preparar Prisma y la base de datos
 
 ```bash
 npm run db:generate
@@ -299,9 +370,9 @@ npm run db:migrate
 npm run db:seed
 ```
 
-El seed público crea un usuario de demostración con el correo definido en el proyecto y la contraseña indicada en `SEED_ADMIN_PASSWORD`. Los datos institucionales o credenciales locales deben mantenerse fuera de Git.
+El seed público crea un usuario de demostración utilizando la contraseña indicada en `SEED_ADMIN_PASSWORD`. No subas credenciales reales ni archivos `.env` al repositorio.
 
-### 7. Iniciar el proyecto
+### 8. Iniciar el proyecto
 
 ```bash
 npm run dev
@@ -315,38 +386,34 @@ Servicios locales:
 | API | http://localhost:3000/api |
 | Swagger | http://localhost:3000/docs |
 | Health check | http://localhost:3000/api/health |
+| Verificación pública | http://localhost:5173/verify/quote/{publicCode} |
 
-## 🐳 Desarrollo con Docker Compose (opcional)
+## 🐳 Docker Compose
 
 Docker permite levantar SQL Server de forma reproducible sin reemplazar la instalación local recomendada.
 
-### 1. Configurar la contraseña del contenedor
+### Configurar la contraseña
 
-En el archivo `.env` de la raíz:
+En el `.env` de la raíz:
 
 ```env
 MSSQL_SA_PASSWORD=UNA_CONTRASENA_SEGURA_COMPATIBLE_CON_SQL_SERVER
 ```
 
-### 2. Levantar SQL Server
+### Levantar el entorno
 
 ```bash
 docker compose up -d
-```
-
-Comprueba el contenedor:
-
-```bash
 docker compose ps
 ```
 
-### 3. Configurar `apps/api/.env`
+Configura `apps/api/.env`:
 
 ```env
 DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;user=sa;password=UNA_CONTRASENA_SEGURA_COMPATIBLE_CON_SQL_SERVER;encrypt=true;trustServerCertificate=true"
 ```
 
-### 4. Preparar y ejecutar AdminGest
+Prepara y ejecuta:
 
 ```bash
 npm run db:generate
@@ -361,66 +428,89 @@ Para detener el contenedor:
 docker compose down
 ```
 
-Los datos persistidos en volúmenes no se eliminan con `docker compose down`. Evita usar `docker compose down -v` salvo que realmente quieras borrar el almacenamiento local del contenedor.
+Los volúmenes no se eliminan con `docker compose down`. Evita `docker compose down -v` salvo que realmente quieras borrar el almacenamiento local.
 
 ## ✅ Validación técnica
 
+Validación completa:
+
 ```bash
 npm run db:generate
+npm run db:validate
 npm run lint
 npm run test
 npm run build
 ```
 
-Estado validado durante RC3.1:
+Validación de release:
 
-- API: 4 suites y 10 pruebas aprobadas.
-- Web: 3 archivos y 7 pruebas aprobadas.
+```bash
+npm run release:check
+```
+
+Estado validado para `v1.0.1`:
+
+- API: 6 suites y 17 pruebas aprobadas.
+- Web: 5 archivos y 12 pruebas aprobadas.
+- Total: 29 pruebas aprobadas.
+- Prisma generate y validate aprobados.
+- Migraciones SQL Server aplicadas correctamente.
 - Lint limpio.
 - Build de NestJS y Vite exitoso.
+- QR con logo escaneado correctamente.
+- Página pública de autenticidad validada manualmente.
 
-## 🛡️ Seguridad
+## 🔄 Integración continua y releases
 
-AdminGest implementa actualmente:
+El workflow de CI ejecuta:
 
-- autenticación JWT;
-- contraseñas con bcrypt;
-- autorización basada en roles;
-- aislamiento multiempresa;
-- validación de DTO;
-- auditoría de operaciones sensibles;
-- protección contra auto-desactivación;
-- secretos mediante variables de entorno.
+- instalación reproducible con `npm ci`;
+- generación y validación de Prisma;
+- SQL Server 2022 real como servicio;
+- creación de base de datos;
+- despliegue de migraciones;
+- lint;
+- pruebas;
+- build;
+- auditoría de vulnerabilidades críticas;
+- publicación de artefactos.
 
-Antes de `v1.0.0` está planificado completar:
+El workflow de Release se activa mediante tags `v*` y genera:
 
-- revisión controlada de dependencias y vulnerabilidades;
-- endurecimiento de encabezados HTTP;
-- política CORS por entorno;
-- rate limiting definitivo;
-- revisión de Swagger en producción;
-- sanitización y manejo centralizado de errores;
-- mayor cobertura de pruebas de permisos y aislamiento.
+- paquete compilado de la API;
+- paquete compilado del frontend;
+- GitHub Release con notas automáticas.
 
-## 🇩🇴 Validación dominicana
+## 📦 Versiones
 
-AdminGest incluye validación de:
+### `v1.0.1`
 
-- cédula dominicana de 11 dígitos;
-- RNC de 9 dígitos;
-- máscara y formato automático;
-- verificación en frontend y backend;
-- almacenamiento normalizado sin guiones.
+- Verificación pública de cotizaciones.
+- Código QR dentro del PDF.
+- Logo oficial incrustado en el QR.
+- Código público único por cotización.
+- Endpoint público con rate limiting.
+- Página responsive de autenticidad.
 
-La implementación de cédula fue adaptada con atribución al proyecto público de OGTIC **Cuenta Única Registry**. Consulta [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+### `v1.0.0`
 
-## 🗺️ Roadmap hacia `v1.0.0`
+- Primera versión estable completa.
+- CRM, proyectos, cotizaciones, reportes, seguridad, recuperación de contraseña, Docker, CI/CD y documentación.
 
+Consulta [CHANGELOG.md](CHANGELOG.md) para el historial detallado.
+
+## 🗺️ Roadmap completado
+
+- [x] RC1 — Experiencia visual, dashboard y navegación.
+- [x] RC2 — Exportaciones, Kanban, calendario y cronograma.
 - [x] RC3.1 — Usuarios, roles y perfil.
-- [ ] RC3.2 — Recuperación de contraseña.
-- [ ] RC3.3 — Seguridad y actualización controlada de dependencias.
-- [ ] RC3.4 — Testing ampliado, Docker y CI.
-- [ ] RC3.5 — Documentación final, changelog y release `v1.0.0`.
+- [x] RC3.2 — Recuperación de contraseña.
+- [x] RC3.3 — Seguridad y dependencias.
+- [x] RC3.4 — Testing, Docker y CI.
+- [x] RC3.5 — Documentación y release `v1.0.0`.
+- [x] `v1.0.1` — Verificación QR de cotizaciones.
+
+El MVP se considera completado. Las siguientes mejoras deberán desarrollarse en versiones evolutivas como `v1.1.0` o `v2.0.0`.
 
 ## 👥 Equipo académico original
 
@@ -439,21 +529,23 @@ La implementación de cédula fue adaptada con atribución al proyecto público 
 | Información | Detalle |
 |---|---|
 | 📖 Asignatura | Administración de Proyectos de Software (SOF-013) |
-| 👨‍🏫 Profesor | Juan Martínez López |
 | 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
 | 📅 Período académico | 2018-C3 |
-| 🧑‍🤝‍🧑 Tipo | Proyecto Final Grupal |
-| 🛠️ Reconstrucción | Julio 2026 |
+| 🧩 Proyecto original | GestorAdministrativo |
+| 🚀 Reconstrucción moderna | AdminGest |
 
-El trabajo académico original fue grupal. La reconstrucción moderna fue desarrollada desde cero por **Jairo Matías**, conservando el contexto de la asignatura e incorporando una arquitectura web moderna.
+## 📚 Documentación
 
-## 🧭 Continuidad académica
-
-| Orden | Asignatura | Proyecto | Período |
-|---:|---|---|---|
-| 1 | Diseño Centrado en el Usuario (SOF-010) | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) | 2018-C1 |
-| 2 | Administración de Proyectos de Software (SOF-013) | AdminGest / GestorAdministrativo | 2018-C3 |
+- [Arquitectura](docs/ARCHITECTURE.md)
+- [Despliegue](docs/DEPLOYMENT.md)
+- [Recuperación de contraseña](docs/RC3.2-PASSWORD-RECOVERY.md)
+- [Checklist de pruebas RC3.2](docs/RC3.2-TEST-CHECKLIST.md)
+- [Cierre de RC3](docs/RC3-COMPLETION.md)
+- [Checklist del release 1.0.0](docs/RELEASE-1.0.0-CHECKLIST.md)
+- [Política de seguridad](SECURITY.md)
+- [Avisos de terceros](THIRD_PARTY_NOTICES.md)
+- [Historial de cambios](CHANGELOG.md)
 
 ## 📄 Licencia
 
-Repositorio privado. No se concede una licencia de distribución pública.
+Este repositorio conserva el contexto académico original y su reconstrucción moderna. Revisa la licencia y los avisos de terceros antes de reutilizar componentes fuera de este proyecto.
