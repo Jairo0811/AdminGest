@@ -2,17 +2,27 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "release/**"]
   pull_request:
     branches: [main, develop]
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: test
+  DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=AdminGest_CI_2026!;trustServerCertificate=true"
+  JWT_SECRET: "AdminGest_CI_Secret_With_At_Least_32_Characters"
+  CORS_ORIGIN: "http://localhost:5173"
+
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -21,21 +31,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
           cache: npm
+
+      - name: Use repository npm version
+        run: npm install --global npm@11.9.0
 
       - name: Install dependencies
         run: npm ci
 
       - name: Generate Prisma Client
         run: npm run db:generate
-        env:
-          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
 
       - name: Validate Prisma schema
         run: npm run db:validate
-        env:
-          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
+
+      - name: Check formatting
+        run: npm run format:check
 
       - name: Lint
         run: npm run lint
@@ -45,3 +57,16 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=critical
+
+      - name: Upload production builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: admingest-build-${{ github.sha }}
+          path: |
+            apps/api/dist
+            apps/web/dist
+          if-no-files-found: error
+          retention-days: 7
