@@ -14,6 +14,7 @@ import { CustomersModule } from './modules/customers/customers.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
 import { LeadsModule } from './modules/leads/leads.module';
+import { NavigationModule } from './modules/navigation/navigation.module';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
@@ -37,6 +38,7 @@ import { UsersModule } from './modules/users/users.module';
     QuotesModule,
     ProjectsModule,
     DashboardModule,
+    NavigationModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
