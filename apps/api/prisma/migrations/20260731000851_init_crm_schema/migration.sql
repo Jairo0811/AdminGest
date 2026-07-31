@@ -2,9 +2,6 @@ BEGIN TRY
 
 BEGIN TRAN;
 
--- CreateSchema
-IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = N'dbo') EXEC sp_executesql N'CREATE SCHEMA [dbo];';
-
 -- CreateTable
 CREATE TABLE [dbo].[Company] (
     [id] NVARCHAR(36) NOT NULL,
@@ -249,58 +246,158 @@ CREATE TABLE [dbo].[AuditLog] (
 
 -- CreateIndex
 CREATE NONCLUSTERED INDEX [User_companyId_status_idx] ON [dbo].[User]([companyId], [status]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [User_companyId_role_idx] ON [dbo].[User]([companyId], [role]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Lead_companyId_status_idx] ON [dbo].[Lead]([companyId], [status]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Lead_ownerId_idx] ON [dbo].[Lead]([ownerId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Customer_companyId_name_idx] ON [dbo].[Customer]([companyId], [name]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Contact_customerId_idx] ON [dbo].[Contact]([customerId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [PipelineStage_companyId_idx] ON [dbo].[PipelineStage]([companyId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Opportunity_companyId_status_idx] ON [dbo].[Opportunity]([companyId], [status]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Opportunity_customerId_idx] ON [dbo].[Opportunity]([customerId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Opportunity_ownerId_idx] ON [dbo].[Opportunity]([ownerId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Opportunity_pipelineStageId_idx] ON [dbo].[Opportunity]([pipelineStageId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Activity_companyId_scheduledAt_idx] ON [dbo].[Activity]([companyId], [scheduledAt]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Activity_ownerId_status_idx] ON [dbo].[Activity]([ownerId], [status]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [CatalogItem_companyId_isActive_idx] ON [dbo].[CatalogItem]([companyId], [isActive]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Quote_customerId_status_idx] ON [dbo].[Quote]([customerId], [status]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [QuoteItem_quoteId_idx] ON [dbo].[QuoteItem]([quoteId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Project_companyId_status_idx] ON [dbo].[Project]([companyId], [status]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [Project_customerId_idx] ON [dbo].[Project]([customerId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [ProjectTask_projectId_status_idx] ON [dbo].[ProjectTask]([projectId], [status]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [ProjectTask_assigneeId_idx] ON [dbo].[ProjectTask]([assigneeId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [ProjectTask_parentId_idx] ON [dbo].[ProjectTask]([parentId]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [AuditLog_companyId_createdAt_idx] ON [dbo].[AuditLog]([companyId], [createdAt]);
+
+-- CreateIndex
 CREATE NONCLUSTERED INDEX [AuditLog_userId_idx] ON [dbo].[AuditLog]([userId]);
 
 -- AddForeignKey
 ALTER TABLE [dbo].[User] ADD CONSTRAINT [User_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Lead] ADD CONSTRAINT [Lead_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Lead] ADD CONSTRAINT [Lead_ownerId_fkey] FOREIGN KEY ([ownerId]) REFERENCES [dbo].[User]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Customer] ADD CONSTRAINT [Customer_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Contact] ADD CONSTRAINT [Contact_customerId_fkey] FOREIGN KEY ([customerId]) REFERENCES [dbo].[Customer]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[PipelineStage] ADD CONSTRAINT [PipelineStage_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Opportunity] ADD CONSTRAINT [Opportunity_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Opportunity] ADD CONSTRAINT [Opportunity_customerId_fkey] FOREIGN KEY ([customerId]) REFERENCES [dbo].[Customer]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Opportunity] ADD CONSTRAINT [Opportunity_ownerId_fkey] FOREIGN KEY ([ownerId]) REFERENCES [dbo].[User]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Opportunity] ADD CONSTRAINT [Opportunity_pipelineStageId_fkey] FOREIGN KEY ([pipelineStageId]) REFERENCES [dbo].[PipelineStage]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Activity] ADD CONSTRAINT [Activity_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Activity] ADD CONSTRAINT [Activity_customerId_fkey] FOREIGN KEY ([customerId]) REFERENCES [dbo].[Customer]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Activity] ADD CONSTRAINT [Activity_opportunityId_fkey] FOREIGN KEY ([opportunityId]) REFERENCES [dbo].[Opportunity]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Activity] ADD CONSTRAINT [Activity_ownerId_fkey] FOREIGN KEY ([ownerId]) REFERENCES [dbo].[User]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[CatalogItem] ADD CONSTRAINT [CatalogItem_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Quote] ADD CONSTRAINT [Quote_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Quote] ADD CONSTRAINT [Quote_customerId_fkey] FOREIGN KEY ([customerId]) REFERENCES [dbo].[Customer]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Quote] ADD CONSTRAINT [Quote_opportunityId_fkey] FOREIGN KEY ([opportunityId]) REFERENCES [dbo].[Opportunity]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[QuoteItem] ADD CONSTRAINT [QuoteItem_quoteId_fkey] FOREIGN KEY ([quoteId]) REFERENCES [dbo].[Quote]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[QuoteItem] ADD CONSTRAINT [QuoteItem_catalogItemId_fkey] FOREIGN KEY ([catalogItemId]) REFERENCES [dbo].[CatalogItem]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Project] ADD CONSTRAINT [Project_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Project] ADD CONSTRAINT [Project_customerId_fkey] FOREIGN KEY ([customerId]) REFERENCES [dbo].[Customer]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Project] ADD CONSTRAINT [Project_opportunityId_fkey] FOREIGN KEY ([opportunityId]) REFERENCES [dbo].[Opportunity]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[Project] ADD CONSTRAINT [Project_managerId_fkey] FOREIGN KEY ([managerId]) REFERENCES [dbo].[User]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[ProjectTask] ADD CONSTRAINT [ProjectTask_projectId_fkey] FOREIGN KEY ([projectId]) REFERENCES [dbo].[Project]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[ProjectTask] ADD CONSTRAINT [ProjectTask_assigneeId_fkey] FOREIGN KEY ([assigneeId]) REFERENCES [dbo].[User]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[ProjectTask] ADD CONSTRAINT [ProjectTask_parentId_fkey] FOREIGN KEY ([parentId]) REFERENCES [dbo].[ProjectTask]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[AuditLog] ADD CONSTRAINT [AuditLog_companyId_fkey] FOREIGN KEY ([companyId]) REFERENCES [dbo].[Company]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[AuditLog] ADD CONSTRAINT [AuditLog_userId_fkey] FOREIGN KEY ([userId]) REFERENCES [dbo].[User]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 COMMIT TRAN;
@@ -315,4 +412,3 @@ END;
 THROW
 
 END CATCH
-

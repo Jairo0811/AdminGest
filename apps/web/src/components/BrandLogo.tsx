@@ -1,18 +1,36 @@
+type BrandLogoVariant = "login" | "sidebar" | "loader";
+
 type BrandLogoProps = {
+  variant?: BrandLogoVariant;
   compact?: boolean;
   className?: string;
-  inverse?: boolean;
 };
 
-export function BrandLogo({ compact = false, className = '' }: BrandLogoProps) {
-  const src = compact ? '/brand/isotipo.svg' : '/brand/logo.svg';
+export function BrandLogo({
+  variant = "sidebar",
+  compact = false,
+  className = "",
+}: BrandLogoProps) {
+  const imageSource = compact
+    ? "/brand/isotipo.png"
+    : "/brand/logo.png";
 
   return (
-    <img
-      alt="AdminGest"
-      className={`brand-logo ${compact ? 'brand-logo--compact' : ''} ${className}`.trim()}
-      decoding="async"
-      src={src}
-    />
+    <span
+      className={[
+        "brand-logo",
+        `brand-logo--${variant}`,
+        compact ? "brand-logo--compact" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <img
+        src={imageSource}
+        alt="AdminGest"
+        className="brand-logo__image"
+      />
+    </span>
   );
 }

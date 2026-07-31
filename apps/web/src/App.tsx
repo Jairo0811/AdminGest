@@ -1,18 +1,18 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { useAuth } from './auth/AuthContext';
-import { AppLayout } from './components/AppLayout';
-import { BrandLogo } from './components/BrandLogo';
-import { ActivitiesPage } from './pages/ActivitiesPage';
-import { CatalogPage } from './pages/CatalogPage';
-import { CustomersPage } from './pages/CustomersPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { LeadsPage } from './pages/LeadsPage';
-import { LoginPage } from './pages/LoginPage';
-import { OpportunitiesPage } from './pages/OpportunitiesPage';
-import { ProjectsPage } from './pages/ProjectsPage';
-import { QuotesPage } from './pages/QuotesPage';
-import { ReportsPage } from './pages/ReportsPage';
-import { SettingsPage } from './pages/SettingsPage';
+import { Navigate, Route, Routes } from "react-router-dom";
+import { useAuth } from "./auth/AuthContext";
+import { AppLayout } from "./components/AppLayout";
+import { BrandLogo } from "./components/BrandLogo";
+import { ActivitiesPage } from "./pages/ActivitiesPage";
+import { CatalogPage } from "./pages/CatalogPage";
+import { CustomersPage } from "./pages/CustomersPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { LeadsPage } from "./pages/LeadsPage";
+import { LoginPage } from "./pages/LoginPage";
+import { OpportunitiesPage } from "./pages/OpportunitiesPage";
+import { ProjectsPage } from "./pages/ProjectsPage";
+import { QuotesPage } from "./pages/QuotesPage";
+import { ReportsPage } from "./pages/ReportsPage";
+import { SettingsPage } from "./pages/SettingsPage";
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
@@ -20,7 +20,7 @@ function ProtectedLayout() {
   if (loading) {
     return (
       <div className="app-loader">
-        <BrandLogo compact />
+        <BrandLogo compact variant="loader" />
         <p>Cargando AdminGest…</p>
       </div>
     );

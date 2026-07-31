@@ -1,42 +1,71 @@
 .brand-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  line-height: 0;
+}
+
+.brand-logo__image {
   display: block;
-  width: 156px;
-  max-width: 100%;
+  width: 100%;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 12px 22px rgba(4, 16, 34, .2));
+}
+
+/* Login: logo completo */
+.brand-logo--login {
+  width: clamp(150px, 14vw, 205px);
+}
+
+/* Sidebar: logo completo, proporcionado al ancho de 260 px */
+.brand-logo--sidebar {
+  width: 138px;
+}
+
+/* Pantalla de carga */
+.brand-logo--loader {
+  width: 112px;
 }
 
 .brand-logo--compact {
-  width: 54px;
-  flex: 0 0 auto;
+  justify-content: center;
 }
 
-.auth-brand .brand-logo {
-  width: 168px;
-}
-
-.brand .brand-logo--compact {
-  width: 52px;
-}
-
-.app-loader .brand-logo--compact {
-  width: 92px;
+.app-loader .brand-logo__image {
   animation: brandLogoFloat 1.8s ease-in-out infinite;
-  filter: drop-shadow(0 16px 28px rgba(18, 103, 213, .28));
+  filter: drop-shadow(0 14px 22px rgba(18, 103, 213, 0.22));
 }
 
 @keyframes brandLogoFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
-@media (max-width: 760px) {
-  .auth-brand .brand-logo {
-    width: 142px;
+@media (max-width: 900px) {
+  .brand-logo--login {
+    width: 190px;
+  }
+
+  .brand-logo--sidebar {
+    width: 128px;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-logo--login {
+    width: 165px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-loader .brand-logo--compact { animation: none; }
+  .app-loader .brand-logo__image {
+    animation: none;
+  }
 }
