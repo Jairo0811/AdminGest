@@ -7,6 +7,7 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AuthUser } from '../../common/auth-user.interface';
@@ -25,6 +26,7 @@ export class AuthController {
 
   @Post('register')
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Crea una empresa y su usuario administrador' })
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
@@ -32,6 +34,7 @@ export class AuthController {
 
   @Post('login')
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Inicia una sesión' })
   login(@Body() dto: LoginDto) {
@@ -40,6 +43,7 @@ export class AuthController {
 
   @Post('forgot-password')
   @Public()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Solicita un enlace de recuperación de contraseña' })
   forgotPassword(@Body() dto: ForgotPasswordDto, @Req() request: Request) {
@@ -48,6 +52,7 @@ export class AuthController {
 
   @Post('reset-password')
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Restablece la contraseña usando un token temporal' })
   resetPassword(@Body() dto: ResetPasswordDto, @Req() request: Request) {
