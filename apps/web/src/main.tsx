@@ -11,6 +11,7 @@ import "./dashboard.css";
 import "./theme.css";
 import "./navigation.css";
 import "./professional.css";
+import "./release.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
