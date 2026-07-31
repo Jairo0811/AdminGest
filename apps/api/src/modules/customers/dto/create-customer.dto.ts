@@ -7,6 +7,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsDominicanTaxId } from '../../../common/validation/is-dominican-tax-id.decorator';
 
 export class CreateContactDto {
   @IsString()
@@ -37,6 +38,7 @@ export class CreateCustomerDto {
 
   @IsOptional()
   @IsString()
+  @IsDominicanTaxId()
   taxId?: string;
 
   @IsOptional()
@@ -60,4 +62,3 @@ export class CreateCustomerDto {
   @Type(() => CreateContactDto)
   primaryContact?: CreateContactDto;
 }
-
