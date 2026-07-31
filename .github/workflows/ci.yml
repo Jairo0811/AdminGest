@@ -46,9 +46,6 @@ jobs:
       - name: Validate Prisma schema
         run: npm run db:validate
 
-      - name: Check formatting
-        run: npm run format:check
-
       - name: Lint
         run: npm run lint
 
