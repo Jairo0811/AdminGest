@@ -32,6 +32,7 @@ interface AuthContextValue {
   loading: boolean;
   login(email: string, password: string): Promise<void>;
   register(data: RegisterData): Promise<void>;
+  refreshUser(): Promise<void>;
   logout(): void;
 }
 
@@ -55,17 +56,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    setUser(await api<SessionUser>('/auth/me'));
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('admingest_token');
     if (!token) {
       setLoading(false);
       return;
     }
-    api<SessionUser>('/auth/me')
-      .then(setUser)
+    refreshUser()
       .catch(logout)
       .finally(() => setLoading(false));
-  }, [logout]);
+  }, [logout, refreshUser]);
 
   useEffect(() => {
     window.addEventListener('admingest:unauthorized', logout);
@@ -81,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     loading,
     logout,
+    refreshUser,
     async login(email, password) {
       establishSession(
         await api<SessionResponse>('/auth/login', {
