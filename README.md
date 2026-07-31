@@ -3,43 +3,78 @@
 </p>
 
 <p align="center">
-<img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
-</p>
-
-<p align="center">
-  <strong>CRM, proyectos y gestión inteligente para tu empresa.</strong>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/versión-1.0.0-18A96F?style=for-the-badge" alt="Versión 1.0.0" />
-  <img src="https://img.shields.io/badge/estado-Finalizado-2EA44F?style=for-the-badge" alt="Estado finalizado" />
-  <img src="https://img.shields.io/badge/alcance-MVP%20completo-1677DF?style=for-the-badge" alt="MVP completo" />
+  <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
+  <img src="https://img.shields.io/badge/estado-Release%20Candidate-1677DF?style=for-the-badge" alt="Estado Release Candidate" />
+  <img src="https://img.shields.io/badge/versión-próxima%201.0.0-18A96F?style=for-the-badge" alt="Próxima versión 1.0.0" />
   <img src="https://img.shields.io/badge/arquitectura-npm%20workspaces-0F172A?style=for-the-badge" alt="npm workspaces" />
 </p>
 
-> Estado actual: **Proyecto finalizado en su versión 1.0.0. El MVP funcional, la persistencia, la seguridad, las pruebas y la integración continua están implementados; futuras incorporaciones se consideran evolución posterior del producto.**
+<p align="center">
+  <strong>CRM, proyectos y gestión empresarial en una plataforma web multiempresa.</strong>
+</p>
+
+> Estado actual: **AdminGest se encuentra en fase RC3. El núcleo funcional está completo y estable; antes de publicar `v1.0.0` quedan el endurecimiento final de seguridad, la ampliación de pruebas, la revisión controlada de dependencias, la documentación de despliegue y la publicación formal del release.**
 
 ## Descripción
 
-**AdminGest** es una plataforma web multiempresa que centraliza CRM, cotizaciones, agenda comercial y gestión de proyectos. La versión 1.0 convierte la maqueta inicial en un MVP funcional con API segura, persistencia en SQL Server e interfaz responsive.
+**AdminGest** es una plataforma web multiempresa para centralizar CRM, cotizaciones, agenda comercial, reportes, usuarios y gestión de proyectos. La reconstrucción moderna convierte la maqueta académica original en una aplicación funcional con API segura, persistencia en SQL Server, interfaz responsive y una arquitectura modular preparada para evolucionar.
 
 El proyecto reconstruye de forma independiente el trabajo final **GestorAdministrativo**, realizado para **Administración de Proyectos de Software (SOF-013)** en el ITLA durante **2018-C3**.
 
-## Funcionalidades
+## Funcionalidades principales
 
-- Registro de empresa, inicio de sesión y sesiones JWT.
-- Usuarios con roles `ADMIN`, `SALES_MANAGER`, `SALES_REP`, `PROJECT_MANAGER` y `VIEWER`.
+### CRM y operación comercial
+
+- Registro de empresa e inicio de sesión con JWT.
 - Aislamiento de datos por empresa.
-- Prospectos con prioridad, origen, responsable y ciclo de conversión.
+- Prospectos con origen, prioridad, responsable y ciclo de conversión.
 - Clientes y contactos.
-- Pipeline, oportunidades, valor estimado y probabilidad.
-- Llamadas, correos, reuniones, visitas y seguimientos.
+- Pipeline comercial y oportunidades.
+- Kanban de oportunidades.
+- Actividades: llamadas, correos, reuniones, visitas, tareas y seguimientos.
+- Calendario comercial.
 - Catálogo de productos y servicios.
-- Cotizaciones con descuento, ITBIS y cálculo de totales.
-- Proyectos, tareas, responsables, fechas y progreso automático.
-- Dashboard, reportes ejecutivos y auditoría.
-- Swagger/OpenAPI, validación de entradas, Helmet y rate limiting.
-- Pruebas automatizadas y GitHub Actions.
+- Cotizaciones con descuento configurable e ITBIS fijo del 18%.
+- Generación de cotizaciones imprimibles con branding, datos empresariales y resumen financiero.
+
+### Proyectos y productividad
+
+- Proyectos con cliente, presupuesto, fechas, estado y progreso.
+- Tareas, responsables y seguimiento de avance.
+- Cronograma visual.
+- Importación y exportación CSV compatible con Microsoft Project.
+- Impresión de cronograma tipo Gantt.
+
+### Administración y experiencia de usuario
+
+- Dashboard con indicadores, tendencias, gráficos y embudo comercial.
+- Reportes ejecutivos.
+- Exportación de listados a Excel.
+- Impresión y guardado como PDF desde el navegador.
+- Navegación avanzada, breadcrumbs, buscador y notificaciones.
+- Tema claro y oscuro.
+- Sidebar colapsable y diseño responsive.
+- Configuración de empresa.
+- Validación dominicana de cédula y RNC con formato automático.
+
+### Usuarios, roles y seguridad funcional
+
+- Gestión de usuarios por empresa.
+- Roles:
+  - `SUPER_ADMIN`
+  - `ADMIN`
+  - `SALES_MANAGER`
+  - `SALES_REP`
+  - `PROJECT_MANAGER`
+  - `VIEWER`
+- Activación y desactivación de cuentas.
+- Prevención de auto-desactivación.
+- Restablecimiento administrativo de contraseña.
+- Perfil personal.
+- Cambio de contraseña verificando la contraseña actual.
+- Contraseñas protegidas con bcrypt.
+- Auditoría de operaciones sensibles.
+- Exclusión de hashes de contraseña de los registros de auditoría.
 
 ## Stack tecnológico
 
@@ -49,18 +84,14 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
   <img src="https://skillicons.dev/icons?i=react,ts,vite,html,css" alt="React, TypeScript, Vite, HTML y CSS" />
 </p>
 
-<p>
-  <img src="https://img.shields.io/badge/React%20Router-7-CA4245?style=flat-square&logo=reactrouter&logoColor=white" alt="React Router" />
-  <img src="https://img.shields.io/badge/TanStack%20Query-5-FF4154?style=flat-square&logo=reactquery&logoColor=white" alt="TanStack Query" />
-  <img src="https://img.shields.io/badge/Lucide-React-F56565?style=flat-square" alt="Lucide React" />
-</p>
-
 - React 19
 - TypeScript
 - Vite
 - React Router
 - TanStack Query
 - Lucide React
+- Vitest
+- Testing Library
 
 ### Backend
 
@@ -68,21 +99,14 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
   <img src="https://skillicons.dev/icons?i=nodejs,nestjs,ts" alt="Node.js, NestJS y TypeScript" />
 </p>
 
-<p>
-  <img src="https://img.shields.io/badge/Passport-JWT-34E27A?style=flat-square&logo=passport&logoColor=white" alt="Passport JWT" />
-  <img src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=flat-square&logo=swagger&logoColor=black" alt="Swagger OpenAPI" />
-  <img src="https://img.shields.io/badge/Helmet-Seguridad-111827?style=flat-square" alt="Helmet" />
-  <img src="https://img.shields.io/badge/Rate%20Limiting-NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white" alt="Rate limiting" />
-</p>
-
-- Node.js 22 o 24 LTS
+- Node.js
 - NestJS 11
 - Passport
 - JWT
 - Swagger/OpenAPI
 - `class-validator`
-- Helmet
-- Rate limiting
+- bcrypt
+- Jest
 
 ### Base de datos y persistencia
 
@@ -91,13 +115,8 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg" width="42" alt="Prisma ORM" title="Prisma ORM" />
 </p>
 
-<p>
-  <img src="https://img.shields.io/badge/Migraciones-Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white" alt="Migraciones Prisma" />
-  <img src="https://img.shields.io/badge/Modelo-Multiempresa-1677DF?style=flat-square" alt="Modelo multiempresa" />
-</p>
-
 - Microsoft SQL Server 2022
-- Prisma ORM
+- Prisma ORM 6
 - Migraciones versionadas
 - Modelo relacional multiempresa
 
@@ -107,66 +126,82 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
   <img src="https://skillicons.dev/icons?i=docker,npm,git,github,githubactions" alt="Docker, npm, Git, GitHub y GitHub Actions" />
 </p>
 
-<p>
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/eslint/eslint-original.svg" width="42" alt="ESLint" title="ESLint" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jest/jest-plain.svg" width="42" alt="Jest" title="Jest" />
-  <img src="https://img.shields.io/badge/Prettier-Formato-F7B93E?style=flat-square&logo=prettier&logoColor=black" alt="Prettier" />
-  <img src="https://img.shields.io/badge/Vitest-Pruebas-6E9F18?style=flat-square&logo=vitest&logoColor=white" alt="Vitest" />
-  <img src="https://img.shields.io/badge/Testing%20Library-React-E33332?style=flat-square&logo=testinglibrary&logoColor=white" alt="Testing Library" />
-</p>
-
-- Docker Compose
 - npm workspaces
 - ESLint
 - Prettier
 - Jest
 - Vitest
-- Testing Library
 - GitHub Actions
+- Docker Compose
 
 ## Arquitectura
 
 ```text
 React + TypeScript
         │
-        │ HTTPS / REST + JWT
+        │ REST + JWT
         ▼
 NestJS modular
         │
-        ├── Autenticación y roles
-        ├── Servicios multiempresa
+        ├── Autenticación y autorización
+        ├── CRM y operación comercial
+        ├── Proyectos y tareas
+        ├── Usuarios y perfil
         ├── Auditoría
+        └── Servicios multiempresa
         ▼
-Prisma ORM ── Microsoft SQL Server 2022
+Prisma ORM
+        │
+        ▼
+Microsoft SQL Server 2022
 ```
 
-Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones y límites entre capas.
+La solución usa un monorepo con npm workspaces:
+
+```text
+AdminGest/
+├── apps/
+│   ├── api/
+│   │   ├── prisma/
+│   │   └── src/
+│   └── web/
+│       └── src/
+├── docs/
+├── .github/workflows/
+├── docker-compose.yml
+├── package.json
+└── package-lock.json
+```
+
+Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones de arquitectura y separación de responsabilidades.
 
 ## Estado del proyecto
 
 | Área | Estado |
 |---|---|
 | Arquitectura monorepo | ✅ Completada |
-| Frontend React | ✅ Completado |
-| API NestJS | ✅ Completada |
-| Autenticación y autorización | ✅ Completadas |
-| Persistencia SQL Server y Prisma | ✅ Completada |
-| CRM y pipeline comercial | ✅ Completados |
-| Cotizaciones | ✅ Completadas |
-| Proyectos y tareas | ✅ Completados |
-| Dashboard, reportes y auditoría | ✅ Completados |
-| Pruebas automatizadas | ✅ Implementadas |
-| GitHub Actions | ✅ Configurado |
-| MVP 1.0.0 | ✅ Finalizado |
+| Frontend React | ✅ Funcional |
+| API NestJS | ✅ Funcional |
+| SQL Server y Prisma | ✅ Funcionales |
+| CRM y pipeline | ✅ Completados |
+| Actividades y calendario | ✅ Completados |
+| Cotizaciones e ITBIS | ✅ Completados |
+| Proyectos y Microsoft Project CSV | ✅ Completados |
+| Dashboard y reportes | ✅ Completados |
+| Usuarios, roles y perfil | ✅ RC3.1 completado |
+| Validación de cédula y RNC | ✅ Completada |
+| Pruebas automatizadas | 🟡 Implementadas; cobertura en ampliación |
+| Seguridad y dependencias | 🟡 Endurecimiento pendiente |
+| Docker y despliegue | 🟡 Preparación final pendiente |
+| Documentación de release | 🟡 En progreso |
+| Release `v1.0.0` | ⏳ Pendiente |
 
 ## Requisitos
 
-Antes de clonar el proyecto, instala:
-
-- Git.
-- Node.js 22 o 24 LTS.
-- npm 11.
-- Docker Desktop con contenedores Linux habilitados, o una instancia local de SQL Server 2019+.
+- Git
+- Node.js 22 LTS recomendado
+- npm compatible con el `package-lock.json`
+- Microsoft SQL Server 2019 o superior, o Docker Desktop
 
 Comprueba las herramientas:
 
@@ -174,10 +209,9 @@ Comprueba las herramientas:
 git --version
 node --version
 npm --version
-docker --version
 ```
 
-## Clonar y probar el proyecto
+## Instalación local
 
 ### 1. Clonar el repositorio
 
@@ -186,23 +220,13 @@ git clone https://github.com/Jairo0811/AdminGest.git
 cd AdminGest
 ```
 
-### 2. Instalar las dependencias
+### 2. Instalar dependencias
 
 ```bash
 npm ci
 ```
 
-Usa `npm install` únicamente cuando necesites actualizar dependencias o regenerar el `package-lock.json`.
-
-### 3. Crear los archivos de entorno
-
-Linux y macOS:
-
-```bash
-cp .env.example .env
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
-```
+### 3. Crear archivos de entorno
 
 Windows PowerShell:
 
@@ -212,37 +236,37 @@ Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env
 ```
 
-### 4. Configurar variables sensibles
+Linux y macOS:
 
-En `.env` define una contraseña segura para SQL Server:
-
-```env
-MSSQL_SA_PASSWORD=TU_CONTRASENA_SEGURA
+```bash
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
 ```
 
-En `apps/api/.env` configura la conexión y los secretos:
+### 4. Configurar la API
+
+Ejemplo con SQL Server y autenticación SQL:
 
 ```env
-DATABASE_URL="sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=TU_CONTRASENA_SEGURA;encrypt=true;trustServerCertificate=true"
+NODE_ENV=development
+PORT=3000
+DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;user=admingest_app;password=TU_CONTRASENA;encrypt=true;trustServerCertificate=true"
+CORS_ORIGIN=http://localhost:5173
 JWT_SECRET=UNA_CLAVE_ALEATORIA_DE_AL_MENOS_32_CARACTERES
+JWT_EXPIRES_IN=8h
 SEED_ADMIN_PASSWORD=UNA_CONTRASENA_LOCAL_SEGURA
 ```
 
-No subas estos archivos al repositorio.
+En un entorno Windows local también puede utilizarse autenticación integrada si la instalación y el controlador lo permiten:
 
-### 5. Levantar SQL Server
-
-```bash
-docker compose up -d
+```env
+DATABASE_URL="sqlserver://127.0.0.1:1433;database=AdminGestDb;integratedSecurity=true;trustServerCertificate=true"
 ```
 
-Comprueba el estado del contenedor:
+No subas archivos `.env` ni credenciales reales al repositorio.
 
-```bash
-docker compose ps
-```
-
-### 6. Preparar Prisma y la base de datos
+### 5. Preparar Prisma y la base de datos
 
 ```bash
 npm run db:generate
@@ -250,22 +274,15 @@ npm run db:migrate
 npm run db:seed
 ```
 
-El seed crea el usuario local:
+El seed público crea un usuario de demostración con el correo definido en el proyecto y la contraseña indicada en `SEED_ADMIN_PASSWORD`. Los datos institucionales o credenciales locales deben mantenerse fuera de Git.
 
-```text
-Correo: admin@example.test
-Contraseña: valor definido en SEED_ADMIN_PASSWORD
-```
-
-Si `SEED_ADMIN_PASSWORD` queda vacío, el proceso genera una contraseña aleatoria y la muestra una sola vez en la consola.
-
-### 7. Iniciar el proyecto
+### 6. Iniciar el proyecto
 
 ```bash
 npm run dev
 ```
 
-### 8. Abrir los servicios
+Servicios locales:
 
 | Servicio | URL |
 |---|---|
@@ -274,32 +291,64 @@ npm run dev
 | Swagger | http://localhost:3000/docs |
 | Health check | http://localhost:3000/api/health |
 
-### 9. Validar la instalación
+## Validación técnica
 
 ```bash
-npm run db:validate
+npm run db:generate
 npm run lint
 npm run test
 npm run build
 ```
 
-El workflow de CI ejecuta estas validaciones en cada pull request hacia `main` o `develop`.
+Estado validado durante RC3.1:
 
-## Estructura
+- API: 4 suites y 10 pruebas aprobadas.
+- Web: 3 archivos y 7 pruebas aprobadas.
+- Lint limpio.
+- Build de NestJS y Vite exitoso.
 
-```text
-AdminGest/
-├── apps/
-│   ├── api/
-│   │   ├── prisma/
-│   │   └── src/modules/
-│   └── web/
-│       └── src/
-├── docs/
-├── .github/workflows/
-├── docker-compose.yml
-└── package-lock.json
-```
+## Seguridad
+
+AdminGest implementa actualmente:
+
+- autenticación JWT;
+- contraseñas con bcrypt;
+- autorización basada en roles;
+- aislamiento multiempresa;
+- validación de DTO;
+- auditoría de operaciones sensibles;
+- protección contra auto-desactivación;
+- secretos mediante variables de entorno.
+
+Antes de `v1.0.0` está planificado completar:
+
+- revisión controlada de dependencias y vulnerabilidades;
+- endurecimiento de encabezados HTTP;
+- política CORS por entorno;
+- rate limiting definitivo;
+- revisión de Swagger en producción;
+- sanitización y manejo centralizado de errores;
+- mayor cobertura de pruebas de permisos y aislamiento.
+
+## Validación dominicana
+
+AdminGest incluye validación de:
+
+- cédula dominicana de 11 dígitos;
+- RNC de 9 dígitos;
+- máscara y formato automático;
+- verificación en frontend y backend;
+- almacenamiento normalizado sin guiones.
+
+La implementación de cédula fue adaptada con atribución al proyecto público de OGTIC **Cuenta Única Registry**. Consulta [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Roadmap hacia `v1.0.0`
+
+- [x] RC3.1 — Usuarios, roles y perfil.
+- [ ] RC3.2 — Recuperación de contraseña.
+- [ ] RC3.3 — Seguridad y actualización controlada de dependencias.
+- [ ] RC3.4 — Testing ampliado, Docker y CI.
+- [ ] RC3.5 — Documentación final, changelog y release `v1.0.0`.
 
 ## Equipo académico original
 
@@ -324,18 +373,14 @@ AdminGest/
 | Tipo | Proyecto Final Grupal |
 | Reconstrucción | Julio 2026 |
 
-El trabajo académico original fue grupal. La reconstrucción actual fue desarrollada desde cero por **Jairo Matías**, conservando el contexto de la asignatura y aplicando una arquitectura moderna.
+El trabajo académico original fue grupal. La reconstrucción moderna fue desarrollada desde cero por **Jairo Matías**, conservando el contexto de la asignatura e incorporando una arquitectura web moderna.
 
-## 🧭 Continuidad académica
-
-AdminGest forma parte de una continuidad de proyectos realizados con el profesor **Juan Martínez López** en el ITLA:
+## Continuidad académica
 
 | Orden | Asignatura | Proyecto | Período |
 |---:|---|---|---|
 | 1 | Diseño Centrado en el Usuario (SOF-010) | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) | 2018-C1 |
 | 2 | Administración de Proyectos de Software (SOF-013) | AdminGest / GestorAdministrativo | 2018-C3 |
-
-Esta continuidad refleja la evolución desde una aplicación centrada en experiencia de usuario hacia una plataforma empresarial con arquitectura modular, seguridad, persistencia y gestión de procesos comerciales.
 
 ## Licencia
 
