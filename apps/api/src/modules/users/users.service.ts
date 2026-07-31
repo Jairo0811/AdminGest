@@ -13,6 +13,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { assertCanChangeUserStatus } from './user-policy';
 
 const PUBLIC_USER_SELECT = {
   id: true,
@@ -26,6 +27,24 @@ const PUBLIC_USER_SELECT = {
   createdAt: true,
   updatedAt: true,
 } as const;
+
+function auditSnapshot(user: {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  status: string;
+}) {
+  return {
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    status: user.status,
+  };
+}
 
 @Injectable()
 export class UsersService {
@@ -73,16 +92,15 @@ export class UsersService {
       action: 'CREATE',
       entity: 'User',
       entityId: created.id,
-      newValues: created,
+      newValues: auditSnapshot(created),
     });
     return created;
   }
 
   async update(companyId: string, actorId: string, id: string, dto: UpdateUserDto) {
     const existing = await this.requireUser(companyId, id);
-    if (actorId === id && dto.status && dto.status !== 'ACTIVE') {
-      throw new BadRequestException('No puedes desactivar o bloquear tu propia cuenta.');
-    }
+    assertCanChangeUserStatus(actorId, id, dto.status);
+
     const email = dto.email?.trim().toLowerCase();
     if (email && email !== existing.email) {
       const duplicate = await this.prisma.user.findUnique({ where: { email } });
@@ -105,8 +123,8 @@ export class UsersService {
       action: 'UPDATE',
       entity: 'User',
       entityId: id,
-      oldValues: existing,
-      newValues: updated,
+      oldValues: auditSnapshot(existing),
+      newValues: auditSnapshot(updated),
     });
     return updated;
   }
@@ -118,6 +136,7 @@ export class UsersService {
       const duplicate = await this.prisma.user.findUnique({ where: { email } });
       if (duplicate) throw new ConflictException('Ya existe un usuario con este correo.');
     }
+
     const updated = await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -133,8 +152,8 @@ export class UsersService {
       action: 'UPDATE_PROFILE',
       entity: 'User',
       entityId: userId,
-      oldValues: existing,
-      newValues: updated,
+      oldValues: auditSnapshot(existing),
+      newValues: auditSnapshot(updated),
     });
     return updated;
   }
@@ -147,6 +166,7 @@ export class UsersService {
     if (dto.currentPassword === dto.newPassword) {
       throw new BadRequestException('La nueva contraseña debe ser diferente.');
     }
+
     await this.prisma.user.update({
       where: { id: userId },
       data: { passwordHash: await hash(dto.newPassword, 12) },
