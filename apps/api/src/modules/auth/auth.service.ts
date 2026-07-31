@@ -2,6 +2,7 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
+import { normalizeDominicanTaxId } from '../../common/validation/dominican-tax-id';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -43,7 +44,7 @@ export class AuthService {
       const company = await transaction.company.create({
         data: {
           name: dto.companyName.trim(),
-          taxId: dto.taxId?.trim() || null,
+          taxId: dto.taxId ? normalizeDominicanTaxId(dto.taxId) : null,
           email,
         },
       });
