@@ -132,7 +132,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Jest
 - Vitest
 - GitHub Actions
-- Docker Compose opcional
+- Docker Compose (opcional)
 
 ## Arquitectura
 
