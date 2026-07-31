@@ -6,7 +6,7 @@ import {
   FolderKanban,
   ShieldCheck,
 } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { BrandLogo } from "../components/BrandLogo";
 import {
@@ -181,6 +181,12 @@ export function LoginPage() {
               type="password"
             />
           </label>
+
+          {mode === "login" && (
+            <Link className="text-button auth-recovery-link" to="/forgot-password">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          )}
 
           {error && <div className="alert error">{error}</div>}
 
