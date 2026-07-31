@@ -302,7 +302,7 @@ h2 {
 
 .workspace {
   min-width: 0;
-  padding: 2rem clamp(1.25rem, 3vw, 3rem) 3rem;
+  padding: 2rem clamp(1.25rem, 3vw, 3rem) 5rem;
 }
 .page {
   max-width: 1500px;
@@ -477,7 +477,7 @@ h2 {
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 0.9rem;
-  padding: 1rem 0;
+  padding: 0.35rem 0;
   border-bottom: 1px solid #edf1f6;
 }
 .opportunity-row:last-child {
@@ -758,18 +758,25 @@ h2 {
   background: #fff3f5;
 }
 
-.auth-page {
+.auth-page-wrapper {
+  height: 100dvh;
   min-height: 100vh;
+  overflow: hidden;
+}
+
+.auth-page {
+  height: calc(100dvh - 42px);
+  min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(440px, 0.9fr);
   background: white;
 }
 .auth-showcase {
-  min-height: 100vh;
+  min-height: 0;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 1.5rem;
-  padding: clamp(1.5rem, 3vw, 2.75rem) clamp(2rem, 5vw, 4.25rem);
+  gap: 1rem;
+  padding: clamp(1.2rem, 2.5vw, 2.25rem) clamp(1.75rem, 4vw, 3.75rem);
   overflow: hidden;
   color: #dce8f6;
   background:
@@ -804,7 +811,7 @@ h2 {
   max-width: 620px;
   margin-bottom: 1rem;
   color: white;
-  font-size: clamp(2.6rem, 5.3vw, 5rem);
+  font-size: clamp(2.3rem, 4.2vw, 4.2rem);
   line-height: 1.03;
   letter-spacing: -0.055em;
 }
@@ -817,15 +824,15 @@ h2 {
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
+  gap: 0.55rem;
 }
 
 .feature-grid > div {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  min-height: 58px;
-  padding: 0.65rem 0.8rem;
+  min-height: 50px;
+  padding: 0.58rem 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 13px;
   background: rgba(255, 255, 255, 0.045);
@@ -846,15 +853,17 @@ h2 {
   font-size: 0.72rem;
 }
 .auth-form-panel {
+  min-height: 0;
   display: grid;
   place-items: center;
-  padding: 2rem;
+  padding: 1.25rem 2rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .auth-form {
-  width: min(440px, 100%);
+  width: min(430px, 100%);
   display: grid;
-  gap: 1rem;
+  gap: 0.9rem;
 }
 .auth-form h2 {
   margin-bottom: 0.4rem;
@@ -1049,7 +1058,8 @@ h2 {
     display: none;
   }
   .auth-form-panel {
-    min-height: 600px;
+    min-height: 0;
+    padding: 1.5rem;
   }
 }
 
@@ -1185,8 +1195,8 @@ h2 {
     font-size: 2.65rem;
   }
   .auth-form-panel {
-    min-height: 560px;
-    padding: 1.3rem;
+    min-height: 0;
+    padding: 1.15rem;
   }
   .modal-backdrop {
     padding: 0.5rem;
@@ -1195,28 +1205,95 @@ h2 {
     max-height: calc(100vh - 1rem);
   }
 }
-@media (max-height: 820px) and (min-width: 901px) {
+@media (max-height: 900px) and (min-width: 901px) {
   .auth-showcase {
-    gap: 1rem;
-    padding-top: 1.35rem;
-    padding-bottom: 1.35rem;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    padding-bottom: 0.9rem;
   }
 
   .auth-copy {
-    padding: 0.5rem 0;
+    padding: 0;
   }
 
   .auth-copy h1 {
-    font-size: clamp(2.5rem, 4.9vw, 4.5rem);
+    font-size: clamp(2.25rem, 3.7vw, 3.45rem);
   }
 
   .auth-copy > p:last-child {
-    font-size: 1rem;
-    line-height: 1.5;
+    font-size: 0.96rem;
+    line-height: 1.45;
   }
 
   .feature-grid > div {
-    min-height: 52px;
-    padding: 0.55rem 0.7rem;
+    min-height: 46px;
+    padding: 0.48rem 0.65rem;
+  }
+
+  .auth-form {
+    gap: 0.75rem;
+  }
+}
+
+.app-footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 260px;
+  z-index: 40;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  background: rgba(244, 247, 251, 0.96);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 -6px 20px rgba(15, 33, 56, 0.04);
+  backdrop-filter: blur(12px);
+}
+
+.app-shell--collapsed .app-footer {
+  left: 76px;
+}
+
+.auth-page-wrapper > .app-footer {
+  left: 0;
+}
+
+[data-theme="dark"] .app-footer,
+.dark .app-footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  color: #9fb0c3;
+  background: rgba(7, 24, 45, 0.95);
+}
+
+@media (max-width: 900px) {
+  .auth-page-wrapper {
+    height: auto;
+    min-height: 100dvh;
+    overflow: auto;
+  }
+
+  .auth-page {
+    height: auto;
+    min-height: calc(100dvh - 38px);
+    padding-bottom: 38px;
+  }
+
+  .app-footer,
+  .app-shell--collapsed .app-footer,
+  .auth-page-wrapper > .app-footer {
+    left: 0;
+    height: 38px;
+    padding: 0 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .workspace {
+    padding-bottom: 4.5rem;
   }
 }
