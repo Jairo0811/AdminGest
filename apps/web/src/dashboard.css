@@ -1,0 +1,194 @@
+.metric-card-premium {
+  min-height: 118px;
+  align-items: flex-start;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.metric-card-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px rgba(15, 33, 56, .1);
+}
+
+.metric-content {
+  min-width: 0;
+  display: grid;
+  gap: .18rem;
+}
+
+.metric-content p {
+  margin-bottom: 0;
+}
+
+.metric-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-top: .22rem;
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.metric-trend.positive { color: #13845d; }
+.metric-trend.negative { color: #c23b50; }
+.metric-trend.neutral { color: #8796a8; font-weight: 600; }
+
+.dashboard-premium-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(330px, .75fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-detail-grid { margin-bottom: 1rem; }
+.chart-panel, .funnel-panel { min-height: 390px; }
+.panel-caption { color: var(--muted); font-size: .75rem; }
+
+.chart-shell {
+  width: 100%;
+  overflow-x: auto;
+  padding-top: .8rem;
+}
+
+.sales-chart {
+  width: 100%;
+  min-width: 560px;
+  height: auto;
+  overflow: visible;
+}
+
+.chart-grid-line {
+  stroke: #e8edf3;
+  stroke-width: 1;
+  stroke-dasharray: 4 5;
+}
+
+.chart-axis-label {
+  fill: #7a8da2;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+}
+
+.chart-axis-label.month {
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.chart-line {
+  stroke: #1677df;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-point {
+  fill: #fff;
+  stroke: #1677df;
+  stroke-width: 4;
+  transition: r .15s ease;
+}
+
+.chart-point:hover { r: 7; }
+.chart-empty { min-height: 270px; display: grid; place-items: center; }
+
+.funnel-list {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1.15rem;
+}
+
+.funnel-stage {
+  display: grid;
+  gap: .42rem;
+}
+
+.funnel-stage-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #31465e;
+  font-size: .82rem;
+}
+
+.funnel-stage-meta span { font-weight: 700; }
+.funnel-stage-meta strong { color: #102238; }
+
+.funnel-track {
+  height: 34px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #eef3f7;
+}
+
+.funnel-fill {
+  height: 100%;
+  min-width: 44%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 .75rem;
+  border-radius: inherit;
+  color: #fff;
+  background: linear-gradient(90deg, #1677df, #18a96f);
+  box-shadow: inset 0 0 20px rgba(255,255,255,.08);
+  transition: width .35s ease;
+}
+
+.funnel-fill span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+.funnel-stage small { color: var(--muted); font-size: .68rem; }
+
+.skeleton-card { overflow: hidden; }
+.skeleton-panel { min-height: 390px; }
+.skeleton-stack { width: 100%; display: grid; gap: .55rem; }
+.skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #eaf0f5;
+}
+
+.skeleton::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.72), transparent);
+  animation: dashboardShimmer 1.35s infinite;
+}
+
+.skeleton-icon { width: 43px; height: 43px; flex: 0 0 auto; border-radius: 12px; }
+.skeleton-line { height: 10px; }
+.skeleton-line.short { width: 58%; }
+.skeleton-line.value { width: 38%; height: 19px; }
+.skeleton-line.trend { width: 74%; height: 8px; }
+
+@keyframes dashboardShimmer {
+  100% { transform: translateX(100%); }
+}
+
+@media (max-width: 1180px) {
+  .dashboard-premium-grid { grid-template-columns: 1fr; }
+  .chart-panel, .funnel-panel { min-height: auto; }
+}
+
+@media (max-width: 700px) {
+  .metric-card-premium { min-height: 104px; }
+  .panel-caption { display: none; }
+  .dashboard-premium-grid { gap: .8rem; }
+  .sales-chart { min-width: 500px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metric-card-premium,
+  .funnel-fill,
+  .chart-point { transition: none; }
+  .skeleton::after { animation: none; }
+}

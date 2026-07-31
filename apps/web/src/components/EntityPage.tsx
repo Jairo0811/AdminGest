@@ -1,7 +1,18 @@
-import { FormEvent, ReactNode, useMemo, useState } from 'react';
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Edit3, Plus, Search, Trash2 } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  FileDown,
+  FileSpreadsheet,
+  Filter,
+  Plus,
+  Search,
+  Trash2,
+} from 'lucide-react';
 import { api } from '../api/client';
+import { ExportColumn, exportToExcel, printTable } from '../utils/export';
 import { Modal } from './Modal';
 
 export interface Entity extends Record<string, unknown> {
@@ -11,6 +22,7 @@ export interface Entity extends Record<string, unknown> {
 interface Column {
   label: string;
   render(item: Entity): ReactNode;
+  exportValue?: (item: Entity) => string | number | null | undefined;
 }
 
 interface Option {
@@ -40,10 +52,14 @@ interface EntityPageProps {
   canEdit?: boolean;
   canDelete?: boolean;
   buildPayload?(values: Record<string, string | number>): unknown;
+  itemActions?: (item: Entity) => ReactNode;
 }
 
 const normalizeValue = (field: Field, value: string) =>
   field.type === 'number' ? Number(value) : value || undefined;
+
+const humanize = (value: string) =>
+  value.replace(/([a-z])([A-Z])/g, '$1 $2').replaceAll('_', ' ');
 
 export function EntityPage({
   title,
@@ -55,11 +71,17 @@ export function EntityPage({
   canEdit = true,
   canDelete = true,
   buildPayload,
+  itemActions,
 }: EntityPageProps) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('ALL');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [editing, setEditing] = useState<Entity | null | undefined>(undefined);
+  const [pendingDelete, setPendingDelete] = useState<Entity | null>(null);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const queryKey = [endpoint];
 
   const { data = [], isLoading } = useQuery({
@@ -95,19 +117,70 @@ export function EntityPage({
       void queryClient.invalidateQueries({ queryKey });
       setEditing(undefined);
       setError('');
+      setNotice(`${singular[0].toUpperCase()}${singular.slice(1)} guardado correctamente.`);
     },
     onError: (mutationError: Error) => setError(mutationError.message),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => api(`${endpoint}/${id}`, { method: 'DELETE' }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey });
+      setPendingDelete(null);
+      setNotice(`${singular[0].toUpperCase()}${singular.slice(1)} eliminado.`);
+    },
     onError: (mutationError: Error) => setError(mutationError.message),
   });
 
-  const filtered = data.filter((item) =>
-    JSON.stringify(item).toLowerCase().includes(search.toLowerCase()),
+  useEffect(() => {
+    setPage(1);
+  }, [search, status, pageSize]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timeout = window.setTimeout(() => setNotice(''), 3200);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
+
+  const statuses = useMemo(
+    () =>
+      [...new Set(data.map((item) => String(item.status ?? '')).filter(Boolean))].sort(),
+    [data],
   );
+
+  const filtered = useMemo(
+    () =>
+      data.filter((item) => {
+        const matchesSearch = JSON.stringify(item)
+          .toLowerCase()
+          .includes(search.toLowerCase());
+        const matchesStatus = status === 'ALL' || String(item.status) === status;
+        return matchesSearch && matchesStatus;
+      }),
+    [data, search, status],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const visibleItems = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  const exportColumns = useMemo<ExportColumn<Entity>[]>(() => {
+    if (columns.every((column) => column.exportValue)) {
+      return columns.map((column) => ({
+        label: column.label,
+        value: column.exportValue!,
+      }));
+    }
+
+    const primitiveKeys = Object.keys(data[0] ?? {}).filter((key) => {
+      const value = data[0]?.[key];
+      return value == null || ['string', 'number', 'boolean'].includes(typeof value);
+    });
+
+    return primitiveKeys.map((key) => ({
+      label: humanize(key),
+      value: (item) => String(item[key] ?? ''),
+    }));
+  }, [columns, data]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -123,6 +196,8 @@ export function EntityPage({
 
   return (
     <section className="page">
+      {notice && <div className="toast toast--success" role="status">{notice}</div>}
+
       <div className="page-heading">
         <div>
           <p className="eyebrow">Gestión empresarial</p>
@@ -134,7 +209,7 @@ export function EntityPage({
         </button>
       </div>
 
-      <div className="toolbar">
+      <div className="toolbar entity-toolbar">
         <label className="search-box">
           <Search size={18} />
           <input
@@ -144,6 +219,37 @@ export function EntityPage({
             value={search}
           />
         </label>
+
+        {statuses.length > 0 && (
+          <label className="filter-select">
+            <Filter size={16} />
+            <select aria-label="Filtrar por estado" onChange={(event) => setStatus(event.target.value)} value={status}>
+              <option value="ALL">Todos los estados</option>
+              {statuses.map((itemStatus) => (
+                <option key={itemStatus} value={itemStatus}>{humanize(itemStatus)}</option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        <div className="export-actions">
+          <button
+            className="secondary-button"
+            disabled={!filtered.length}
+            onClick={() => exportToExcel(title, filtered, exportColumns)}
+            type="button"
+          >
+            <FileSpreadsheet size={17} /> Excel
+          </button>
+          <button
+            className="secondary-button"
+            disabled={!filtered.length}
+            onClick={() => printTable(title, filtered, exportColumns)}
+            type="button"
+          >
+            <FileDown size={17} /> PDF
+          </button>
+        </div>
         <span className="record-count">{filtered.length} registros</span>
       </div>
 
@@ -152,22 +258,28 @@ export function EntityPage({
       <div className="table-card">
         <div className="data-table table-header">
           {columns.map((column) => <strong key={column.label}>{column.label}</strong>)}
-          {(canEdit || canDelete) && <strong>Acciones</strong>}
+          {(canEdit || canDelete || itemActions) && <strong>Acciones</strong>}
         </div>
         {isLoading ? (
-          <div className="empty-state">Cargando información…</div>
-        ) : filtered.length === 0 ? (
-          <div className="empty-state">Todavía no hay registros para mostrar.</div>
+          <div className="table-skeleton" aria-label="Cargando información">
+            {Array.from({ length: 5 }, (_, index) => <span key={index} />)}
+          </div>
+        ) : visibleItems.length === 0 ? (
+          <div className="empty-state">
+            <strong>No hay resultados</strong>
+            <p>Ajusta los filtros o crea tu primer {singular}.</p>
+          </div>
         ) : (
-          filtered.map((item) => (
+          visibleItems.map((item) => (
             <div className="data-table table-row" key={item.id}>
               {columns.map((column) => (
                 <div data-label={column.label} key={column.label}>
                   {column.render(item)}
                 </div>
               ))}
-              {(canEdit || canDelete) && (
+              {(canEdit || canDelete || itemActions) && (
                 <div className="row-actions" data-label="Acciones">
+                  {itemActions?.(item)}
                   {canEdit && (
                     <button
                       aria-label={`Editar ${singular}`}
@@ -182,11 +294,7 @@ export function EntityPage({
                     <button
                       aria-label={`Eliminar ${singular}`}
                       className="table-action danger"
-                      onClick={() => {
-                        if (window.confirm(`¿Deseas eliminar este ${singular}?`)) {
-                          remove.mutate(item.id);
-                        }
-                      }}
+                      onClick={() => setPendingDelete(item)}
                       type="button"
                     >
                       <Trash2 size={17} />
@@ -198,6 +306,26 @@ export function EntityPage({
           ))
         )}
       </div>
+
+      {filtered.length > pageSize && (
+        <div className="pagination">
+          <label>
+            Mostrar
+            <select onChange={(event) => setPageSize(Number(event.target.value))} value={pageSize}>
+              {[10, 25, 50].map((size) => <option key={size} value={size}>{size}</option>)}
+            </select>
+          </label>
+          <span>Página {page} de {totalPages}</span>
+          <div>
+            <button aria-label="Página anterior" disabled={page === 1} onClick={() => setPage((value) => value - 1)} type="button">
+              <ChevronLeft size={18} />
+            </button>
+            <button aria-label="Página siguiente" disabled={page === totalPages} onClick={() => setPage((value) => value + 1)} type="button">
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {editing !== undefined && (
         <Modal
@@ -225,43 +353,40 @@ export function EntityPage({
                 >
                   <span>{field.label}</span>
                   {field.type === 'textarea' ? (
-                    <textarea
-                      defaultValue={defaultValue}
-                      name={field.name}
-                      placeholder={field.placeholder}
-                      required={field.required}
-                    />
+                    <textarea defaultValue={defaultValue} name={field.name} placeholder={field.placeholder} required={field.required} />
                   ) : field.type === 'select' ? (
                     <select defaultValue={defaultValue} name={field.name} required={field.required}>
                       <option value="">Selecciona una opción</option>
-                      {options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
+                      {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                     </select>
                   ) : (
-                    <input
-                      defaultValue={defaultValue}
-                      name={field.name}
-                      placeholder={field.placeholder}
-                      required={field.required}
-                      type={field.type ?? 'text'}
-                    />
+                    <input defaultValue={defaultValue} name={field.name} placeholder={field.placeholder} required={field.required} type={field.type ?? 'text'} />
                   )}
                 </label>
               );
             })}
             {error && <div className="alert error form-alert">{error}</div>}
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => setEditing(undefined)} type="button">
-                Cancelar
-              </button>
+              <button className="secondary-button" onClick={() => setEditing(undefined)} type="button">Cancelar</button>
               <button className="primary-button" disabled={save.isPending} type="submit">
                 {save.isPending ? 'Guardando…' : 'Guardar'}
               </button>
             </footer>
           </form>
+        </Modal>
+      )}
+
+      {pendingDelete && (
+        <Modal onClose={() => setPendingDelete(null)} title={`Eliminar ${singular}`}>
+          <div className="confirm-dialog">
+            <p>Esta acción no se puede deshacer. ¿Deseas eliminar el registro seleccionado?</p>
+            <footer className="form-actions">
+              <button className="secondary-button" onClick={() => setPendingDelete(null)} type="button">Cancelar</button>
+              <button className="danger-button" disabled={remove.isPending} onClick={() => remove.mutate(pendingDelete.id)} type="button">
+                {remove.isPending ? 'Eliminando…' : 'Eliminar'}
+              </button>
+            </footer>
+          </div>
         </Modal>
       )}
     </section>
