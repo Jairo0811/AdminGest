@@ -378,10 +378,10 @@ Resultados validados:
 | Información | Detalle |
 |---|---|
 | 📖 Asignatura | Administración de Proyectos de Software (SOF-013) |
-| 👨‍🏫 Profesor | Juan Pablo Valdez Reyes |
+| 👨‍🏫 Profesor | Juan Martinez López |
 | 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
 | 📅 Período académico | 2018-C3 |
-| 📁 Tipo de entrega | Proyecto final |
+| 📁 Tipo de entrega | Proyecto Final |
 
 ## 📄 Licencia
 
