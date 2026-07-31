@@ -1,4 +1,5 @@
 import { IsEmail, IsOptional, IsString, Length, MinLength } from 'class-validator';
+import { IsDominicanTaxId } from '../../../common/validation/is-dominican-tax-id.decorator';
 
 export class RegisterDto {
   @IsString()
@@ -7,7 +8,7 @@ export class RegisterDto {
 
   @IsOptional()
   @IsString()
-  @Length(9, 20)
+  @IsDominicanTaxId()
   taxId?: string;
 
   @IsString()
@@ -25,4 +26,3 @@ export class RegisterDto {
   @MinLength(10)
   password!: string;
 }
-
