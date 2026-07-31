@@ -1,28 +1,17 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
-type Theme = "light" | "dark";
-
-type ThemeContextValue = {
-  theme: Theme;
-  toggleTheme: () => void;
-};
+import { ReactNode, useEffect, useMemo, useState } from "react";
+import { Theme, ThemeContext } from "./theme-context";
 
 const STORAGE_KEY = "admingest-theme";
-
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function getInitialTheme(): Theme {
   const storedTheme = localStorage.getItem(STORAGE_KEY);
 
   if (storedTheme === "light" || storedTheme === "dark") {
     return storedTheme;
+  }
+
+  if (typeof window.matchMedia !== "function") {
+    return "light";
   }
 
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -54,14 +43,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-
-  if (!context) {
-    throw new Error("useTheme debe utilizarse dentro de ThemeProvider.");
-  }
-
-  return context;
 }
