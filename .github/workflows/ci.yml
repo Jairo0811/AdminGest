@@ -70,3 +70,69 @@ jobs:
             apps/web/dist
           if-no-files-found: error
           retention-days: 7
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: validate
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: "AdminGest_CI_2026!"
+        ports:
+          - 1433:1433
+
+    env:
+      SEED_ADMIN_PASSWORD: "AdminGest_E2E_2026!"
+      E2E_PASSWORD: "AdminGest_E2E_2026!"
+      E2E_EMAIL: "admin@example.test"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Use repository npm version
+        run: npm install --global npm@11.9.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for SQL Server
+        run: timeout 150 bash -c 'until </dev/tcp/127.0.0.1/1433; do sleep 3; done'
+
+      - name: Create test database
+        run: |
+          SQLCMD=/opt/mssql-tools18/bin/sqlcmd
+          docker exec ${{ job.services.sqlserver.id }} test -x "$SQLCMD" || SQLCMD=/opt/mssql-tools/bin/sqlcmd
+          docker exec ${{ job.services.sqlserver.id }} "$SQLCMD" \
+            -S localhost -U sa -P "AdminGest_CI_2026!" -C \
+            -Q "IF DB_ID('AdminGestDb') IS NULL CREATE DATABASE AdminGestDb"
+
+      - name: Prepare database
+        run: |
+          npm run db:generate
+          npm run db:deploy
+          npm run db:seed
+
+      - name: Build API
+        run: npm run build --workspace @admingest/api
+
+      - name: Start API
+        run: npm run start:prod --workspace @admingest/api > api.log 2>&1 &
+
+      - name: Run E2E smoke journey
+        run: npm run test:e2e
+
+      - name: Print API logs on failure
+        if: failure()
+        run: cat api.log || true
