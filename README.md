@@ -3,7 +3,11 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
+    <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
+</p>
+
+<p align="center">
+
   <img src="https://img.shields.io/badge/estado-Release%20Candidate-1677DF?style=for-the-badge" alt="Estado Release Candidate" />
   <img src="https://img.shields.io/badge/versión-próxima%201.0.0-18A96F?style=for-the-badge" alt="Próxima versión 1.0.0" />
   <img src="https://img.shields.io/badge/arquitectura-npm%20workspaces-0F172A?style=for-the-badge" alt="npm workspaces" />
