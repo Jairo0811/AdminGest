@@ -58,7 +58,7 @@ export class CustomersService {
       throw new ConflictException('Ya existe un cliente con esta cédula o RNC.');
     }
 
-    const { primaryContact, taxId: _ignoredTaxId, ...data } = dto;
+    const { primaryContact, ...data } = dto;
     const customer = await this.prisma.customer.create({
       data: {
         companyId,
