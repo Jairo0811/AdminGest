@@ -15,15 +15,15 @@
 
 > Estado actual: **AdminGest se encuentra en fase RC3. El núcleo funcional está completo y estable; antes de publicar `v1.0.0` quedan el endurecimiento final de seguridad, la ampliación de pruebas, la revisión controlada de dependencias, la documentación de despliegue y la publicación formal del release.**
 
-## Descripción
+## 📘 Descripción
 
 **AdminGest** es una plataforma web multiempresa para centralizar CRM, cotizaciones, agenda comercial, reportes, usuarios y gestión de proyectos. La reconstrucción moderna convierte la maqueta académica original en una aplicación funcional con API segura, persistencia en SQL Server, interfaz responsive y una arquitectura modular preparada para evolucionar.
 
 El proyecto reconstruye de forma independiente el trabajo final **GestorAdministrativo**, realizado para **Administración de Proyectos de Software (SOF-013)** en el ITLA durante **2018-C3**.
 
-## Funcionalidades principales
+## ✨ Funcionalidades principales
 
-### CRM y operación comercial
+### 🤝 CRM y operación comercial
 
 - Registro de empresa e inicio de sesión con JWT.
 - Aislamiento de datos por empresa.
@@ -37,7 +37,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Cotizaciones con descuento configurable e ITBIS fijo del 18%.
 - Generación de cotizaciones imprimibles con branding, datos empresariales y resumen financiero.
 
-### Proyectos y productividad
+### 📊 Proyectos y productividad
 
 - Proyectos con cliente, presupuesto, fechas, estado y progreso.
 - Tareas, responsables y seguimiento de avance.
@@ -45,7 +45,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Importación y exportación CSV compatible con Microsoft Project.
 - Impresión de cronograma tipo Gantt.
 
-### Administración y experiencia de usuario
+### 🖥️ Administración y experiencia de usuario
 
 - Dashboard con indicadores, tendencias, gráficos y embudo comercial.
 - Reportes ejecutivos.
@@ -57,7 +57,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Configuración de empresa.
 - Validación dominicana de cédula y RNC con formato automático.
 
-### Usuarios, roles y seguridad funcional
+### 👤 Usuarios, roles y seguridad funcional
 
 - Gestión de usuarios por empresa.
 - Roles:
@@ -76,9 +76,9 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Auditoría de operaciones sensibles.
 - Exclusión de hashes de contraseña de los registros de auditoría.
 
-## Stack tecnológico
+## 🧰 Stack tecnológico
 
-### Frontend
+### ⚛️ Frontend
 
 <p>
   <img src="https://skillicons.dev/icons?i=react,ts,vite,html,css" alt="React, TypeScript, Vite, HTML y CSS" />
@@ -93,7 +93,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Vitest
 - Testing Library
 
-### Backend
+### ⚙️ Backend
 
 <p>
   <img src="https://skillicons.dev/icons?i=nodejs,nestjs,ts" alt="Node.js, NestJS y TypeScript" />
@@ -108,7 +108,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - bcrypt
 - Jest
 
-### Base de datos y persistencia
+### 🗄️ Base de datos y persistencia
 
 <p>
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" width="42" alt="Microsoft SQL Server" title="Microsoft SQL Server" />
@@ -120,7 +120,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - Migraciones versionadas
 - Modelo relacional multiempresa
 
-### Calidad e infraestructura
+### 🧪 Calidad e infraestructura
 
 <p>
   <img src="https://skillicons.dev/icons?i=docker,npm,git,github,githubactions" alt="Docker, npm, Git, GitHub y GitHub Actions" />
@@ -134,7 +134,7 @@ El proyecto reconstruye de forma independiente el trabajo final **GestorAdminist
 - GitHub Actions
 - Docker Compose (opcional)
 
-## Arquitectura
+## 🏗️ Arquitectura
 
 ```text
 React + TypeScript
@@ -175,7 +175,7 @@ AdminGest/
 
 Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones de arquitectura y separación de responsabilidades.
 
-## Estado del proyecto
+## 🚦 Estado del proyecto
 
 | Área | Estado |
 |---|---|
@@ -196,7 +196,7 @@ Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para las decisiones de arq
 | Documentación de release | 🟡 En progreso |
 | Release `v1.0.0` | ⏳ Pendiente |
 
-## Requisitos
+## 📋 Requisitos
 
 - Git
 - Node.js 22 LTS recomendado
@@ -212,7 +212,7 @@ node --version
 npm --version
 ```
 
-## Modalidades de ejecución
+## 🔀 Modalidades de ejecución
 
 AdminGest mantiene dos modalidades soportadas:
 
@@ -223,7 +223,7 @@ AdminGest mantiene dos modalidades soportadas:
 
 El entorno utilizado principalmente durante el desarrollo de AdminGest es **Windows 11 + SQL Server Express 2022 + Prisma ORM**. Docker se conserva como alternativa compatible, pero no es un requisito obligatorio.
 
-## Instalación local recomendada
+## 🚀 Instalación local recomendada
 
 ### 1. Clonar el repositorio
 
@@ -312,7 +312,7 @@ Servicios locales:
 | Swagger | http://localhost:3000/docs |
 | Health check | http://localhost:3000/api/health |
 
-## Desarrollo con Docker Compose (opcional)
+## 🐳 Desarrollo con Docker Compose (opcional)
 
 Docker permite levantar SQL Server de forma reproducible sin reemplazar la instalación local recomendada.
 
@@ -359,7 +359,7 @@ docker compose down
 
 Los datos persistidos en volúmenes no se eliminan con `docker compose down`. Evita usar `docker compose down -v` salvo que realmente quieras borrar el almacenamiento local del contenedor.
 
-## Validación técnica
+## ✅ Validación técnica
 
 ```bash
 npm run db:generate
@@ -375,7 +375,7 @@ Estado validado durante RC3.1:
 - Lint limpio.
 - Build de NestJS y Vite exitoso.
 
-## Seguridad
+## 🛡️ Seguridad
 
 AdminGest implementa actualmente:
 
@@ -398,7 +398,7 @@ Antes de `v1.0.0` está planificado completar:
 - sanitización y manejo centralizado de errores;
 - mayor cobertura de pruebas de permisos y aislamiento.
 
-## Validación dominicana
+## 🇩🇴 Validación dominicana
 
 AdminGest incluye validación de:
 
@@ -410,7 +410,7 @@ AdminGest incluye validación de:
 
 La implementación de cédula fue adaptada con atribución al proyecto público de OGTIC **Cuenta Única Registry**. Consulta [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-## Roadmap hacia `v1.0.0`
+## 🗺️ Roadmap hacia `v1.0.0`
 
 - [x] RC3.1 — Usuarios, roles y perfil.
 - [ ] RC3.2 — Recuperación de contraseña.
@@ -418,9 +418,9 @@ La implementación de cédula fue adaptada con atribución al proyecto público 
 - [ ] RC3.4 — Testing ampliado, Docker y CI.
 - [ ] RC3.5 — Documentación final, changelog y release `v1.0.0`.
 
-## Equipo académico original
+## 👥 Equipo académico original
 
-| Integrante | Matrícula |
+| 👤 Integrante | 🆔 Matrícula |
 |---|---|
 | Francis Jairo Matías Rosario | 2015-2984 |
 | Isaías Pérez Moya | 2016-3595 |
@@ -430,26 +430,26 @@ La implementación de cédula fue adaptada con atribución al proyecto público 
 | Alexander Dionicio Mercedes | 2016-3962 |
 | Raymundo Eduardo Peña Sánchez | 2016-4276 |
 
-## Información académica
+## 🎓 Información académica
 
 | Información | Detalle |
 |---|---|
-| Asignatura | Administración de Proyectos de Software (SOF-013) |
-| Profesor | Juan Martínez López |
-| Institución | Instituto Tecnológico de Las Américas (ITLA) |
-| Período académico | 2018-C3 |
-| Tipo | Proyecto Final Grupal |
-| Reconstrucción | Julio 2026 |
+| 📖 Asignatura | Administración de Proyectos de Software (SOF-013) |
+| 👨‍🏫 Profesor | Juan Martínez López |
+| 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
+| 📅 Período académico | 2018-C3 |
+| 🧑‍🤝‍🧑 Tipo | Proyecto Final Grupal |
+| 🛠️ Reconstrucción | Julio 2026 |
 
 El trabajo académico original fue grupal. La reconstrucción moderna fue desarrollada desde cero por **Jairo Matías**, conservando el contexto de la asignatura e incorporando una arquitectura web moderna.
 
-## Continuidad académica
+## 🧭 Continuidad académica
 
 | Orden | Asignatura | Proyecto | Período |
 |---:|---|---|---|
 | 1 | Diseño Centrado en el Usuario (SOF-010) | [RadioEmisora RD](https://github.com/Jairo0811/RadioEmisora) | 2018-C1 |
 | 2 | Administración de Proyectos de Software (SOF-013) | AdminGest / GestorAdministrativo | 2018-C3 |
 
-## Licencia
+## 📄 Licencia
 
 Repositorio privado. No se concede una licencia de distribución pública.
