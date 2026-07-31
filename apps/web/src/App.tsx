@@ -13,6 +13,7 @@ import { ProjectsPage } from "./pages/ProjectsPage";
 import { QuotesPage } from "./pages/QuotesPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { UsersPage } from "./pages/UsersPage";
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
@@ -29,6 +30,13 @@ function ProtectedLayout() {
   return user ? <AppLayout /> : <Navigate replace to="/login" />;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  return user && ["SUPER_ADMIN", "ADMIN"].includes(user.role)
+    ? children
+    : <Navigate replace to="/" />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -43,6 +51,7 @@ export default function App() {
         <Route element={<QuotesPage />} path="quotes" />
         <Route element={<ProjectsPage />} path="projects" />
         <Route element={<ReportsPage />} path="reports" />
+        <Route element={<AdminRoute><UsersPage /></AdminRoute>} path="users" />
         <Route element={<SettingsPage />} path="settings" />
       </Route>
       <Route element={<Navigate replace to="/" />} path="*" />
