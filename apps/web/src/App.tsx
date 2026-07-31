@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { AppLayout } from './components/AppLayout';
+import { BrandLogo } from './components/BrandLogo';
 import { ActivitiesPage } from './pages/ActivitiesPage';
 import { CatalogPage } from './pages/CatalogPage';
 import { CustomersPage } from './pages/CustomersPage';
@@ -15,7 +16,16 @@ import { SettingsPage } from './pages/SettingsPage';
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
-  if (loading) return <div className="app-loader"><span className="brand-mark">AG</span><p>Cargando AdminGest…</p></div>;
+
+  if (loading) {
+    return (
+      <div className="app-loader">
+        <BrandLogo compact />
+        <p>Cargando AdminGest…</p>
+      </div>
+    );
+  }
+
   return user ? <AppLayout /> : <Navigate replace to="/login" />;
 }
 
@@ -39,4 +49,3 @@ export default function App() {
     </Routes>
   );
 }
-
