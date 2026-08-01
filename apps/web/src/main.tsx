@@ -14,6 +14,7 @@ import "./professional.css";
 import "./ms-project.css";
 import "./corporate-theme.css";
 import "./corporate-refinements.css";
+import "./login-cover.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
