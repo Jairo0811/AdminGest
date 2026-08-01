@@ -2,9 +2,15 @@ import { FormEvent, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
+  BriefcaseBusiness,
   CheckCircle2,
+  CircleDollarSign,
+  Cloud,
   FolderKanban,
+  MonitorSmartphone,
+  Settings2,
   ShieldCheck,
+  UsersRound,
 } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
@@ -15,6 +21,34 @@ import {
   normalizeDominicanTaxId,
   validateDominicanTaxId,
 } from "../utils/dominican-tax-id";
+
+const productPillars = [
+  {
+    icon: UsersRound,
+    title: "CRM inteligente",
+    description: "Gestiona clientes y prospectos",
+  },
+  {
+    icon: FolderKanban,
+    title: "Gestión de proyectos",
+    description: "Planifica tareas, fechas y avances",
+  },
+  {
+    icon: BarChart3,
+    title: "Reportes en tiempo real",
+    description: "Decide con información actualizada",
+  },
+  {
+    icon: CircleDollarSign,
+    title: "Finanzas controladas",
+    description: "Cotizaciones, facturas y pagos",
+  },
+  {
+    icon: Settings2,
+    title: "Administración total",
+    description: "Centraliza toda tu operación",
+  },
+];
 
 export function LoginPage() {
   const { user, login, register } = useAuth();
@@ -67,52 +101,48 @@ export function LoginPage() {
 
   return (
     <div className="auth-page-wrapper">
-      <div className="auth-page">
-        <section className="auth-showcase">
+      <div className="auth-page auth-page--cover-inspired">
+        <section className="auth-showcase auth-showcase--cover-inspired">
           <div className="auth-brand">
             <BrandLogo variant="login" />
           </div>
 
-          <div className="auth-copy">
+          <div className="auth-cover-copy">
             <p className="eyebrow">Gestión sin fricción</p>
-
             <h1>La gestión inteligente para tu empresa</h1>
-
-            <p>CRM, proyectos y gestión inteligente para tu empresa.</p>
+            <p>
+              CRM, proyectos, reportes, finanzas y administración en una sola
+              plataforma.
+            </p>
           </div>
 
-          <div className="feature-grid">
-            <div>
-              <BarChart3 />
-              <span>
-                <strong>Decisiones claras</strong>
-                <small>Indicadores en tiempo real</small>
-              </span>
-            </div>
+          <div className="auth-product-pillars" aria-label="Módulos principales">
+            {productPillars.map(({ icon: Icon, title, description }) => (
+              <article key={title}>
+                <span className="auth-pillar-icon">
+                  <Icon size={20} />
+                </span>
+                <div>
+                  <strong>{title}</strong>
+                  <small>{description}</small>
+                </div>
+              </article>
+            ))}
+          </div>
 
-            <div>
-              <FolderKanban />
-              <span>
-                <strong>Proyectos bajo control</strong>
-                <small>Tareas, fechas y progreso</small>
-              </span>
-            </div>
-
-            <div>
-              <ShieldCheck />
-              <span>
-                <strong>Datos protegidos</strong>
-                <small>Acceso por empresa y rol</small>
-              </span>
-            </div>
-
-            <div>
-              <CheckCircle2 />
-              <span>
-                <strong>Flujos conectados</strong>
-                <small>Del prospecto al proyecto</small>
-              </span>
-            </div>
+          <div className="auth-trust-strip" aria-label="Ventajas de la plataforma">
+            <span>
+              <MonitorSmartphone size={19} />
+              Web · móvil · desktop
+            </span>
+            <span>
+              <Cloud size={19} />
+              100% en la nube
+            </span>
+            <span>
+              <ShieldCheck size={19} />
+              Seguro · rápido · confiable
+            </span>
           </div>
         </section>
 
@@ -237,6 +267,12 @@ export function LoginPage() {
                 ? "¿Primera vez? Crea una cuenta"
                 : "¿Ya tienes cuenta? Inicia sesión"}
             </button>
+
+            <div className="auth-form-assurance">
+              <BriefcaseBusiness size={16} />
+              <span>Operación empresarial centralizada</span>
+              <CheckCircle2 size={16} />
+            </div>
           </form>
         </section>
       </div>
