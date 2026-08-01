@@ -13,6 +13,7 @@ import "./navigation.css";
 import "./professional.css";
 import "./ms-project.css";
 import "./corporate-theme.css";
+import "./corporate-refinements.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
