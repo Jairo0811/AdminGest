@@ -1,0 +1,147 @@
+/* AdminGest Corporate Refinements — azul dominante, verde semántico */
+:root {
+  --navy: #0e2337;
+  --navy-soft: #17344d;
+  --blue: #315f8c;
+  --blue-hover: #274f78;
+  --blue-soft: #edf3f8;
+  --green: #34775f;
+  --green-hover: #2a634f;
+  --green-soft: #edf5f1;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, #0d2236 0%, #112b42 58%, #15354c 100%);
+}
+
+.nav-item.active {
+  background: rgba(68, 108, 143, 0.42);
+  box-shadow: inset 3px 0 #4f9278;
+}
+
+.primary-button {
+  border-color: #294f75;
+  background: linear-gradient(135deg, #376b9d 0%, #294f75 100%);
+  box-shadow: 0 6px 14px rgba(38, 77, 113, 0.22);
+}
+
+.primary-button:hover {
+  border-color: #24476a;
+  background: linear-gradient(135deg, #315f8c 0%, #24476a 100%);
+  box-shadow: 0 8px 18px rgba(38, 77, 113, 0.28);
+}
+
+.avatar {
+  background: linear-gradient(135deg, #3c719f, #2b557d);
+}
+
+.eyebrow,
+.feature-grid svg {
+  color: #6f9bc0;
+}
+
+.metric-card:nth-child(2n) .metric-icon {
+  color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.status-badge,
+.calendar-event,
+.kanban-card > b,
+.trend-positive {
+  color: var(--green);
+}
+
+.progress-cell i,
+.bar-row i,
+.timeline-bar {
+  background: linear-gradient(90deg, #376b9d 0%, #315f8c 72%, #39765f 100%);
+}
+
+.auth-showcase {
+  background:
+    radial-gradient(circle at 78% 20%, rgba(61, 111, 151, 0.18), transparent 30%),
+    radial-gradient(circle at 18% 82%, rgba(51, 100, 142, 0.16), transparent 35%),
+    linear-gradient(145deg, #0c2134 0%, #15364f 62%, #1a4057 100%);
+}
+
+/* EntityPage conserva el formulario de alta en vistas Calendario/Kanban. */
+.entity-page-controller-only .toolbar,
+.entity-page-controller-only .table-card,
+.entity-page-controller-only .pagination,
+.entity-page-controller-only > .page > .alert {
+  display: none;
+}
+
+.entity-page-controller-only .page-heading {
+  margin-bottom: 1rem;
+}
+
+.custom-view-content {
+  margin-top: 0;
+}
+
+.calendar-controls--standalone {
+  width: fit-content;
+  margin: 0 0 1rem auto;
+}
+
+.custom-view-status {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+[data-theme="dark"],
+.dark {
+  --surface: #172a3d;
+  --surface-subtle: #112437;
+  --page-background: #0a1724;
+  --border: #30475b;
+  --blue: #77a1c3;
+  --blue-hover: #8bb0cd;
+  --blue-soft: #1a3349;
+  --green: #76a990;
+  --green-soft: #19382f;
+}
+
+[data-theme="dark"] .sidebar,
+.dark .sidebar {
+  background: linear-gradient(180deg, #0b1d2e 0%, #10283d 58%, #143249 100%);
+}
+
+[data-theme="dark"] .primary-button,
+.dark .primary-button {
+  border-color: #426f96;
+  background: linear-gradient(135deg, #426f96 0%, #315878 100%);
+}
+
+[data-theme="dark"] .primary-button:hover,
+.dark .primary-button:hover {
+  background: linear-gradient(135deg, #4b7da8 0%, #376484 100%);
+}
+
+[data-theme="dark"] .metric-card,
+[data-theme="dark"] .panel,
+[data-theme="dark"] .table-card,
+[data-theme="dark"] .report-card,
+[data-theme="dark"] .kanban-column,
+[data-theme="dark"] .kanban-card,
+[data-theme="dark"] .calendar-day,
+.dark .metric-card,
+.dark .panel,
+.dark .table-card,
+.dark .report-card,
+.dark .kanban-column,
+.dark .kanban-card,
+.dark .calendar-day {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+@media (max-width: 900px) {
+  .calendar-controls--standalone {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
