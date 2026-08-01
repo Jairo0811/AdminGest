@@ -29,7 +29,6 @@
     "db:seed": "npm run prisma:seed --workspace @admingest/api"
   },
   "devDependencies": {
-    "@rollup/rollup-win32-x64-msvc": "^4.62.3",
     "prettier": "^3.6.2"
   }
 }
