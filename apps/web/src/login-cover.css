@@ -39,6 +39,7 @@
 
 .auth-product-pillars article {
   min-width: 0;
+  min-height: 78px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -70,25 +71,31 @@
 .auth-product-pillars article > div {
   min-width: 0;
   display: grid;
-  gap: 0.12rem;
-}
-
-.auth-product-pillars strong,
-.auth-product-pillars small {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  align-content: center;
+  gap: 0.18rem;
 }
 
 .auth-product-pillars strong {
+  display: -webkit-box;
+  overflow: hidden;
   color: #f4f7fa;
-  font-size: 0.76rem;
-  white-space: nowrap;
+  font-size: 0.75rem;
+  line-height: 1.18;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .auth-product-pillars small {
+  display: -webkit-box;
+  overflow: hidden;
   color: #91a9bc;
-  font-size: 0.66rem;
+  font-size: 0.65rem;
   line-height: 1.25;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .auth-trust-strip {
@@ -188,12 +195,21 @@
   }
 
   .auth-product-pillars article {
+    min-height: 70px;
     padding: 0.48rem 0.55rem;
   }
 
   .auth-pillar-icon {
     width: 30px;
     height: 30px;
+  }
+
+  .auth-product-pillars strong {
+    font-size: 0.7rem;
+  }
+
+  .auth-product-pillars small {
+    font-size: 0.61rem;
   }
 
   .auth-trust-strip span {
