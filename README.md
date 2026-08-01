@@ -383,6 +383,19 @@ Resultados validados:
 | 📅 Período académico | 2018-C3 |
 | 📁 Tipo de entrega | Proyecto Final |
 
+## 🔄 Continuidad académica
+
+**AdminGest** forma parte de una continuidad académica desarrollada con el profesor **Juan Martínez López** en el Instituto Tecnológico de Las Américas (ITLA).
+
+El primer proyecto fue **RadioEmisora**, realizado como proyecto final de la asignatura **Diseño Centrado en el Usuario (SOF-010)** durante el período **2018-C1**.
+
+Posteriormente se desarrolló **GestorAdministrativo**, proyecto académico original que hoy evoluciona como **AdminGest**, para la asignatura **Administración de Proyectos de Software (SOF-013)** durante el período **2018-C3**.
+
+| Orden | Proyecto | Asignatura | Período |
+|---|---|---|---|
+| 1 | RadioEmisora | Diseño Centrado en el Usuario (SOF-010) | 2018-C1 |
+| 2 | AdminGest | Administración de Proyectos de Software (SOF-013) | 2018-C3 |
+
 ## 📄 Licencia
 
 Este proyecto se distribuye bajo los términos definidos en [LICENSE](LICENSE).
