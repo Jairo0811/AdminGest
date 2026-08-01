@@ -65,6 +65,7 @@ El proyecto reconstruye de forma independiente el trabajo final académico **Ges
 - Cronograma visual.
 - Impresión de cronograma tipo Gantt.
 - Importación y exportación CSV compatible con Microsoft Project.
+- Acceso permanente a **Nuevo proyecto** desde Lista, Cronograma y MS Project.
 
 ### 🖥️ Administración y experiencia de usuario
 
@@ -79,6 +80,10 @@ El proyecto reconstruye de forma independiente el trabajo final académico **Ges
 - Diseño responsive.
 - Configuración de empresa.
 - Validación dominicana de cédula y RNC.
+- Design System corporativo con azul dominante y verde reservado para estados positivos.
+- Login institucional alineado con la propuesta de valor de AdminGest.
+- Footer global con año dinámico.
+- Acciones persistentes entre vistas especializadas: Lista, Calendario, Kanban, Cronograma y MS Project.
 
 ### 👤 Usuarios, roles y perfil
 
@@ -91,6 +96,20 @@ El proyecto reconstruye de forma independiente el trabajo final académico **Ges
 - Restablecimiento administrativo de contraseña.
 - Recuperación de contraseña mediante enlace temporal.
 - Cierre automático de sesión al expirar el JWT.
+
+## 🎨 Identidad visual y experiencia corporativa
+
+AdminGest conserva su logo original y evoluciona su interfaz hacia una estética empresarial más sobria, coherente con un CRM/ERP moderno.
+
+La interfaz utiliza una paleta donde el azul concentra la jerarquía visual principal y el verde se reserva para crecimiento, progreso, éxito e indicadores positivos. El sistema visual incluye:
+
+- Sidebar corporativo de alto contraste.
+- Botones primarios con gradiente azul.
+- Cards y tablas con jerarquía visual refinada.
+- Login inspirado en la portada institucional.
+- Componentes adaptados a modo claro y oscuro.
+- Composición responsive sin scroll innecesario en el login de escritorio.
+- Reutilización de formularios y acciones mediante `EntityPage` para mantener consistencia entre módulos.
 
 ## 🛡️ Seguridad
 
