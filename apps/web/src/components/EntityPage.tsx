@@ -1,5 +1,10 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,10 +15,10 @@ import {
   Plus,
   Search,
   Trash2,
-} from 'lucide-react';
-import { api } from '../api/client';
-import { ExportColumn, exportToExcel, printTable } from '../utils/export';
-import { Modal } from './Modal';
+} from "lucide-react";
+import { api } from "../api/client";
+import { ExportColumn, exportToExcel, printTable } from "../utils/export";
+import { Modal } from "./Modal";
 
 export interface Entity extends Record<string, unknown> {
   id: string;
@@ -33,7 +38,14 @@ interface Option {
 interface Field {
   name: string;
   label: string;
-  type?: 'text' | 'email' | 'number' | 'date' | 'datetime-local' | 'textarea' | 'select';
+  type?:
+    | "text"
+    | "email"
+    | "number"
+    | "date"
+    | "datetime-local"
+    | "textarea"
+    | "select";
   required?: boolean;
   options?: Option[];
   optionsEndpoint?: string;
@@ -57,10 +69,10 @@ interface EntityPageProps {
 }
 
 const normalizeValue = (field: Field, value: string) =>
-  field.type === 'number' ? Number(value) : value || undefined;
+  field.type === "number" ? Number(value) : value || undefined;
 
 const humanize = (value: string) =>
-  value.replace(/([a-z])([A-Z])/g, '$1 $2').replaceAll('_', ' ');
+  value.replace(/([a-z])([A-Z])/g, "$1 $2").replaceAll("_", " ");
 
 export function EntityPage({
   title,
@@ -76,14 +88,14 @@ export function EntityPage({
   itemActions,
 }: EntityPageProps) {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('ALL');
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("ALL");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [editing, setEditing] = useState<Entity | null | undefined>(undefined);
   const [pendingDelete, setPendingDelete] = useState<Entity | null>(null);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const queryKey = [endpoint];
 
   const { data = [], isLoading } = useQuery({
@@ -92,7 +104,9 @@ export function EntityPage({
   });
 
   const lookupEndpoints = useMemo(
-    () => [...new Set(fields.map((field) => field.optionsEndpoint).filter(Boolean))],
+    () => [
+      ...new Set(fields.map((field) => field.optionsEndpoint).filter(Boolean)),
+    ],
     [fields],
   ) as string[];
 
@@ -111,21 +125,23 @@ export function EntityPage({
     mutationFn: async (values: Record<string, string | number>) => {
       const payload = buildPayload ? buildPayload(values) : values;
       return api<Entity>(editing ? `${endpoint}/${editing.id}` : endpoint, {
-        method: editing ? 'PATCH' : 'POST',
+        method: editing ? "PATCH" : "POST",
         body: JSON.stringify(payload),
       });
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
       setEditing(undefined);
-      setError('');
-      setNotice(`${singular[0].toUpperCase()}${singular.slice(1)} guardado correctamente.`);
+      setError("");
+      setNotice(
+        `${singular[0].toUpperCase()}${singular.slice(1)} guardado correctamente.`,
+      );
     },
     onError: (mutationError: Error) => setError(mutationError.message),
   });
 
   const remove = useMutation({
-    mutationFn: (id: string) => api(`${endpoint}/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: string) => api(`${endpoint}/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
       setPendingDelete(null);
@@ -140,13 +156,17 @@ export function EntityPage({
 
   useEffect(() => {
     if (!notice) return;
-    const timeout = window.setTimeout(() => setNotice(''), 3200);
+    const timeout = window.setTimeout(() => setNotice(""), 3200);
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
   const statuses = useMemo(
     () =>
-      [...new Set(data.map((item) => String(item.status ?? '')).filter(Boolean))].sort(),
+      [
+        ...new Set(
+          data.map((item) => String(item.status ?? "")).filter(Boolean),
+        ),
+      ].sort(),
     [data],
   );
 
@@ -156,7 +176,8 @@ export function EntityPage({
         const matchesSearch = JSON.stringify(item)
           .toLowerCase()
           .includes(search.toLowerCase());
-        const matchesStatus = status === 'ALL' || String(item.status) === status;
+        const matchesStatus =
+          status === "ALL" || String(item.status) === status;
         return matchesSearch && matchesStatus;
       }),
     [data, search, status],
@@ -175,12 +196,14 @@ export function EntityPage({
 
     const primitiveKeys = Object.keys(data[0] ?? {}).filter((key) => {
       const value = data[0]?.[key];
-      return value == null || ['string', 'number', 'boolean'].includes(typeof value);
+      return (
+        value == null || ["string", "number", "boolean"].includes(typeof value)
+      );
     });
 
     return primitiveKeys.map((key) => ({
       label: humanize(key),
-      value: (item) => String(item[key] ?? ''),
+      value: (item) => String(item[key] ?? ""),
     }));
   }, [columns, data]);
 
@@ -190,7 +213,7 @@ export function EntityPage({
     const values = Object.fromEntries(
       fields.map((field) => [
         field.name,
-        normalizeValue(field, String(formData.get(field.name) ?? '')),
+        normalizeValue(field, String(formData.get(field.name) ?? "")),
       ]),
     ) as Record<string, string | number>;
     save.mutate(values);
@@ -198,7 +221,11 @@ export function EntityPage({
 
   return (
     <section className="page">
-      {notice && <div className="toast toast--success" role="status">{notice}</div>}
+      {notice && (
+        <div className="toast toast--success" role="status">
+          {notice}
+        </div>
+      )}
 
       <div className="page-heading">
         <div>
@@ -208,7 +235,11 @@ export function EntityPage({
         </div>
         <div className="page-heading-actions">
           {headerActions}
-          <button className="primary-button" onClick={() => setEditing(null)} type="button">
+          <button
+            className="primary-button"
+            onClick={() => setEditing(null)}
+            type="button"
+          >
             <Plus size={18} /> Nuevo {singular}
           </button>
         </div>
@@ -228,10 +259,16 @@ export function EntityPage({
         {statuses.length > 0 && (
           <label className="filter-select">
             <Filter size={16} />
-            <select aria-label="Filtrar por estado" onChange={(event) => setStatus(event.target.value)} value={status}>
+            <select
+              aria-label="Filtrar por estado"
+              onChange={(event) => setStatus(event.target.value)}
+              value={status}
+            >
               <option value="ALL">Todos los estados</option>
               {statuses.map((itemStatus) => (
-                <option key={itemStatus} value={itemStatus}>{humanize(itemStatus)}</option>
+                <option key={itemStatus} value={itemStatus}>
+                  {humanize(itemStatus)}
+                </option>
               ))}
             </select>
           </label>
@@ -262,12 +299,16 @@ export function EntityPage({
 
       <div className="table-card">
         <div className="data-table table-header">
-          {columns.map((column) => <strong key={column.label}>{column.label}</strong>)}
+          {columns.map((column) => (
+            <strong key={column.label}>{column.label}</strong>
+          ))}
           {(canEdit || canDelete || itemActions) && <strong>Acciones</strong>}
         </div>
         {isLoading ? (
           <div className="table-skeleton" aria-label="Cargando información">
-            {Array.from({ length: 5 }, (_, index) => <span key={index} />)}
+            {Array.from({ length: 5 }, (_, index) => (
+              <span key={index} />
+            ))}
           </div>
         ) : visibleItems.length === 0 ? (
           <div className="empty-state">
@@ -316,16 +357,35 @@ export function EntityPage({
         <div className="pagination">
           <label>
             Mostrar
-            <select onChange={(event) => setPageSize(Number(event.target.value))} value={pageSize}>
-              {[10, 25, 50].map((size) => <option key={size} value={size}>{size}</option>)}
+            <select
+              onChange={(event) => setPageSize(Number(event.target.value))}
+              value={pageSize}
+            >
+              {[10, 25, 50].map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
             </select>
           </label>
-          <span>Página {page} de {totalPages}</span>
+          <span>
+            Página {page} de {totalPages}
+          </span>
           <div>
-            <button aria-label="Página anterior" disabled={page === 1} onClick={() => setPage((value) => value - 1)} type="button">
+            <button
+              aria-label="Página anterior"
+              disabled={page === 1}
+              onClick={() => setPage((value) => value - 1)}
+              type="button"
+            >
               <ChevronLeft size={18} />
             </button>
-            <button aria-label="Página siguiente" disabled={page === totalPages} onClick={() => setPage((value) => value + 1)} type="button">
+            <button
+              aria-label="Página siguiente"
+              disabled={page === totalPages}
+              onClick={() => setPage((value) => value + 1)}
+              type="button"
+            >
               <ChevronRight size={18} />
             </button>
           </div>
@@ -336,45 +396,81 @@ export function EntityPage({
         <Modal
           onClose={() => {
             setEditing(undefined);
-            setError('');
+            setError("");
           }}
           title={editing ? `Editar ${singular}` : `Nuevo ${singular}`}
         >
           <form className="entity-form" onSubmit={submit}>
             {fields.map((field) => {
-              const lookup = lookups.find(([key]) => key === field.optionsEndpoint)?.[1] ?? [];
+              const lookup =
+                lookups.find(([key]) => key === field.optionsEndpoint)?.[1] ??
+                [];
               const options =
                 field.options ??
                 lookup.map((item) => ({
                   value: item.id,
-                  label: field.optionLabel?.(item) ?? String(item.name ?? item.id),
+                  label:
+                    field.optionLabel?.(item) ?? String(item.name ?? item.id),
                 }));
-              const defaultValue = String(editing?.[field.name] ?? field.defaultValue ?? '');
+              const defaultValue = String(
+                editing?.[field.name] ?? field.defaultValue ?? "",
+              );
 
               return (
                 <label
-                  className={field.type === 'textarea' ? 'form-field full' : 'form-field'}
+                  className={
+                    field.type === "textarea" ? "form-field full" : "form-field"
+                  }
                   key={field.name}
                 >
                   <span>{field.label}</span>
-                  {field.type === 'textarea' ? (
-                    <textarea defaultValue={defaultValue} name={field.name} placeholder={field.placeholder} required={field.required} />
-                  ) : field.type === 'select' ? (
-                    <select defaultValue={defaultValue} name={field.name} required={field.required}>
+                  {field.type === "textarea" ? (
+                    <textarea
+                      defaultValue={defaultValue}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                    />
+                  ) : field.type === "select" ? (
+                    <select
+                      defaultValue={defaultValue}
+                      name={field.name}
+                      required={field.required}
+                    >
                       <option value="">Selecciona una opción</option>
-                      {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                      {options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   ) : (
-                    <input defaultValue={defaultValue} name={field.name} placeholder={field.placeholder} required={field.required} type={field.type ?? 'text'} />
+                    <input
+                      defaultValue={defaultValue}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                      type={field.type ?? "text"}
+                    />
                   )}
                 </label>
               );
             })}
             {error && <div className="alert error form-alert">{error}</div>}
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => setEditing(undefined)} type="button">Cancelar</button>
-              <button className="primary-button" disabled={save.isPending} type="submit">
-                {save.isPending ? 'Guardando…' : 'Guardar'}
+              <button
+                className="secondary-button"
+                onClick={() => setEditing(undefined)}
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button
+                className="primary-button"
+                disabled={save.isPending}
+                type="submit"
+              >
+                {save.isPending ? "Guardando…" : "Guardar"}
               </button>
             </footer>
           </form>
@@ -382,13 +478,30 @@ export function EntityPage({
       )}
 
       {pendingDelete && (
-        <Modal onClose={() => setPendingDelete(null)} title={`Eliminar ${singular}`}>
+        <Modal
+          onClose={() => setPendingDelete(null)}
+          title={`Eliminar ${singular}`}
+        >
           <div className="confirm-dialog">
-            <p>Esta acción no se puede deshacer. ¿Deseas eliminar el registro seleccionado?</p>
+            <p>
+              Esta acción no se puede deshacer. ¿Deseas eliminar el registro
+              seleccionado?
+            </p>
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => setPendingDelete(null)} type="button">Cancelar</button>
-              <button className="danger-button" disabled={remove.isPending} onClick={() => remove.mutate(pendingDelete.id)} type="button">
-                {remove.isPending ? 'Eliminando…' : 'Eliminar'}
+              <button
+                className="secondary-button"
+                onClick={() => setPendingDelete(null)}
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button
+                className="danger-button"
+                disabled={remove.isPending}
+                onClick={() => remove.mutate(pendingDelete.id)}
+                type="button"
+              >
+                {remove.isPending ? "Eliminando…" : "Eliminar"}
               </button>
             </footer>
           </div>
