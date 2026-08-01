@@ -1,0 +1,218 @@
+/* Login inspirado en la portada institucional de AdminGest */
+.auth-showcase--cover-inspired {
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 0.85rem;
+  background:
+    linear-gradient(rgba(8, 25, 41, 0.28), rgba(8, 25, 41, 0.28)),
+    radial-gradient(circle at 18% 78%, rgba(40, 94, 145, 0.24), transparent 35%),
+    radial-gradient(circle at 86% 72%, rgba(38, 112, 82, 0.16), transparent 32%),
+    linear-gradient(145deg, #0b1f32 0%, #12304a 62%, #102d3d 100%);
+}
+
+.auth-cover-copy {
+  max-width: 720px;
+  align-self: center;
+}
+
+.auth-cover-copy h1 {
+  max-width: 690px;
+  margin-bottom: 0.7rem;
+  color: #f3f7fb;
+  font-size: clamp(2.2rem, 4vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.auth-cover-copy > p:last-child {
+  max-width: 660px;
+  margin-bottom: 0;
+  color: #b9c8d5;
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  line-height: 1.5;
+}
+
+.auth-product-pillars {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.auth-product-pillars article {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(159, 188, 210, 0.16);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.auth-pillar-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(104, 153, 195, 0.25);
+  border-radius: 9px;
+  color: #78a8d0;
+  background: rgba(37, 84, 125, 0.2);
+}
+
+.auth-product-pillars article:nth-child(4) .auth-pillar-icon,
+.auth-product-pillars article:nth-child(5) .auth-pillar-icon {
+  color: #79ad94;
+  border-color: rgba(88, 147, 117, 0.25);
+  background: rgba(39, 91, 66, 0.2);
+}
+
+.auth-product-pillars article > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.auth-product-pillars strong,
+.auth-product-pillars small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auth-product-pillars strong {
+  color: #f4f7fa;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.auth-product-pillars small {
+  color: #91a9bc;
+  font-size: 0.66rem;
+  line-height: 1.25;
+}
+
+.auth-trust-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid rgba(91, 137, 174, 0.24);
+  border-radius: 12px;
+  background: rgba(7, 20, 32, 0.28);
+}
+
+.auth-trust-strip span {
+  min-width: 0;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.8rem;
+  color: #d4dee7;
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.auth-trust-strip span + span {
+  border-left: 1px solid rgba(117, 154, 184, 0.2);
+}
+
+.auth-trust-strip svg {
+  color: #6f9fc6;
+  flex: 0 0 auto;
+}
+
+.auth-trust-strip span:last-child svg {
+  color: #70a98e;
+}
+
+.auth-form-assurance {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.auth-form-assurance svg:first-child {
+  color: var(--blue);
+}
+
+.auth-form-assurance svg:last-child {
+  color: var(--green);
+}
+
+@media (max-width: 1280px) {
+  .auth-product-pillars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .auth-product-pillars article:nth-child(4),
+  .auth-product-pillars article:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .auth-showcase--cover-inspired {
+    display: block;
+  }
+
+  .auth-product-pillars,
+  .auth-trust-strip {
+    display: none;
+  }
+
+  .auth-cover-copy {
+    padding: 3rem 0 1rem;
+  }
+}
+
+@media (max-height: 900px) and (min-width: 901px) {
+  .auth-showcase--cover-inspired {
+    gap: 0.55rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .auth-cover-copy h1 {
+    font-size: clamp(2rem, 3.4vw, 3.15rem);
+  }
+
+  .auth-cover-copy > p:last-child {
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .auth-product-pillars article {
+    padding: 0.48rem 0.55rem;
+  }
+
+  .auth-pillar-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .auth-trust-strip span {
+    min-height: 36px;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.66rem;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 901px) {
+  .auth-product-pillars article:nth-child(3) {
+    display: none;
+  }
+
+  .auth-product-pillars {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .auth-cover-copy h1 {
+    font-size: 2.35rem;
+  }
+}
