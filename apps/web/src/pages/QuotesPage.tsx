@@ -258,22 +258,27 @@ export function QuotesPage() {
         },
         {
           label: 'Emisión',
-          exportValue: (item) => new Date(String(item.issueDate)).toLocaleDateString('es-DO'),
+          exportValue: (item) => String(item.issueDate),
+          exportFormat: 'date',
           render: (item) => new Date(String(item.issueDate)).toLocaleDateString('es-DO'),
         },
         {
           label: 'Total',
           exportValue: (item) => Number(item.total ?? 0),
+          exportFormat: 'currency',
+          exportAlign: 'right',
           render: (item) => money.format(Number(item.total)),
         },
         {
           label: 'Estado',
           exportValue: (item) => String(item.status),
+          exportFormat: 'status',
           render: (item) => <span className="status-badge">{statusLabels[String(item.status)] ?? String(item.status)}</span>,
         },
         {
           label: 'Líneas',
           exportValue: (item) => Number((item._count as Entity)?.items ?? 0),
+          exportAlign: 'center',
           render: (item) => String((item._count as Entity)?.items ?? 0),
         },
       ]}
@@ -307,6 +312,27 @@ export function QuotesPage() {
           {printingId === item.id ? <LoaderCircle className="spin" size={17} /> : <Printer size={17} />}
         </button>
       )}
+      reportMetrics={(items) => [
+        { label: 'Cotizaciones', value: items.length, tone: 'blue', icon: '📄' },
+        {
+          label: 'Monto total',
+          value: money.format(items.reduce((sum, item) => sum + Number(item.total ?? 0), 0)),
+          tone: 'green',
+          icon: '💰',
+        },
+        {
+          label: 'Borradores',
+          value: items.filter((item) => item.status === 'DRAFT').length,
+          tone: 'neutral',
+          icon: '📝',
+        },
+        {
+          label: 'Aceptadas',
+          value: items.filter((item) => item.status === 'ACCEPTED').length,
+          tone: 'green',
+          icon: '✅',
+        },
+      ]}
       singular="cotización"
       title="Cotizaciones"
     />
