@@ -79,16 +79,74 @@ const statusLabels: Record<string, string> = {
 
 const statusTone = (value: unknown) => {
   const normalized = String(value ?? '').toUpperCase();
-  if (['ACTIVE', 'WON', 'COMPLETED', 'QUALIFIED', 'CONVERTED', 'ACCEPTED', 'APPROVED'].includes(normalized)) {
+  if (
+    [
+      'ACTIVE',
+      'WON',
+      'COMPLETED',
+      'QUALIFIED',
+      'CONVERTED',
+      'ACCEPTED',
+      'APPROVED',
+    ].includes(normalized)
+  ) {
     return 'success';
   }
-  if (['PENDING', 'DRAFT', 'PLANNED', 'CONTACTED', 'SENT', 'IN_PROGRESS'].includes(normalized)) {
+  if (
+    ['PENDING', 'DRAFT', 'PLANNED', 'CONTACTED', 'SENT', 'IN_PROGRESS'].includes(
+      normalized,
+    )
+  ) {
     return 'warning';
   }
-  if (['LOST', 'CANCELLED', 'REJECTED', 'EXPIRED', 'DISQUALIFIED'].includes(normalized)) {
+  if (
+    ['LOST', 'CANCELLED', 'REJECTED', 'EXPIRED', 'DISQUALIFIED'].includes(
+      normalized,
+    )
+  ) {
     return 'danger';
   }
   return 'info';
+};
+
+const inferFormat = (
+  label: string,
+): CorporateReportColumn<unknown>['format'] => {
+  const normalized = label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+  if (normalized.includes('estado') || normalized.includes('tipo')) return 'status';
+  if (
+    normalized.includes('presupuesto') ||
+    normalized.includes('precio') ||
+    normalized.includes('total') ||
+    normalized === 'valor' ||
+    normalized.includes('monto')
+  ) {
+    return 'currency';
+  }
+  if (
+    normalized.includes('progreso') ||
+    normalized.includes('probabilidad') ||
+    normalized.includes('itbis') ||
+    normalized.includes('porcentaje')
+  ) {
+    return 'percent';
+  }
+  if (normalized.includes('fecha y hora')) return 'datetime';
+  if (
+    normalized.includes('fecha') ||
+    normalized.includes('emision') ||
+    normalized === 'inicio' ||
+    normalized.includes('finalizacion') ||
+    normalized.includes('vencimiento')
+  ) {
+    return 'date';
+  }
+
+  return 'text';
 };
 
 const formatValue = (
@@ -120,6 +178,42 @@ const metricMarkup = (metrics: CorporateReportMetric[]) =>
     )
     .join('');
 
+const buildDefaultMetrics = <T,>(
+  title: string,
+  items: T[],
+  metrics: CorporateReportMetric[],
+): CorporateReportMetric[] => {
+  const normalizedTitle = title.toLowerCase();
+  if (!normalizedTitle.includes('proyecto')) return metrics;
+
+  const projects = items as Array<Record<string, unknown>>;
+  const active = projects.filter((item) => item.status === 'ACTIVE').length;
+  const completed = projects.filter((item) => item.status === 'COMPLETED').length;
+  const budget = projects.reduce((sum, item) => sum + Number(item.budget ?? 0), 0);
+  const averageProgress = projects.length
+    ? projects.reduce((sum, item) => sum + Number(item.progress ?? 0), 0) /
+      projects.length
+    : 0;
+
+  return [
+    { label: 'Proyectos', value: projects.length, tone: 'blue', icon: '📁' },
+    { label: 'Activos', value: active, tone: 'green', icon: '▶' },
+    { label: 'Completados', value: completed, tone: 'green', icon: '✓' },
+    {
+      label: 'Presupuesto total',
+      value: money.format(budget),
+      tone: 'blue',
+      icon: 'RD$',
+    },
+    {
+      label: 'Avance promedio',
+      value: `${averageProgress.toFixed(1)}%`,
+      tone: 'neutral',
+      icon: '%',
+    },
+  ];
+};
+
 export function buildCorporateReportHtml<T>({
   title,
   subtitle,
@@ -131,6 +225,7 @@ export function buildCorporateReportHtml<T>({
 }: CorporateReportOptions<T>) {
   const generatedAt = new Date();
   const logoUrl = new URL('/brand/logo.png', window.location.origin).href;
+  const resolvedMetrics = buildDefaultMetrics(title, items, metrics);
   const rows = items
     .map(
       (item) => `
@@ -138,8 +233,9 @@ export function buildCorporateReportHtml<T>({
           ${columns
             .map((column) => {
               const rawValue = column.value(item);
-              const formatted = formatValue(rawValue, column.format);
-              if (column.format === 'status') {
+              const resolvedFormat = column.format ?? inferFormat(column.label);
+              const formatted = formatValue(rawValue, resolvedFormat);
+              if (resolvedFormat === 'status') {
                 return `<td class="align-${column.align ?? 'left'}"><span class="report-status report-status--${statusTone(rawValue)}">${escapeHtml(formatted)}</span></td>`;
               }
               return `<td class="align-${column.align ?? 'left'}">${escapeHtml(formatted)}</td>`;
@@ -194,7 +290,7 @@ export function buildCorporateReportHtml<T>({
       <p>${escapeHtml(subtitle ?? `Emitido el ${longDateTime.format(generatedAt)}`)}</p>
     </div>
   </header>
-  ${metrics.length ? `<section class="report-metrics">${metricMarkup(metrics)}</section>` : ''}
+  ${resolvedMetrics.length ? `<section class="report-metrics">${metricMarkup(resolvedMetrics)}</section>` : ''}
   <div class="report-section-title"><h2>Detalle del reporte</h2><span>${items.length} registros</span></div>
   ${items.length ? `<table class="report-table"><thead><tr>${columns.map((column) => `<th class="align-${column.align ?? 'left'}">${escapeHtml(column.label)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>` : '<div class="report-empty">No hay registros para mostrar.</div>'}
   <footer class="report-footer">
