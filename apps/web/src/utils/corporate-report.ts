@@ -1,3 +1,5 @@
+import QRCode from 'qrcode';
+
 export interface CorporateReportColumn<T> {
   label: string;
   value: (item: T) => string | number | null | undefined;
@@ -22,289 +24,138 @@ export interface CorporateReportOptions<T> {
   metrics?: CorporateReportMetric[];
 }
 
-const escapeHtml = (value: unknown) =>
-  String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-
 const money = new Intl.NumberFormat('es-DO', {
   style: 'currency',
   currency: 'DOP',
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
-
 const shortDate = new Intl.DateTimeFormat('es-DO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
+  day: '2-digit', month: 'short', year: 'numeric',
+});
+const longDateTime = new Intl.DateTimeFormat('es-DO', {
+  day: '2-digit', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit',
 });
 
-const longDateTime = new Intl.DateTimeFormat('es-DO', {
-  day: '2-digit',
-  month: 'long',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: '2-digit',
-});
+const escapeHtml = (value: unknown) => String(value ?? '')
+  .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 
 const statusLabels: Record<string, string> = {
-  NEW: 'Nuevo',
-  CONTACTED: 'Contactado',
-  QUALIFIED: 'Calificado',
-  DISQUALIFIED: 'Descartado',
-  CONVERTED: 'Convertido',
-  OPEN: 'Abierta',
-  WON: 'Ganada',
-  LOST: 'Perdida',
-  PENDING: 'Pendiente',
-  IN_PROGRESS: 'En progreso',
-  COMPLETED: 'Completada',
-  CANCELLED: 'Cancelada',
-  PLANNED: 'Planificado',
-  ACTIVE: 'Activo',
-  ON_HOLD: 'En pausa',
-  DRAFT: 'Borrador',
-  SENT: 'Enviada',
-  ACCEPTED: 'Aceptada',
-  APPROVED: 'Aprobada',
-  REJECTED: 'Rechazada',
-  EXPIRED: 'Vencida',
-  PRODUCT: 'Producto',
-  SERVICE: 'Servicio',
+  NEW: 'Nuevo', CONTACTED: 'Contactado', QUALIFIED: 'Calificado',
+  DISQUALIFIED: 'Descartado', CONVERTED: 'Convertido', OPEN: 'Abierta',
+  WON: 'Ganada', LOST: 'Perdida', PENDING: 'Pendiente', IN_PROGRESS: 'En progreso',
+  COMPLETED: 'Completada', CANCELLED: 'Cancelada', PLANNED: 'Planificado',
+  ACTIVE: 'Activo', ON_HOLD: 'En pausa', DRAFT: 'Borrador', SENT: 'Enviada',
+  ACCEPTED: 'Aceptada', APPROVED: 'Aprobada', REJECTED: 'Rechazada',
+  EXPIRED: 'Vencida', PRODUCT: 'Producto', SERVICE: 'Servicio',
 };
 
-const statusTone = (value: unknown) => {
-  const normalized = String(value ?? '').toUpperCase();
-  if (
-    [
-      'ACTIVE',
-      'WON',
-      'COMPLETED',
-      'QUALIFIED',
-      'CONVERTED',
-      'ACCEPTED',
-      'APPROVED',
-    ].includes(normalized)
-  ) {
-    return 'success';
-  }
-  if (
-    ['PENDING', 'DRAFT', 'PLANNED', 'CONTACTED', 'SENT', 'IN_PROGRESS'].includes(
-      normalized,
-    )
-  ) {
-    return 'warning';
-  }
-  if (
-    ['LOST', 'CANCELLED', 'REJECTED', 'EXPIRED', 'DISQUALIFIED'].includes(
-      normalized,
-    )
-  ) {
-    return 'danger';
-  }
-  return 'info';
-};
-
-const inferFormat = (
-  label: string,
-): CorporateReportColumn<unknown>['format'] => {
-  const normalized = label
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-
-  if (normalized.includes('estado') || normalized.includes('tipo')) return 'status';
-  if (
-    normalized.includes('presupuesto') ||
-    normalized.includes('precio') ||
-    normalized.includes('total') ||
-    normalized === 'valor' ||
-    normalized.includes('monto')
-  ) {
-    return 'currency';
-  }
-  if (
-    normalized.includes('progreso') ||
-    normalized.includes('probabilidad') ||
-    normalized.includes('itbis') ||
-    normalized.includes('porcentaje')
-  ) {
-    return 'percent';
-  }
-  if (normalized.includes('fecha y hora')) return 'datetime';
-  if (
-    normalized.includes('fecha') ||
-    normalized.includes('emision') ||
-    normalized === 'inicio' ||
-    normalized.includes('finalizacion') ||
-    normalized.includes('vencimiento')
-  ) {
-    return 'date';
-  }
-
+const inferFormat = (label: string): CorporateReportColumn<unknown>['format'] => {
+  const text = label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (text.includes('estado') || text.includes('tipo')) return 'status';
+  if (['presupuesto', 'precio', 'total', 'monto'].some((x) => text.includes(x)) || text === 'valor') return 'currency';
+  if (['progreso', 'probabilidad', 'itbis', 'porcentaje'].some((x) => text.includes(x))) return 'percent';
+  if (text.includes('fecha y hora')) return 'datetime';
+  if (['fecha', 'emision', 'inicio', 'finalizacion', 'vencimiento'].some((x) => text.includes(x))) return 'date';
   return 'text';
 };
 
-const formatValue = (
-  value: string | number | null | undefined,
-  format: CorporateReportColumn<unknown>['format'],
-) => {
-  if (value == null || value === '') return '—';
+const statusTone = (value: unknown) => {
+  const status = String(value ?? '').toUpperCase();
+  if (['ACTIVE', 'WON', 'COMPLETED', 'QUALIFIED', 'CONVERTED', 'ACCEPTED', 'APPROVED'].includes(status)) return 'success';
+  if (['PENDING', 'DRAFT', 'PLANNED', 'CONTACTED', 'SENT', 'IN_PROGRESS'].includes(status)) return 'warning';
+  if (['LOST', 'CANCELLED', 'REJECTED', 'EXPIRED', 'DISQUALIFIED'].includes(status)) return 'danger';
+  return 'info';
+};
 
+const formatValue = (value: string | number | null | undefined, format?: CorporateReportColumn<unknown>['format']) => {
+  if (value == null || value === '') return '—';
   if (format === 'currency') return money.format(Number(value));
   if (format === 'percent') return `${Number(value)}%`;
   if (format === 'date') return shortDate.format(new Date(String(value)));
   if (format === 'datetime') return longDateTime.format(new Date(String(value)));
   if (format === 'status') return statusLabels[String(value)] ?? String(value);
-
   return String(value);
 };
 
-const metricMarkup = (metrics: CorporateReportMetric[]) =>
-  metrics
-    .map(
-      (metric) => `
-        <article class="report-metric report-metric--${metric.tone ?? 'neutral'}">
-          <div class="report-metric-heading">
-            ${metric.icon ? `<span class="report-metric-icon">${escapeHtml(metric.icon)}</span>` : ''}
-            <span>${escapeHtml(metric.label)}</span>
-          </div>
-          <strong>${escapeHtml(metric.value)}</strong>
-        </article>`,
-    )
-    .join('');
+const createReportId = (date: Date) =>
+  `REP-${date.toISOString().slice(0, 10).replaceAll('-', '')}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
-const buildDefaultMetrics = <T,>(
-  title: string,
-  items: T[],
-  metrics: CorporateReportMetric[],
-): CorporateReportMetric[] => {
-  const normalizedTitle = title.toLowerCase();
-  if (!normalizedTitle.includes('proyecto')) return metrics;
+const createQrSvg = (text: string) => {
+  const qr = QRCode.create(text, { errorCorrectionLevel: 'M' });
+  const size = qr.modules.size;
+  const cells: string[] = [];
+  for (let row = 0; row < size; row += 1) {
+    for (let column = 0; column < size; column += 1) {
+      if (qr.modules.get(row, column)) cells.push(`<rect x="${column}" y="${row}" width="1" height="1"/>`);
+    }
+  }
+  return `<svg viewBox="-2 -2 ${size + 4} ${size + 4}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="QR de referencia"><rect x="-2" y="-2" width="${size + 4}" height="${size + 4}" fill="white"/><g fill="#0b2441">${cells.join('')}</g></svg>`;
+};
 
-  const projects = items as Array<Record<string, unknown>>;
-  const active = projects.filter((item) => item.status === 'ACTIVE').length;
-  const completed = projects.filter((item) => item.status === 'COMPLETED').length;
-  const budget = projects.reduce((sum, item) => sum + Number(item.budget ?? 0), 0);
-  const averageProgress = projects.length
-    ? projects.reduce((sum, item) => sum + Number(item.progress ?? 0), 0) /
-      projects.length
-    : 0;
-
+const defaultMetrics = <T,>(title: string, items: T[], metrics: CorporateReportMetric[]) => {
+  if (!title.toLowerCase().includes('proyecto')) return metrics;
+  const rows = items as Array<Record<string, unknown>>;
+  const budget = rows.reduce((sum, item) => sum + Number(item.budget ?? 0), 0);
+  const progress = rows.length ? rows.reduce((sum, item) => sum + Number(item.progress ?? 0), 0) / rows.length : 0;
   return [
-    { label: 'Proyectos', value: projects.length, tone: 'blue', icon: '📁' },
-    { label: 'Activos', value: active, tone: 'green', icon: '▶' },
-    { label: 'Completados', value: completed, tone: 'green', icon: '✓' },
-    {
-      label: 'Presupuesto total',
-      value: money.format(budget),
-      tone: 'blue',
-      icon: 'RD$',
-    },
-    {
-      label: 'Avance promedio',
-      value: `${averageProgress.toFixed(1)}%`,
-      tone: 'neutral',
-      icon: '%',
-    },
+    { label: 'Proyectos', value: rows.length, tone: 'blue' as const, icon: '📁' },
+    { label: 'Activos', value: rows.filter((x) => x.status === 'ACTIVE').length, tone: 'green' as const, icon: '▶' },
+    { label: 'Completados', value: rows.filter((x) => x.status === 'COMPLETED').length, tone: 'green' as const, icon: '✓' },
+    { label: 'Presupuesto total', value: money.format(budget), tone: 'blue' as const, icon: 'RD$' },
+    { label: 'Avance promedio', value: `${progress.toFixed(1)}%`, tone: 'neutral' as const, icon: '%' },
   ];
 };
 
-export function buildCorporateReportHtml<T>({
-  title,
-  subtitle,
-  companyName = 'AdminGest',
-  generatedBy,
-  items,
-  columns,
-  metrics = [],
-}: CorporateReportOptions<T>) {
-  const generatedAt = new Date();
-  const logoUrl = new URL('/brand/logo.png', window.location.origin).href;
-  const resolvedMetrics = buildDefaultMetrics(title, items, metrics);
-  const rows = items
-    .map(
-      (item) => `
-        <tr>
-          ${columns
-            .map((column) => {
-              const rawValue = column.value(item);
-              const resolvedFormat = column.format ?? inferFormat(column.label);
-              const formatted = formatValue(rawValue, resolvedFormat);
-              if (resolvedFormat === 'status') {
-                return `<td class="align-${column.align ?? 'left'}"><span class="report-status report-status--${statusTone(rawValue)}">${escapeHtml(formatted)}</span></td>`;
-              }
-              return `<td class="align-${column.align ?? 'left'}">${escapeHtml(formatted)}</td>`;
-            })
-            .join('')}
-        </tr>`,
-    )
-    .join('');
+const metricHtml = (metric: CorporateReportMetric) => `
+  <article class="metric metric--${metric.tone ?? 'neutral'}">
+    <span>${metric.icon ? `${escapeHtml(metric.icon)} ` : ''}${escapeHtml(metric.label)}</span>
+    <strong>${escapeHtml(metric.value)}</strong>
+  </article>`;
 
-  return `<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>${escapeHtml(title)}</title>
-<style>
-  :root{color-scheme:light;--navy:#0b2441;--blue:#176fca;--green:#16805c;--ink:#17263a;--muted:#687b90;--line:#dce5ee;--soft:#f3f7fb;--danger:#b4233f;--warning:#a96800}
-  *{box-sizing:border-box}
-  body{margin:0;background:#eaf0f6;color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.45}
-  .report{width:min(1120px,calc(100% - 32px));margin:24px auto;padding:30px;background:#fff;border-radius:22px;box-shadow:0 22px 60px rgba(15,35,60,.14)}
-  .report-print{float:right;padding:10px 16px;border:0;border-radius:10px;color:#fff;background:linear-gradient(135deg,#176fca,#164f88);font-weight:700;cursor:pointer}
-  .report-header{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start;padding-bottom:20px;border-bottom:3px solid var(--green)}
-  .report-brand{display:flex;gap:16px;align-items:center}.report-logo{width:86px;height:86px;object-fit:contain}.report-company{display:grid;gap:3px}.report-company strong{font-size:18px}.report-company span{color:var(--muted);font-size:12px}
-  .report-title{text-align:right}.report-title small{display:block;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.report-title h1{margin:4px 0 6px;font-size:30px;line-height:1.08}.report-title p{margin:0;color:var(--muted);font-size:12px;max-width:560px}
-  .report-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}
-  .report-metric{min-height:92px;padding:15px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}.report-metric-heading{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.report-metric-icon{font-size:15px}.report-metric strong{display:block;margin-top:8px;font-size:22px}.report-metric--blue{border-color:#cfe3f8;background:#f3f8fe}.report-metric--green{border-color:#cfe9dc;background:#f2faf6}
-  .report-section-title{display:flex;justify-content:space-between;align-items:end;margin:22px 0 10px}.report-section-title h2{margin:0;font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--blue)}.report-section-title span{color:var(--muted);font-size:11px}
-  .report-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:10px}
-  .report-table th{padding:11px;background:var(--navy);color:#fff;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em}.report-table td{padding:10px;border-top:1px solid #e6edf4;vertical-align:middle}.report-table tbody tr:nth-child(even){background:#f8fbfe}.align-center{text-align:center}.align-right{text-align:right}
-  .report-status{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-weight:800;white-space:nowrap}.report-status--success{color:#126142;background:#e8f7ef}.report-status--warning{color:#8a5700;background:#fff4d8}.report-status--danger{color:#9f2037;background:#fdecef}.report-status--info{color:#185f9f;background:#eaf4fd}
-  .report-empty{padding:34px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px;background:var(--soft)}
-  .report-footer{display:grid;grid-template-columns:1fr auto;gap:20px;margin-top:24px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:10px}.report-footer strong{color:#40546c}.report-page-note{text-align:right}.report-version{margin-top:2px}
-  @page{size:A4 landscape;margin:10mm}
-  @media print{body{background:#fff}.report{width:100%;margin:0;padding:0;border-radius:0;box-shadow:none}.report-print{display:none}.report-header,.report-metrics,.report-table,.report-footer{break-inside:avoid}.report-footer{position:relative}.report-page-note::after{content:' · Página ' counter(page) ' de ' counter(pages)}}
-</style>
-</head>
-<body>
-<main class="report">
-  <button class="report-print" type="button" onclick="window.print()">Guardar como PDF</button>
-  <header class="report-header">
-    <div class="report-brand">
-      <img class="report-logo" src="${escapeHtml(logoUrl)}" alt="AdminGest" />
-      <div class="report-company">
-        <strong>${escapeHtml(companyName)}</strong>
-        <span>Gestión Empresarial Inteligente</span>
-        <span>${generatedBy ? `Generado por ${escapeHtml(generatedBy)}` : 'Documento corporativo AdminGest'}</span>
-      </div>
-    </div>
-    <div class="report-title">
-      <small>Reporte ejecutivo</small>
-      <h1>${escapeHtml(title)}</h1>
-      <p>${escapeHtml(subtitle ?? `Emitido el ${longDateTime.format(generatedAt)}`)}</p>
-    </div>
-  </header>
-  ${resolvedMetrics.length ? `<section class="report-metrics">${metricMarkup(resolvedMetrics)}</section>` : ''}
-  <div class="report-section-title"><h2>Detalle del reporte</h2><span>${items.length} registros</span></div>
-  ${items.length ? `<table class="report-table"><thead><tr>${columns.map((column) => `<th class="align-${column.align ?? 'left'}">${escapeHtml(column.label)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>` : '<div class="report-empty">No hay registros para mostrar.</div>'}
-  <footer class="report-footer">
-    <div>
-      <strong>AdminGest</strong><br/>
-      Documento generado automáticamente el ${escapeHtml(longDateTime.format(generatedAt))}.
-      <div class="report-version">Versión 1.0 · ${escapeHtml(companyName)}</div>
-    </div>
-    <div class="report-page-note">Confidencial · Uso empresarial<br/>Gestión Empresarial Inteligente</div>
-  </footer>
-</main>
-<script>
-window.addEventListener('load',()=>{window.focus();window.setTimeout(()=>window.print(),350)});
-</script>
-</body>
-</html>`;
+export function buildCorporateReportHtml<T>(options: CorporateReportOptions<T>) {
+  const generatedAt = new Date();
+  const reportId = createReportId(generatedAt);
+  const companyName = options.companyName ?? 'AdminGest';
+  const logoUrl = new URL('/brand/logo.png', window.location.origin).href;
+  const portalUrl = (import.meta.env.VITE_PUBLIC_APP_URL as string | undefined)?.trim() || window.location.origin;
+  const metrics = defaultMetrics(options.title, options.items, options.metrics ?? []);
+  const qr = createQrSvg(`AdminGest\n${reportId}\n${options.title}\n${companyName}\n${generatedAt.toISOString()}`);
+  const firstPageSize = metrics.length ? 15 : 22;
+  const pages: T[][] = [options.items.slice(0, firstPageSize)];
+  for (let index = firstPageSize; index < options.items.length; index += 24) pages.push(options.items.slice(index, index + 24));
+  if (!pages.length) pages.push([]);
+
+  const table = (items: T[]) => items.length ? `
+    <table><thead><tr>${options.columns.map((c) => `<th class="${c.align ?? 'left'}">${escapeHtml(c.label)}</th>`).join('')}</tr></thead>
+    <tbody>${items.map((item) => `<tr>${options.columns.map((column) => {
+      const raw = column.value(item);
+      const format = column.format ?? inferFormat(column.label);
+      const value = formatValue(raw, format);
+      return format === 'status'
+        ? `<td class="${column.align ?? 'left'}"><b class="status status--${statusTone(raw)}">${escapeHtml(value)}</b></td>`
+        : `<td class="${column.align ?? 'left'}">${escapeHtml(value)}</td>`;
+    }).join('')}</tr>`).join('')}</tbody></table>` : '<div class="empty">No hay registros para mostrar.</div>';
+
+  const pageHtml = pages.map((items, pageIndex) => `
+    <section class="page">
+      <div class="watermark">ADMINGEST</div>
+      <header>
+        <div class="brand"><img src="${escapeHtml(logoUrl)}" alt="AdminGest"/><div><strong>${escapeHtml(companyName)}</strong><span>Gestión Empresarial Inteligente</span><span>${options.generatedBy ? `Generado por ${escapeHtml(options.generatedBy)}` : 'Documento corporativo AdminGest'}</span><span class="folio">${escapeHtml(reportId)}</span></div></div>
+        <div class="title"><small>Reporte ejecutivo</small><h1>${escapeHtml(options.title)}</h1><p>${escapeHtml(options.subtitle ?? `Emitido el ${longDateTime.format(generatedAt)}`)}</p></div>
+      </header>
+      ${pageIndex === 0 && metrics.length ? `<div class="metrics">${metrics.map(metricHtml).join('')}</div>` : ''}
+      <div class="section-title"><h2>${pageIndex ? 'Continuación del reporte' : 'Detalle del reporte'}</h2><span>${options.items.length} registros</span></div>
+      ${table(items)}
+      <footer>
+        <div><strong>AdminGest</strong><br/>Documento generado electrónicamente el ${escapeHtml(longDateTime.format(generatedAt))}.<br/>No requiere firma manuscrita.<span>Versión 1.0 · ${escapeHtml(companyName)} · ${escapeHtml(portalUrl)}</span></div>
+        <div class="reference">${pageIndex === 0 ? qr : ''}<p><strong>${escapeHtml(reportId)}</strong><br/>Confidencial · Uso empresarial<br/>Página ${pageIndex + 1} de ${pages.length}</p></div>
+      </footer>
+    </section>`).join('');
+
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(options.title)} · ${escapeHtml(reportId)}</title><style>
+    :root{--navy:#0b2441;--blue:#176fca;--green:#16805c;--ink:#17263a;--muted:#687b90;--line:#dce5ee}
+    *{box-sizing:border-box}body{margin:0;background:#eaf0f6;color:var(--ink);font-family:Arial,sans-serif;line-height:1.45}.shell{width:min(1160px,calc(100% - 32px));margin:24px auto}.print{position:fixed;right:24px;top:20px;z-index:10;padding:10px 16px;border:0;border-radius:10px;color:#fff;background:#176fca;font-weight:700}.page{position:relative;min-height:770px;margin-bottom:24px;padding:30px;background:#fff;border-radius:22px;box-shadow:0 22px 60px #0f233c24;overflow:hidden;break-after:page}.page:last-child{break-after:auto}.watermark{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%) rotate(-24deg);color:#0b244109;font-size:78px;font-weight:900;letter-spacing:.14em}.page>*:not(.watermark){position:relative}header{display:grid;grid-template-columns:1fr auto;gap:24px;padding-bottom:18px;border-bottom:3px solid var(--green)}.brand{display:flex;gap:16px;align-items:center}.brand img{width:100px;height:100px;object-fit:contain}.brand div{display:grid;gap:3px}.brand strong{font-size:19px}.brand span{color:var(--muted);font-size:12px}.brand .folio{color:var(--blue);font-weight:700}.title{text-align:right}.title small{color:var(--green);font-weight:800;letter-spacing:.14em;text-transform:uppercase}.title h1{margin:4px 0 6px;font-size:30px}.title p{margin:0;color:var(--muted);font-size:12px}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}.metric{min-height:92px;padding:15px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}.metric span{display:block;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase}.metric strong{display:block;margin-top:8px;font-size:22px}.metric--blue{background:#f3f8fe}.metric--green{background:#f2faf6}.section-title{display:flex;justify-content:space-between;align-items:end;margin:22px 0 10px}.section-title h2{margin:0;color:var(--blue);font-size:15px;text-transform:uppercase;letter-spacing:.08em}.section-title span{color:var(--muted);font-size:11px}table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:10px}th{padding:11px;background:var(--navy);color:#fff;text-transform:uppercase}td{padding:10px;border-top:1px solid #e6edf4}tbody tr:nth-child(even){background:#f8fbfe}.center{text-align:center}.right{text-align:right}.status{display:inline-flex;padding:4px 8px;border-radius:999px}.status--success{color:#126142;background:#e8f7ef}.status--warning{color:#8a5700;background:#fff4d8}.status--danger{color:#9f2037;background:#fdecef}.status--info{color:#185f9f;background:#eaf4fd}.empty{padding:34px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}footer{display:grid;grid-template-columns:1fr auto;gap:20px;margin-top:24px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:10px}footer span{display:block;margin-top:3px}.reference{display:flex;align-items:center;gap:10px;text-align:right}.reference svg{width:58px;height:58px;padding:3px;border:1px solid var(--line);border-radius:7px}.reference p{margin:0}@page{size:A4 landscape;margin:8mm}@media print{body{background:#fff}.shell{width:100%;margin:0}.page{min-height:0;margin:0;padding:0;border-radius:0;box-shadow:none;overflow:visible}.print{display:none}}
+  </style></head><body><button class="print" onclick="window.print()">Guardar como PDF</button><main class="shell">${pageHtml}</main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),450));</script></body></html>`;
 }
