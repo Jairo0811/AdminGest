@@ -19,6 +19,10 @@ import {
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import {
+  hasPermission,
+  resourceFromEndpoint,
+} from "../auth/permissions";
+import {
   buildCorporateReportHtml,
   CorporateReportColumn,
   CorporateReportMetric,
@@ -113,6 +117,15 @@ export function EntityPage({
 }: EntityPageProps) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const resource = resourceFromEndpoint(endpoint);
+  const canWrite = resource
+    ? hasPermission(user?.role, resource, "write")
+    : false;
+  const allowEdit = canWrite && canEdit;
+  const allowDelete = canWrite && canDelete;
+  const allowItemActions = canWrite && Boolean(itemActions);
+  const showActionsColumn = allowEdit || allowDelete || allowItemActions;
+
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("ALL");
   const [page, setPage] = useState(1);
@@ -139,8 +152,10 @@ export function EntityPage({
     queries: lookupEndpoints.map((lookupEndpoint) => ({
       queryKey: [lookupEndpoint],
       queryFn: () => api<Entity[]>(lookupEndpoint),
+      enabled: canWrite,
     })),
   });
+
   const lookups = lookupEndpoints.map(
     (lookupEndpoint, index) =>
       [lookupEndpoint, lookupQueries[index].data ?? []] as const,
@@ -148,6 +163,7 @@ export function EntityPage({
 
   const save = useMutation({
     mutationFn: async (values: Record<string, string | number>) => {
+      if (!canWrite) throw new Error("No tienes permiso para modificar este módulo.");
       const payload = buildPayload ? buildPayload(values) : values;
       return api<Entity>(editing ? `${endpoint}/${editing.id}` : endpoint, {
         method: editing ? "PATCH" : "POST",
@@ -166,7 +182,10 @@ export function EntityPage({
   });
 
   const remove = useMutation({
-    mutationFn: (id: string) => api(`${endpoint}/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => {
+      if (!canWrite) throw new Error("No tienes permiso para eliminar en este módulo.");
+      return api(`${endpoint}/${id}`, { method: "DELETE" });
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
       setPendingDelete(null);
@@ -175,15 +194,20 @@ export function EntityPage({
     onError: (mutationError: Error) => setError(mutationError.message),
   });
 
-  useEffect(() => {
-    setPage(1);
-  }, [search, status, pageSize]);
+  useEffect(() => setPage(1), [search, status, pageSize]);
 
   useEffect(() => {
     if (!notice) return;
     const timeout = window.setTimeout(() => setNotice(""), 3200);
     return () => window.clearTimeout(timeout);
   }, [notice]);
+
+  useEffect(() => {
+    if (!canWrite) {
+      setEditing(undefined);
+      setPendingDelete(null);
+    }
+  }, [canWrite]);
 
   const statuses = useMemo(
     () =>
@@ -235,6 +259,7 @@ export function EntityPage({
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!canWrite) return;
     const formData = new FormData(event.currentTarget);
     const values = Object.fromEntries(
       fields.map((field) => [
@@ -264,11 +289,7 @@ export function EntityPage({
 
   return (
     <section className="page">
-      {notice && (
-        <div className="toast toast--success" role="status">
-          {notice}
-        </div>
-      )}
+      {notice && <div className="toast toast--success" role="status">{notice}</div>}
 
       <div className="page-heading">
         <div>
@@ -278,13 +299,11 @@ export function EntityPage({
         </div>
         <div className="page-heading-actions">
           {headerActions}
-          <button
-            className="primary-button"
-            onClick={() => setEditing(null)}
-            type="button"
-          >
-            <Plus size={18} /> Nuevo {singular}
-          </button>
+          {canWrite && (
+            <button className="primary-button" onClick={() => setEditing(null)} type="button">
+              <Plus size={18} /> Nuevo {singular}
+            </button>
+          )}
         </div>
       </div>
 
@@ -302,36 +321,20 @@ export function EntityPage({
         {statuses.length > 0 && (
           <label className="filter-select">
             <Filter size={16} />
-            <select
-              aria-label="Filtrar por estado"
-              onChange={(event) => setStatus(event.target.value)}
-              value={status}
-            >
+            <select aria-label="Filtrar por estado" onChange={(event) => setStatus(event.target.value)} value={status}>
               <option value="ALL">Todos los estados</option>
               {statuses.map((itemStatus) => (
-                <option key={itemStatus} value={itemStatus}>
-                  {humanize(itemStatus)}
-                </option>
+                <option key={itemStatus} value={itemStatus}>{humanize(itemStatus)}</option>
               ))}
             </select>
           </label>
         )}
 
         <div className="export-actions">
-          <button
-            className="secondary-button"
-            disabled={!filtered.length}
-            onClick={() => exportToExcel(title, filtered, exportColumns)}
-            type="button"
-          >
+          <button className="secondary-button" disabled={!filtered.length} onClick={() => exportToExcel(title, filtered, exportColumns)} type="button">
             <FileSpreadsheet size={17} /> Excel
           </button>
-          <button
-            className="secondary-button"
-            disabled={!filtered.length || reportColumns.length === 0}
-            onClick={printCorporateReport}
-            type="button"
-          >
+          <button className="secondary-button" disabled={!filtered.length || reportColumns.length === 0} onClick={printCorporateReport} type="button">
             <FileDown size={17} /> PDF
           </button>
         </div>
@@ -342,50 +345,34 @@ export function EntityPage({
 
       <div className="table-card">
         <div className="data-table table-header">
-          {columns.map((column) => (
-            <strong key={column.label}>{column.label}</strong>
-          ))}
-          {(canEdit || canDelete || itemActions) && <strong>Acciones</strong>}
+          {columns.map((column) => <strong key={column.label}>{column.label}</strong>)}
+          {showActionsColumn && <strong>Acciones</strong>}
         </div>
         {isLoading ? (
           <div className="table-skeleton" aria-label="Cargando información">
-            {Array.from({ length: 5 }, (_, index) => (
-              <span key={index} />
-            ))}
+            {Array.from({ length: 5 }, (_, index) => <span key={index} />)}
           </div>
         ) : visibleItems.length === 0 ? (
           <div className="empty-state">
             <strong>No hay resultados</strong>
-            <p>Ajusta los filtros o crea tu primer {singular}.</p>
+            <p>{canWrite ? `Ajusta los filtros o crea tu primer ${singular}.` : "Ajusta los filtros para consultar la información disponible."}</p>
           </div>
         ) : (
           visibleItems.map((item) => (
             <div className="data-table table-row" key={item.id}>
               {columns.map((column) => (
-                <div data-label={column.label} key={column.label}>
-                  {column.render(item)}
-                </div>
+                <div data-label={column.label} key={column.label}>{column.render(item)}</div>
               ))}
-              {(canEdit || canDelete || itemActions) && (
+              {showActionsColumn && (
                 <div className="row-actions" data-label="Acciones">
-                  {itemActions?.(item)}
-                  {canEdit && (
-                    <button
-                      aria-label={`Editar ${singular}`}
-                      className="table-action"
-                      onClick={() => setEditing(item)}
-                      type="button"
-                    >
+                  {allowItemActions && itemActions?.(item)}
+                  {allowEdit && (
+                    <button aria-label={`Editar ${singular}`} className="table-action" onClick={() => setEditing(item)} type="button">
                       <Edit3 size={17} />
                     </button>
                   )}
-                  {canDelete && (
-                    <button
-                      aria-label={`Eliminar ${singular}`}
-                      className="table-action danger"
-                      onClick={() => setPendingDelete(item)}
-                      type="button"
-                    >
+                  {allowDelete && (
+                    <button aria-label={`Eliminar ${singular}`} className="table-action danger" onClick={() => setPendingDelete(item)} type="button">
                       <Trash2 size={17} />
                     </button>
                   )}
@@ -400,152 +387,61 @@ export function EntityPage({
         <div className="pagination">
           <label>
             Mostrar
-            <select
-              onChange={(event) => setPageSize(Number(event.target.value))}
-              value={pageSize}
-            >
-              {[10, 25, 50].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
+            <select onChange={(event) => setPageSize(Number(event.target.value))} value={pageSize}>
+              {[10, 25, 50].map((size) => <option key={size} value={size}>{size}</option>)}
             </select>
           </label>
-          <span>
-            Página {page} de {totalPages}
-          </span>
+          <span>Página {page} de {totalPages}</span>
           <div>
-            <button
-              aria-label="Página anterior"
-              disabled={page === 1}
-              onClick={() => setPage((value) => value - 1)}
-              type="button"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              aria-label="Página siguiente"
-              disabled={page === totalPages}
-              onClick={() => setPage((value) => value + 1)}
-              type="button"
-            >
-              <ChevronRight size={18} />
-            </button>
+            <button aria-label="Página anterior" disabled={page === 1} onClick={() => setPage((value) => value - 1)} type="button"><ChevronLeft size={18} /></button>
+            <button aria-label="Página siguiente" disabled={page === totalPages} onClick={() => setPage((value) => value + 1)} type="button"><ChevronRight size={18} /></button>
           </div>
         </div>
       )}
 
-      {editing !== undefined && (
-        <Modal
-          onClose={() => {
-            setEditing(undefined);
-            setError("");
-          }}
-          title={editing ? `Editar ${singular}` : `Nuevo ${singular}`}
-        >
+      {canWrite && editing !== undefined && (
+        <Modal onClose={() => { setEditing(undefined); setError(""); }} title={editing ? `Editar ${singular}` : `Nuevo ${singular}`}>
           <form className="entity-form" onSubmit={submit}>
             {fields.map((field) => {
-              const lookup =
-                lookups.find(([key]) => key === field.optionsEndpoint)?.[1] ??
-                [];
-              const options =
-                field.options ??
-                lookup.map((item) => ({
-                  value: item.id,
-                  label:
-                    field.optionLabel?.(item) ?? String(item.name ?? item.id),
-                }));
-              const defaultValue = String(
-                editing?.[field.name] ?? field.defaultValue ?? "",
-              );
+              const lookup = lookups.find(([key]) => key === field.optionsEndpoint)?.[1] ?? [];
+              const options = field.options ?? lookup.map((item) => ({
+                value: item.id,
+                label: field.optionLabel?.(item) ?? String(item.name ?? item.id),
+              }));
+              const defaultValue = String(editing?.[field.name] ?? field.defaultValue ?? "");
 
               return (
-                <label
-                  className={
-                    field.type === "textarea" ? "form-field full" : "form-field"
-                  }
-                  key={field.name}
-                >
+                <label className={field.type === "textarea" ? "form-field full" : "form-field"} key={field.name}>
                   <span>{field.label}</span>
                   {field.type === "textarea" ? (
-                    <textarea
-                      defaultValue={defaultValue}
-                      name={field.name}
-                      placeholder={field.placeholder}
-                      required={field.required}
-                    />
+                    <textarea defaultValue={defaultValue} name={field.name} placeholder={field.placeholder} required={field.required} />
                   ) : field.type === "select" ? (
-                    <select
-                      defaultValue={defaultValue}
-                      name={field.name}
-                      required={field.required}
-                    >
+                    <select defaultValue={defaultValue} name={field.name} required={field.required}>
                       <option value="">Selecciona una opción</option>
-                      {options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
+                      {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                     </select>
                   ) : (
-                    <input
-                      defaultValue={defaultValue}
-                      name={field.name}
-                      placeholder={field.placeholder}
-                      required={field.required}
-                      type={field.type ?? "text"}
-                    />
+                    <input defaultValue={defaultValue} name={field.name} placeholder={field.placeholder} required={field.required} type={field.type ?? "text"} />
                   )}
                 </label>
               );
             })}
             {error && <div className="alert error form-alert">{error}</div>}
             <footer className="form-actions">
-              <button
-                className="secondary-button"
-                onClick={() => setEditing(undefined)}
-                type="button"
-              >
-                Cancelar
-              </button>
-              <button
-                className="primary-button"
-                disabled={save.isPending}
-                type="submit"
-              >
-                {save.isPending ? "Guardando…" : "Guardar"}
-              </button>
+              <button className="secondary-button" onClick={() => setEditing(undefined)} type="button">Cancelar</button>
+              <button className="primary-button" disabled={save.isPending} type="submit">{save.isPending ? "Guardando…" : "Guardar"}</button>
             </footer>
           </form>
         </Modal>
       )}
 
-      {pendingDelete && (
-        <Modal
-          onClose={() => setPendingDelete(null)}
-          title={`Eliminar ${singular}`}
-        >
+      {allowDelete && pendingDelete && (
+        <Modal onClose={() => setPendingDelete(null)} title={`Eliminar ${singular}`}>
           <div className="confirm-dialog">
-            <p>
-              Esta acción no se puede deshacer. ¿Deseas eliminar el registro
-              seleccionado?
-            </p>
+            <p>Esta acción no se puede deshacer. ¿Deseas eliminar el registro seleccionado?</p>
             <footer className="form-actions">
-              <button
-                className="secondary-button"
-                onClick={() => setPendingDelete(null)}
-                type="button"
-              >
-                Cancelar
-              </button>
-              <button
-                className="danger-button"
-                disabled={remove.isPending}
-                onClick={() => remove.mutate(pendingDelete.id)}
-                type="button"
-              >
-                {remove.isPending ? "Eliminando…" : "Eliminar"}
-              </button>
+              <button className="secondary-button" onClick={() => setPendingDelete(null)} type="button">Cancelar</button>
+              <button className="danger-button" disabled={remove.isPending} onClick={() => remove.mutate(pendingDelete.id)} type="button">{remove.isPending ? "Eliminando…" : "Eliminar"}</button>
             </footer>
           </div>
         </Modal>
