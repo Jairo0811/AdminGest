@@ -89,7 +89,7 @@ describe('role permissions', () => {
     expect(resolveResource('/api/projects/import/ms-project')).toBe('projects');
     expect(resolveResource('/api/users')).toBe('users');
     expect(resolveAction('GET')).toBe('read');
-    expect(resolveAction('HEAD')).toBe('read');
+    expect(resolveAction('HEAD')).toBe('write');
     expect(resolveAction('POST')).toBe('write');
     expect(resolveAction('PATCH')).toBe('write');
     expect(resolveAction('PUT')).toBe('write');
@@ -100,6 +100,6 @@ describe('role permissions', () => {
     expect(roleHasPermission('UNKNOWN_ROLE', 'customers', 'read')).toBe(false);
     expect(roleHasPermission('', 'customers', 'read')).toBe(false);
     expect(resolveResource('/api/unknown-resource')).toBeNull();
-    expect(resolveAction('OPTIONS')).toBe('read');
+    expect(resolveAction('OPTIONS')).toBe('write');
   });
 });
