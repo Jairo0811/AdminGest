@@ -7,7 +7,6 @@
 </p>
 
 <p align="center">
-
   <img src="https://img.shields.io/badge/estado-Estable-18A96F?style=for-the-badge" alt="Estado estable" />
   <img src="https://img.shields.io/badge/arquitectura-Monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
 </p>
@@ -70,6 +69,7 @@ El proyecto reconstruye de forma independiente el trabajo final académico **Ges
 ### 🖥️ Administración y experiencia de usuario
 
 - Dashboard ejecutivo con KPIs, tendencias, gráficos y embudo comercial.
+- Dashboard adaptado al rol activo.
 - Reportes ejecutivos.
 - Exportación de listados a Excel.
 - Impresión y exportación PDF desde el navegador.
@@ -84,11 +84,16 @@ El proyecto reconstruye de forma independiente el trabajo final académico **Ges
 - Login institucional alineado con la propuesta de valor de AdminGest.
 - Footer global con año dinámico.
 - Acciones persistentes entre vistas especializadas: Lista, Calendario, Kanban, Cronograma y MS Project.
+- Botones de creación, edición y eliminación condicionados por permisos efectivos.
 
 ### 👤 Usuarios, roles y perfil
 
 - Gestión de usuarios por empresa.
 - Roles disponibles: `SUPER_ADMIN`, `ADMIN`, `SALES_MANAGER`, `SALES_REP`, `PROJECT_MANAGER` y `VIEWER`.
+- Matriz RBAC real en backend y frontend.
+- Separación entre permisos de lectura y escritura.
+- Menú, rutas, dashboards y acciones adaptados al rol.
+- Protección de la API con respuesta `403 Forbidden` ante accesos no autorizados.
 - Activación y desactivación de cuentas.
 - Prevención de auto-desactivación.
 - Perfil personal.
@@ -96,6 +101,8 @@ El proyecto reconstruye de forma independiente el trabajo final académico **Ges
 - Restablecimiento administrativo de contraseña.
 - Recuperación de contraseña mediante enlace temporal.
 - Cierre automático de sesión al expirar el JWT.
+
+Consulta la [matriz RBAC](docs/security/rbac-matrix.md) para conocer el alcance de cada perfil.
 
 ## 🎨 Identidad visual y experiencia corporativa
 
@@ -115,7 +122,9 @@ La interfaz utiliza una paleta donde el azul concentra la jerarquía visual prin
 
 AdminGest incorpora autenticación JWT, contraseñas con bcrypt, autorización basada en roles, aislamiento multiempresa, recuperación de contraseña con tokens de un solo uso, rate limiting, Helmet, CORS configurable, validación estricta de DTO, auditoría de operaciones sensibles y gestión de secretos mediante variables de entorno.
 
-Consulta [SECURITY.md](SECURITY.md) para la política completa.
+La API es la fuente de verdad de autorización. Aunque la interfaz oculte una acción, el backend vuelve a validar el rol, recurso y tipo de operación antes de procesarla.
+
+Consulta [SECURITY.md](SECURITY.md) y la [matriz RBAC](docs/security/rbac-matrix.md) para la documentación completa.
 
 ## 🇩🇴 Validación dominicana
 
@@ -362,18 +371,21 @@ npm run test
 npm run build
 ```
 
-Resultados validados:
+La integración continua valida automáticamente:
 
-- API: 6 suites y 17 pruebas aprobadas.
-- Web: 5 archivos y 12 pruebas aprobadas.
-- Total: 29 pruebas aprobadas.
-- Migraciones SQL Server aplicadas correctamente.
-- Lint limpio.
-- Build de NestJS y Vite exitoso.
+- generación del cliente Prisma;
+- esquema y migraciones de SQL Server;
+- lint del monorepo;
+- pruebas de API y web;
+- matriz completa de autorización por roles;
+- build de NestJS y Vite;
+- auditoría de dependencias;
+- artefactos de frontend y backend.
 
 ## 📚 Documentación
 
 - [Arquitectura](docs/ARCHITECTURE.md)
+- [Matriz RBAC](docs/security/rbac-matrix.md)
 - [Despliegue](docs/DEPLOYMENT.md)
 - [Recuperación de contraseña](docs/PASSWORD_RESET.md)
 - [Política de seguridad](SECURITY.md)
