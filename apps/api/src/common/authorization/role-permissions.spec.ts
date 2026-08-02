@@ -97,8 +97,8 @@ describe('role permissions', () => {
   });
 
   it('rechaza roles, recursos o métodos desconocidos de forma segura', () => {
-    expect(roleHasPermission(undefined, 'customers', 'read')).toBe(false);
     expect(roleHasPermission('UNKNOWN_ROLE', 'customers', 'read')).toBe(false);
+    expect(roleHasPermission('', 'customers', 'read')).toBe(false);
     expect(resolveResource('/api/unknown-resource')).toBeNull();
     expect(resolveAction('OPTIONS')).toBe('read');
   });
