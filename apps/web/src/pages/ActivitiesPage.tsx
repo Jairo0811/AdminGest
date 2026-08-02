@@ -112,7 +112,8 @@ export function ActivitiesPage() {
         },
         {
           label: 'Fecha',
-          exportValue: (item) => new Date(String(item.scheduledAt)).toLocaleString('es-DO'),
+          exportValue: (item) => String(item.scheduledAt),
+          exportFormat: 'datetime',
           render: (item) =>
             new Intl.DateTimeFormat('es-DO', {
               dateStyle: 'medium',
@@ -127,6 +128,7 @@ export function ActivitiesPage() {
         {
           label: 'Estado',
           exportValue: (item) => String(item.status),
+          exportFormat: 'status',
           render: (item) => <span className="status-badge">{String(item.status)}</span>,
         },
       ]}
@@ -137,6 +139,27 @@ export function ActivitiesPage() {
       }
       endpoint="/activities"
       fields={activityFields}
+      reportMetrics={(items) => [
+        { label: 'Actividades', value: items.length, tone: 'blue', icon: '📅' },
+        {
+          label: 'Pendientes',
+          value: items.filter((item) => item.status === 'PENDING').length,
+          tone: 'neutral',
+          icon: '⏳',
+        },
+        {
+          label: 'Completadas',
+          value: items.filter((item) => item.status === 'COMPLETED').length,
+          tone: 'green',
+          icon: '✅',
+        },
+        {
+          label: 'Canceladas',
+          value: items.filter((item) => item.status === 'CANCELLED').length,
+          tone: 'neutral',
+          icon: '✕',
+        },
+      ]}
       singular="actividad"
       title={view === 'table' ? 'Actividades' : 'Calendario de actividades'}
     />
