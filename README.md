@@ -380,7 +380,7 @@ Resultados validados:
 - [Componentes de terceros](THIRD_PARTY_NOTICES.md)
 - [Historial de cambios](CHANGELOG.md)
 
-## 👥 Equipo académico original
+## 👥 Equipo Académico Original
 
 | 👤 Integrante | 🆔 Matrícula |
 |---|---|
@@ -392,7 +392,7 @@ Resultados validados:
 | 👨🏻‍💻 Alexander Dionicio Mercedes | 2016-3962 |
 | 👨🏻‍💻 Raymundo Eduardo Peña Sánchez | 2016-4276 |
 
-## 🎓 Información académica
+## 🎓 Información Académica
 
 | Información | Detalle |
 |---|---|
