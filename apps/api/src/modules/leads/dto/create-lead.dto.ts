@@ -1,5 +1,7 @@
+import { Type } from 'class-transformer';
 import {
   IsEmail,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -8,6 +10,14 @@ import {
   Max,
   Min,
 } from 'class-validator';
+
+export const LEAD_STATUSES = [
+  'NEW',
+  'CONTACTED',
+  'QUALIFIED',
+  'DISQUALIFIED',
+  'CONVERTED',
+] as const;
 
 export class CreateLeadDto {
   @IsString()
@@ -45,13 +55,17 @@ export class CreateLeadDto {
   ownerId?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(3)
   priority?: number;
 
   @IsOptional()
+  @IsIn(LEAD_STATUSES)
+  status?: (typeof LEAD_STATUSES)[number];
+
+  @IsOptional()
   @IsString()
   notes?: string;
 }
-
