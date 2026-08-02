@@ -1,5 +1,7 @@
+import { Type } from 'class-transformer';
 import {
   IsDateString,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -7,6 +9,8 @@ import {
   Max,
   Min,
 } from 'class-validator';
+
+export const OPPORTUNITY_STATUSES = ['OPEN', 'WON', 'LOST'] as const;
 
 export class CreateOpportunityDto {
   @IsUUID()
@@ -26,11 +30,13 @@ export class CreateOpportunityDto {
   @IsString()
   description?: string;
 
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   estimatedValue!: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   @Max(100)
@@ -39,5 +45,8 @@ export class CreateOpportunityDto {
   @IsOptional()
   @IsDateString()
   expectedCloseDate?: string;
-}
 
+  @IsOptional()
+  @IsIn(OPPORTUNITY_STATUSES)
+  status?: (typeof OPPORTUNITY_STATUSES)[number];
+}
