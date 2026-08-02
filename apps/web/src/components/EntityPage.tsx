@@ -17,7 +17,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { api } from "../api/client";
-import { ExportColumn, exportToExcel, printTable } from "../utils/export";
+import { useAuth } from "../auth/AuthContext";
+import {
+  buildCorporateReportHtml,
+  CorporateReportColumn,
+  CorporateReportMetric,
+} from "../utils/corporate-report";
+import { ExportColumn, exportToExcel } from "../utils/export";
 import { Modal } from "./Modal";
 
 export interface Entity extends Record<string, unknown> {
@@ -28,6 +34,8 @@ interface Column {
   label: string;
   render(item: Entity): ReactNode;
   exportValue?: (item: Entity) => string | number | null | undefined;
+  exportFormat?: CorporateReportColumn<Entity>["format"];
+  exportAlign?: CorporateReportColumn<Entity>["align"];
 }
 
 interface Option {
@@ -66,6 +74,7 @@ interface EntityPageProps {
   headerActions?: ReactNode;
   buildPayload?(values: Record<string, string | number>): unknown;
   itemActions?: (item: Entity) => ReactNode;
+  reportMetrics?: (items: Entity[]) => CorporateReportMetric[];
 }
 
 const normalizeValue = (field: Field, value: string) =>
@@ -73,6 +82,20 @@ const normalizeValue = (field: Field, value: string) =>
 
 const humanize = (value: string) =>
   value.replace(/([a-z])([A-Z])/g, "$1 $2").replaceAll("_", " ");
+
+const openPrintWindow = (html: string) => {
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    throw new Error(
+      "El navegador bloqueó la ventana de impresión. Habilita las ventanas emergentes para AdminGest e inténtalo nuevamente.",
+    );
+  }
+
+  printWindow.opener = null;
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+};
 
 export function EntityPage({
   title,
@@ -86,8 +109,10 @@ export function EntityPage({
   headerActions,
   buildPayload,
   itemActions,
+  reportMetrics,
 }: EntityPageProps) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("ALL");
   const [page, setPage] = useState(1);
@@ -186,26 +211,27 @@ export function EntityPage({
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const visibleItems = filtered.slice((page - 1) * pageSize, page * pageSize);
 
-  const exportColumns = useMemo<ExportColumn<Entity>[]>(() => {
-    if (columns.every((column) => column.exportValue)) {
-      return columns.map((column) => ({
+  const exportColumns = useMemo<ExportColumn<Entity>[]>(
+    () =>
+      columns.map((column) => ({
         label: column.label,
-        value: column.exportValue!,
-      }));
-    }
+        value: column.exportValue ?? (() => ""),
+      })),
+    [columns],
+  );
 
-    const primitiveKeys = Object.keys(data[0] ?? {}).filter((key) => {
-      const value = data[0]?.[key];
-      return (
-        value == null || ["string", "number", "boolean"].includes(typeof value)
-      );
-    });
-
-    return primitiveKeys.map((key) => ({
-      label: humanize(key),
-      value: (item) => String(item[key] ?? ""),
-    }));
-  }, [columns, data]);
+  const reportColumns = useMemo<CorporateReportColumn<Entity>[]>(
+    () =>
+      columns
+        .filter((column) => column.exportValue)
+        .map((column) => ({
+          label: column.label,
+          value: column.exportValue!,
+          format: column.exportFormat,
+          align: column.exportAlign,
+        })),
+    [columns],
+  );
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -217,6 +243,23 @@ export function EntityPage({
       ]),
     ) as Record<string, string | number>;
     save.mutate(values);
+  };
+
+  const printCorporateReport = () => {
+    const html = buildCorporateReportHtml({
+      title,
+      subtitle: description,
+      companyName: user?.company.name ?? "AdminGest",
+      generatedBy: user
+        ? `${user.firstName} ${user.lastName}`.trim() || user.email
+        : undefined,
+      items: filtered,
+      columns: reportColumns,
+      metrics: reportMetrics?.(filtered) ?? [
+        { label: "Registros", value: filtered.length, tone: "blue" },
+      ],
+    });
+    openPrintWindow(html);
   };
 
   return (
@@ -285,8 +328,8 @@ export function EntityPage({
           </button>
           <button
             className="secondary-button"
-            disabled={!filtered.length}
-            onClick={() => printTable(title, filtered, exportColumns)}
+            disabled={!filtered.length || reportColumns.length === 0}
+            onClick={printCorporateReport}
             type="button"
           >
             <FileDown size={17} /> PDF

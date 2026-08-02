@@ -23,6 +23,7 @@ export function CustomersPage() {
       columns={[
         {
           label: 'Cliente',
+          exportValue: (item) => value(item, 'name'),
           render: (item) => (
             <span className="primary-cell">
               <strong>{value(item, 'name')}</strong>
@@ -32,9 +33,34 @@ export function CustomersPage() {
             </span>
           ),
         },
-        { label: 'Correo', render: (item) => value(item, 'email') },
-        { label: 'Teléfono', render: (item) => value(item, 'phone') },
-        { label: 'Dirección', render: (item) => value(item, 'address') },
+        {
+          label: 'RNC/Cédula',
+          exportValue: (item) =>
+            item.taxId ? formatDominicanTaxId(String(item.taxId)) : '—',
+          render: (item) =>
+            item.taxId ? formatDominicanTaxId(String(item.taxId)) : '—',
+        },
+        {
+          label: 'Correo',
+          exportValue: (item) => value(item, 'email'),
+          render: (item) => value(item, 'email'),
+        },
+        {
+          label: 'Teléfono',
+          exportValue: (item) => value(item, 'phone'),
+          render: (item) => value(item, 'phone'),
+        },
+        {
+          label: 'Sitio web',
+          exportValue: (item) => value(item, 'website'),
+          render: (item) => value(item, 'website'),
+        },
+        {
+          label: 'Estado',
+          exportValue: (item) => (item.isActive === false ? 'Inactivo' : 'Activo'),
+          exportAlign: 'center',
+          render: (item) => (item.isActive === false ? 'Inactivo' : 'Activo'),
+        },
       ]}
       description="Mantén la información comercial y los contactos de cada cliente."
       endpoint="/customers"
@@ -49,6 +75,22 @@ export function CustomersPage() {
         { name: 'phone', label: 'Teléfono' },
         { name: 'website', label: 'Sitio web' },
         { name: 'address', label: 'Dirección', type: 'textarea' },
+      ]}
+      reportMetrics={(items) => [
+        { label: 'Clientes', value: items.length, tone: 'blue' },
+        {
+          label: 'Activos',
+          value: items.filter((item) => item.isActive !== false).length,
+          tone: 'green',
+        },
+        {
+          label: 'Inactivos',
+          value: items.filter((item) => item.isActive === false).length,
+        },
+        {
+          label: 'Con identificación',
+          value: items.filter((item) => Boolean(item.taxId)).length,
+        },
       ]}
       singular="cliente"
       title="Clientes"
