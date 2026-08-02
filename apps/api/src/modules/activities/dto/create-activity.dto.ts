@@ -15,6 +15,12 @@ export const ACTIVITY_TYPES = [
   'FOLLOW_UP',
 ] as const;
 
+export const ACTIVITY_STATUSES = [
+  'PENDING',
+  'COMPLETED',
+  'CANCELLED',
+] as const;
+
 export class CreateActivityDto {
   @IsIn(ACTIVITY_TYPES)
   type!: (typeof ACTIVITY_TYPES)[number];
@@ -40,5 +46,8 @@ export class CreateActivityDto {
   @IsOptional()
   @IsUUID()
   ownerId?: string;
-}
 
+  @IsOptional()
+  @IsIn(ACTIVITY_STATUSES)
+  status?: (typeof ACTIVITY_STATUSES)[number];
+}
