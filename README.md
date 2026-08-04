@@ -86,6 +86,20 @@ El proyecto reconstruye de forma independiente el trabajo final académico **Ges
 - Acciones persistentes entre vistas especializadas: Lista, Calendario, Kanban, Cronograma y MS Project.
 - Botones de creación, edición y eliminación condicionados por permisos efectivos.
 
+### ♿ Accesibilidad
+
+- Base alineada con **NORTIC B2:2017** y **WCAG 2.0 nivel AA**.
+- Navegación completa por teclado y enlace para saltar al contenido principal.
+- Foco visible en controles interactivos.
+- Landmarks, breadcrumbs y títulos de página semánticos.
+- Estados ARIA para menús, buscador, notificaciones y perfil.
+- Mensajes de error y carga anunciados a tecnologías asistivas.
+- Formularios con etiquetas, ayudas y relaciones accesibles.
+- Compatibilidad con preferencia de movimiento reducido y modos de alto contraste.
+- Base responsive preparada para zoom y ampliación de texto.
+
+Consulta la [documentación de accesibilidad](docs/ACCESSIBILITY.md) para conocer el alcance técnico y las validaciones recomendadas.
+
 ### 👤 Usuarios, roles y perfil
 
 - Gestión de usuarios por empresa.
@@ -385,6 +399,7 @@ La integración continua valida automáticamente:
 ## 📚 Documentación
 
 - [Arquitectura](docs/ARCHITECTURE.md)
+- [Accesibilidad](docs/ACCESSIBILITY.md)
 - [Matriz RBAC](docs/security/rbac-matrix.md)
 - [Despliegue](docs/DEPLOYMENT.md)
 - [Recuperación de contraseña](docs/PASSWORD_RESET.md)
@@ -420,13 +435,8 @@ La integración continua valida automáticamente:
 
 El primer proyecto fue **RadioEmisora**, realizado como proyecto final de la asignatura **Diseño Centrado en el Usuario (SOF-010)** durante el período **2018-C1**.
 
-Posteriormente se desarrolló **GestorAdministrativo**, proyecto académico original que hoy evoluciona como **AdminGest**, para la asignatura **Administración de Proyectos de Software (SOF-013)** durante el período **2018-C3**.
-
-| Orden | Proyecto | Asignatura | Período |
-|---|---|---|---|
-| 1 | RadioEmisora | Diseño Centrado en el Usuario (SOF-010) | 2018-C1 |
-| 2 | AdminGest | Administración de Proyectos de Software (SOF-013) | 2018-C3 |
+Posteriormente se desarrolló **GestorAdministrativo**, proyecto académico reconstruido y modernizado como **AdminGest**, para la asignatura **Administración de Proyectos de Software (SOF-013)** durante el período **2018-C3**.
 
 ## 📄 Licencia
 
-Este proyecto se distribuye bajo los términos definidos en [LICENSE](LICENSE).
+Este proyecto se distribuye bajo la licencia incluida en el repositorio.
