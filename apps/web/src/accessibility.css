@@ -1,0 +1,93 @@
+:root {
+  --a11y-focus-color: #7dd3fc;
+  --a11y-focus-shadow: 0 0 0 3px rgba(125, 211, 252, 0.35);
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 9999;
+  transform: translateY(-180%);
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 700;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.28);
+  transition: transform 0.18s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:where(
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: 3px solid var(--a11y-focus-color);
+  outline-offset: 3px;
+  box-shadow: var(--a11y-focus-shadow);
+}
+
+.workspace:focus {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+[aria-disabled="true"],
+:disabled {
+  cursor: not-allowed;
+}
+
+.alert[role="alert"],
+[role="status"] {
+  scroll-margin-top: 5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea):focus-visible {
+    outline: 2px solid CanvasText;
+  }
+}
+
+@media (max-width: 900px), (min-resolution: 1.5dppx) {
+  .workspace,
+  .auth-page,
+  .entity-page,
+  .dashboard-page {
+    min-width: 0;
+  }
+
+  table {
+    max-width: 100%;
+  }
+}
