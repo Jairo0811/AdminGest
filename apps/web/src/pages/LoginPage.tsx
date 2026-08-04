@@ -101,15 +101,17 @@ export function LoginPage() {
 
   return (
     <div className="auth-page-wrapper">
+      <a className="skip-link" href="#auth-form">Saltar al formulario de acceso</a>
+
       <div className="auth-page auth-page--cover-inspired">
-        <section className="auth-showcase auth-showcase--cover-inspired">
+        <section aria-labelledby="auth-product-title" className="auth-showcase auth-showcase--cover-inspired">
           <div className="auth-brand">
             <BrandLogo variant="login" />
           </div>
 
           <div className="auth-cover-copy">
             <p className="eyebrow">Gestión sin fricción</p>
-            <h1>La gestión inteligente para tu empresa</h1>
+            <h1 id="auth-product-title">La gestión inteligente para tu empresa</h1>
             <p>
               CRM, proyectos, reportes, finanzas y administración en una sola
               plataforma.
@@ -119,7 +121,7 @@ export function LoginPage() {
           <div className="auth-product-pillars" aria-label="Módulos principales">
             {productPillars.map(({ icon: Icon, title, description }) => (
               <article key={title}>
-                <span className="auth-pillar-icon">
+                <span aria-hidden="true" className="auth-pillar-icon">
                   <Icon size={20} />
                 </span>
                 <div>
@@ -132,28 +134,28 @@ export function LoginPage() {
 
           <div className="auth-trust-strip" aria-label="Ventajas de la plataforma">
             <span>
-              <MonitorSmartphone size={19} />
+              <MonitorSmartphone aria-hidden="true" size={19} />
               Web · móvil · desktop
             </span>
             <span>
-              <Cloud size={19} />
+              <Cloud aria-hidden="true" size={19} />
               100% en la nube
             </span>
             <span>
-              <ShieldCheck size={19} />
+              <ShieldCheck aria-hidden="true" size={19} />
               Seguro · rápido · confiable
             </span>
           </div>
         </section>
 
-        <section className="auth-form-panel">
-          <form className="auth-form" onSubmit={submit}>
+        <section aria-labelledby="auth-title" className="auth-form-panel" id="auth-form" tabIndex={-1}>
+          <form aria-describedby={error ? "auth-error" : undefined} aria-labelledby="auth-title" className="auth-form" noValidate={false} onSubmit={submit}>
             <div>
               <p className="eyebrow">
                 {mode === "login" ? "Bienvenido de nuevo" : "Comienza hoy"}
               </p>
 
-              <h2>
+              <h2 id="auth-title">
                 {mode === "login"
                   ? "Inicia sesión"
                   : "Crea tu espacio de trabajo"}
@@ -171,6 +173,7 @@ export function LoginPage() {
                 <label className="form-field full">
                   <span>Empresa</span>
                   <input
+                    autoComplete="organization"
                     name="companyName"
                     placeholder="Nombre de la empresa"
                     required
@@ -180,6 +183,7 @@ export function LoginPage() {
                 <label className="form-field full">
                   <span>Cédula o RNC</span>
                   <input
+                    aria-describedby="tax-id-help"
                     inputMode="numeric"
                     maxLength={13}
                     name="taxId"
@@ -190,17 +194,18 @@ export function LoginPage() {
                     }}
                     placeholder="001-0000000-0 o 130-00000-0"
                   />
+                  <small id="tax-id-help">Usa una cédula dominicana de 11 dígitos o un RNC de 9 dígitos.</small>
                 </label>
 
                 <div className="form-grid">
                   <label className="form-field">
                     <span>Nombre</span>
-                    <input name="firstName" required />
+                    <input autoComplete="given-name" name="firstName" required />
                   </label>
 
                   <label className="form-field">
                     <span>Apellido</span>
-                    <input name="lastName" required />
+                    <input autoComplete="family-name" name="lastName" required />
                   </label>
                 </div>
               </>
@@ -220,6 +225,7 @@ export function LoginPage() {
             <label className="form-field full">
               <span>Contraseña</span>
               <input
+                aria-describedby={mode === "register" ? "password-help" : undefined}
                 autoComplete={
                   mode === "login" ? "current-password" : "new-password"
                 }
@@ -228,6 +234,7 @@ export function LoginPage() {
                 required
                 type="password"
               />
+              {mode === "register" && <small id="password-help">Utiliza al menos 10 caracteres.</small>}
             </label>
 
             {mode === "login" && (
@@ -239,9 +246,10 @@ export function LoginPage() {
               </Link>
             )}
 
-            {error && <div className="alert error">{error}</div>}
+            {error && <div aria-live="assertive" className="alert error" id="auth-error" role="alert">{error}</div>}
 
             <button
+              aria-busy={submitting}
               className="primary-button auth-submit"
               disabled={submitting}
               type="submit"
@@ -252,7 +260,7 @@ export function LoginPage() {
                   ? "Entrar"
                   : "Crear cuenta"}
 
-              {!submitting && <ArrowRight size={18} />}
+              {!submitting && <ArrowRight aria-hidden="true" size={18} />}
             </button>
 
             <button
@@ -269,9 +277,9 @@ export function LoginPage() {
             </button>
 
             <div className="auth-form-assurance">
-              <BriefcaseBusiness size={16} />
+              <BriefcaseBusiness aria-hidden="true" size={16} />
               <span>Operación empresarial centralizada</span>
-              <CheckCircle2 size={16} />
+              <CheckCircle2 aria-hidden="true" size={16} />
             </div>
           </form>
         </section>
