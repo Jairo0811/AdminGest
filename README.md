@@ -147,6 +147,28 @@ npm run db:seed
 npm run dev
 ```
 
+### 📱 Acceso desde un móvil en la red local
+
+En desarrollo, el frontend Vite escucha en `0.0.0.0:5173` y reenvía las peticiones `/api` al backend NestJS local. Esto evita configurar la IP de la API en el teléfono.
+
+Con la PC y el móvil conectados a la misma red:
+
+1. Ejecuta `npm run dev`.
+2. Obtén la IPv4 de la PC con `ipconfig`.
+3. Abre desde el navegador del móvil:
+
+```text
+http://<IP-DE-LA-PC>:5173
+```
+
+Ejemplo:
+
+```text
+http://192.168.1.50:5173
+```
+
+El backend continúa disponible localmente en el puerto `3000`. Si Windows solicita permiso de firewall para Node.js, permite únicamente redes privadas.
+
 ## 🔑 Credenciales de demostración
 
 | Campo | Valor |
