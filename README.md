@@ -242,7 +242,7 @@ La primera etapa estuvo enfocada en interacción, usabilidad y experiencia de us
 
 **Diana Caroline Mejía Encarnación (2016-3796)** coincidió con Francis Jairo Matías Rosario en dos proyectos académicos consecutivos durante 2018:
 
-| Orden | Código | Asignatura | Proyecto actual | Período | Compañera recurrente |
+| Orden | Código | Asignatura | Proyecto actual | Período |
 |---:|---|---|---|---|---|
 | 1  | Programación 3 (SOF-005) | [**GamePoint POS**](https://github.com/Jairo0811/GamePointPOS) | 2018-C2 |
 | 2  | Administración de Proyectos de Software (SOF-013) | **AdminGest** | 2018-C3 |
