@@ -93,8 +93,8 @@ Consulta [SECURITY.md](SECURITY.md) y la [matriz RBAC](docs/security/rbac-matrix
 
 <p>
   <img src="https://img.shields.io/badge/GitHub%20Actions-CI-2088FF?style=flat-square&logo=githubactions&logoColor=white" alt="GitHub Actions" />
-  <img src="https://img.shields.io/badge/Jest-Pruebas-C21325?style=flat-square&logo=jest&logoColor=white" alt="Jest" />
-  <img src="https://img.shields.io/badge/Vitest-Pruebas-6E9F18?style=flat-square&logo=vitest&logoColor=white" alt="Vitest" />
+  <img src="https://img.shields.io/badge/Jest-Pruebas-C21325?style=flat-square&logo=jest" alt="Jest" />
+  <img src="https://img.shields.io/badge/Vitest-Pruebas-6E9F18?style=flat-square" alt="Vitest" />
   <img src="https://img.shields.io/badge/ESLint-Calidad-4B32C3?style=flat-square&logo=eslint&logoColor=white" alt="ESLint" />
 </p>
 
@@ -225,18 +225,31 @@ GitHub Actions valida automáticamente Prisma, migraciones, lint, pruebas de API
 
 ## 🔄 Continuidad académica
 
-**AdminGest** forma parte de una trayectoria académica desarrollada con el profesor **Juan Martínez López** en el Instituto Tecnológico de Las Américas (ITLA). Esta relación no implica continuidad técnica entre ambos sistemas, sino una evolución formativa entre asignaturas cursadas con el mismo docente y orientadas a competencias distintas dentro del desarrollo de software.
+AdminGest forma parte de **dos líneas académicas verificables** dentro de la trayectoria del ITLA. Una corresponde a continuidad docente y la otra a una compañera recurrente. Se documentan de forma separada porque representan relaciones diferentes.
 
-La primera etapa fue **RadioEmisora**, proyecto final de **Diseño Centrado en el Usuario (SOF-010)** durante el período **2018-C1**. Ese trabajo estuvo enfocado en interacción, usabilidad, navegación y experiencia de usuario dentro de una aplicación de escritorio.
+### 👨‍🏫 Continuidad por profesor
 
-La segunda etapa fue **GestorAdministrativo**, proyecto final de **Administración de Proyectos de Software (SOF-013)** durante el período **2018-C3**. Ese proyecto fue posteriormente reconstruido y modernizado como **AdminGest**, evolucionando hacia una plataforma profesional de gestión comercial, administrativa y de proyectos.
+El profesor **Juan Martínez López** aparece en dos proyectos académicos de la colección:
 
-| Orden | Proyecto académico original | Evolución actual | Asignatura | Profesor | Período |
+| Orden | Proyecto académico original | Evolución actual | Asignatura | Período |
+|---:|---|---|---|---|
+| 1 | RadioEmisora | [**RadioEmisora RD**](https://github.com/Jairo0811/RadioEmisora) | Diseño Centrado en el Usuario (SOF-010) | 2018-C1 |
+| 2 | GestorAdministrativo | **AdminGest** | Administración de Proyectos de Software (SOF-013) | 2018-C3 |
+
+La primera etapa estuvo enfocada en interacción, usabilidad y experiencia de usuario; la segunda amplió la formación hacia planificación, organización y gestión integral de proyectos de software.
+
+### 👥 Continuidad por estudiante
+
+**Diana Caroline Mejía Encarnación (2016-3796)** coincidió con Francis Jairo Matías Rosario en dos proyectos académicos consecutivos durante 2018:
+
+| Orden | Código | Asignatura | Proyecto actual | Período | Compañera recurrente |
 |---:|---|---|---|---|---|
-| 1 | RadioEmisora | [**RadioEmisora RD**](https://github.com/Jairo0811/RadioEmisora) | Diseño Centrado en el Usuario (SOF-010) | Juan Martínez López | 2018-C1 |
-| 2 | GestorAdministrativo | **AdminGest** | Administración de Proyectos de Software (SOF-013) | Juan Martínez López | 2018-C3 |
+| 1 | SOF-005 | Programación 3 | [**GamePoint POS**](https://github.com/Jairo0811/GamePointPOS) | 2018-C2 | **Diana Caroline Mejía Encarnación — 2016-3796** |
+| 2 | SOF-013 | Administración de Proyectos de Software | **AdminGest** | 2018-C3 | **Diana Caroline Mejía Encarnación — 2016-3796** |
 
-Esta continuidad permite observar una progresión académica desde la **experiencia de usuario y el diseño de interacción** hacia la **planificación, organización y gestión integral de proyectos de software**. En 2026, ambos proyectos fueron preservados y modernizados de forma independiente para mostrar esa evolución dentro del portafolio profesional, manteniendo explícito su contexto académico original.
+La recurrencia queda respaldada por el mismo **nombre completo y matrícula** en los equipos académicos originales de ambos repositorios.
+
+Vistas en conjunto, estas relaciones permiten observar una trayectoria que combina **experiencia de usuario**, **programación aplicada** y **gestión de proyectos de software**, sin presentar los sistemas como dependencias técnicas ni como secuelas funcionales.
 
 ## 📄 Licencia
 
