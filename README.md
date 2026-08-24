@@ -93,8 +93,8 @@ Consulta [SECURITY.md](SECURITY.md) y la [matriz RBAC](docs/security/rbac-matrix
 
 <p>
   <img src="https://img.shields.io/badge/GitHub%20Actions-CI-2088FF?style=flat-square&logo=githubactions&logoColor=white" alt="GitHub Actions" />
-  <img src="https://img.shields.io/badge/Jest-Pruebas-C21325?style=flat-square&logo=jest" alt="Jest" />
-  <img src="https://img.shields.io/badge/Vitest-Pruebas-6E9F18?style=flat-square" alt="Vitest" />
+  <img src="https://img.shields.io/badge/Jest-Pruebas-C21325?style=flat-square&logo=jest&logoColor=white" alt="Jest" />
+  <img src="https://img.shields.io/badge/Vitest-Pruebas-6E9F18?style=flat-square&logo=vitest&logoColor=white" alt="Vitest" />
   <img src="https://img.shields.io/badge/ESLint-Calidad-4B32C3?style=flat-square&logo=eslint&logoColor=white" alt="ESLint" />
 </p>
 
