@@ -3,12 +3,18 @@
 </p>
 
 <p align="center">
-   <img src="https://img.shields.io/badge/ITLA-2018--C3-0057B8?style=for-the-badge" alt="ITLA 2018-C3" />
+   <img src="https://img.shields.io/badge/ITLA-SOF--013-0057B8?style=for-the-badge" alt="ITLA SOF-013" />
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/estado-Estable-18A96F?style=for-the-badge" alt="Estado estable" />
   <img src="https://img.shields.io/badge/arquitectura-Monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/Jairo0811/AdminGest/actions/workflows/ci.yml">
+    <img src="https://github.com/Jairo0811/AdminGest/actions/workflows/ci.yml/badge.svg" alt="CI" />
+  </a>
 </p>
 
 <p align="center">
@@ -44,7 +50,7 @@ La API es la fuente de verdad de autorización. Aunque la interfaz oculte una ac
 
 Consulta [SECURITY.md](SECURITY.md) y la [matriz RBAC](docs/security/rbac-matrix.md) para la documentación completa.
 
-## 🧰 Stack tecnológico
+## 🧱 Stack tecnológico
 
 ### ⚛️ Frontend
 
@@ -201,7 +207,17 @@ GitHub Actions valida automáticamente Prisma, migraciones, lint, pruebas de API
 - [Componentes de terceros](THIRD_PARTY_NOTICES.md)
 - [Historial de cambios](CHANGELOG.md)
 
-## 👥 Equipo Académico Original
+## 🎓 Información académica
+
+| Información | Detalle |
+|---|---|
+| 📖 Asignatura | **Administración de Proyectos de Software (SOF-013)** |
+| 👨‍🏫 Profesor | **Juan Martínez López** |
+| 🏫 Institución | **Instituto Tecnológico de Las Américas (ITLA)** |
+| 📅 Período académico | **2018-C3** |
+| 📁 Tipo de entrega | **Proyecto Final** |
+
+### 👥 Equipo académico original
 
 | 👤 Integrante | 🆔 Matrícula |
 |---|---|
@@ -213,17 +229,7 @@ GitHub Actions valida automáticamente Prisma, migraciones, lint, pruebas de API
 | 👨🏻‍💻 Alexander Dionicio Mercedes | 2016-3962 |
 | 👨🏻‍💻 Raymundo Eduardo Peña Sánchez | 2016-4276 |
 
-## 🎓 Información Académica
-
-| Información | Detalle |
-|---|---|
-| 📖 Asignatura | Administración de Proyectos de Software (SOF-013) |
-| 👨‍🏫 Profesor | Juan Martínez López |
-| 🏫 Institución | Instituto Tecnológico de Las Américas (ITLA) |
-| 📅 Período académico | 2018-C3 |
-| 📁 Tipo de entrega | Proyecto Final |
-
-## 🔄 Continuidad académica
+## 🧭 Continuidad académica
 
 AdminGest forma parte de **dos líneas académicas verificables** dentro de la trayectoria del ITLA. Una corresponde a continuidad docente y la otra a una compañera recurrente. Se documentan de forma separada porque representan relaciones diferentes.
 
