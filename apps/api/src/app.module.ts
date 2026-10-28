@@ -21,6 +21,9 @@ import { ProjectsModule } from './modules/projects/projects.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UsersModule } from './modules/users/users.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WorkflowsModule } from './modules/workflows/workflows.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 
 @Module({
   imports: [
@@ -52,6 +55,9 @@ import { UsersModule } from './modules/users/users.module';
     ProjectsModule,
     DashboardModule,
     NavigationModule,
+    NotificationsModule,
+    WorkflowsModule,
+    DocumentsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
