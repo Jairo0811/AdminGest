@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -13,6 +14,7 @@ export class ProjectsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly subscriptions: SubscriptionsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   findAll(companyId: string, status?: string) {
@@ -66,6 +68,15 @@ export class ProjectsService {
       entity: 'Project',
       entityId: project.id,
       newValues: dto,
+    });
+    await this.notifications.emit({
+      companyId,
+      userId: project.managerId ?? userId,
+      eventType: 'PROJECT_ASSIGNED',
+      title: 'Proyecto asignado',
+      message: project.name,
+      path: '/projects',
+      dedupeKey: 'project-created:' + project.id,
     });
     return project;
   }

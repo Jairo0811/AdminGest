@@ -64,6 +64,13 @@ export class WorkflowsService {
     const created = await this.prisma.projectTask.createMany({
       data: steps.map((title) => ({ projectId, title })),
     });
+    const aggregate = await this.prisma.projectTask.aggregate({
+      where: { projectId }, _avg: { progress: true },
+    });
+    await this.prisma.project.update({
+      where: { id: projectId, companyId },
+      data: { progress: Math.round(aggregate._avg.progress ?? 0) },
+    });
     return { created: created.count, projectId };
   }
 }
