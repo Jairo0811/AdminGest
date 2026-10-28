@@ -171,9 +171,15 @@ export class UsersService {
       throw new BadRequestException('La nueva contraseña debe ser diferente.');
     }
 
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash: await hash(dto.newPassword, 12) },
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.user.update({
+        where: { id: userId },
+        data: { passwordHash: await hash(dto.newPassword, 12) },
+      });
+      await transaction.authSession.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
     });
     await this.audit.record({
       companyId,
@@ -187,9 +193,13 @@ export class UsersService {
 
   async resetPassword(companyId: string, actorId: string, id: string, dto: ResetPasswordDto) {
     await this.requireUser(companyId, id);
-    await this.prisma.user.update({
-      where: { id },
-      data: { passwordHash: await hash(dto.password, 12) },
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.user.update({
+        where: { id }, data: { passwordHash: await hash(dto.password, 12) },
+      });
+      await transaction.authSession.updateMany({
+        where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() },
+      });
     });
     await this.audit.record({
       companyId,
