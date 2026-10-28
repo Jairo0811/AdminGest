@@ -53,11 +53,14 @@ export class SessionsService {
       throw new UnauthorizedException('Sesión expirada o revocada.');
     }
     if (!hashesMatch(session.refreshTokenHash, parsed.hash)) {
-      // Reutilizar un token viejo es una señal de posible robo de sesión.
-      await this.prisma.authSession.updateMany({
-        where: { id: session.id, revokedAt: null },
-        data: { revokedAt: new Date() },
-      });
+      // A short grace period avoids revoking a legitimate session when two tabs
+      // refresh simultaneously. The stale token is *never* accepted.
+      if (Date.now() - session.lastUsedAt.getTime() > 10_000) {
+        await this.prisma.authSession.updateMany({
+          where: { id: session.id, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+      }
       throw new UnauthorizedException('Token de sesión reutilizado.');
     }
     const next = generateRefreshToken();
