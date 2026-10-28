@@ -8,6 +8,7 @@ import {
 import { compare, hash } from 'bcrypt';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -51,6 +52,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly subscriptions: SubscriptionsService,
   ) {}
 
   findAll(companyId: string) {
@@ -73,6 +75,8 @@ export class UsersService {
     if (await this.prisma.user.findUnique({ where: { email } })) {
       throw new ConflictException('Ya existe un usuario con este correo.');
     }
+
+    await this.subscriptions.assertCanCreate(companyId, 'users');
 
     const { password, ...profile } = dto;
     const created = await this.prisma.user.create({
