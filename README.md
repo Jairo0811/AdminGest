@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <strong>CRM, proyectos, cotizaciones y gestión empresarial en una plataforma web multiempresa.</strong>
+  <strong>CRM, proyectos, cotizaciones y gestión empresarial multiempresa con sesiones seguras y automatizaciones.</strong>
 </p>
 
 <p align="center">
@@ -260,3 +260,13 @@ Vistas en conjunto, estas relaciones permiten observar una trayectoria que combi
 ## 📄 Licencia
 
 Este proyecto se distribuye bajo la licencia incluida en el repositorio.
+
+## Evolución SaaS (en revisión)
+
+Las fases comerciales se desarrollan de forma independiente de la reconstrucción académica.
+
+- [Fase 1 — SaaS Foundation](docs/SAAS-FOUNDATION.md)
+- [Fase 2 — Production Security](docs/PRODUCTION-SECURITY.md)
+- [Fase 3 — Business Automation](docs/BUSINESS-AUTOMATION.md)
+
+Las fases 2 y 3 requieren que las PR anteriores se fusionen en orden; las funcionalidades de cobros, MFA, almacenamiento privado de archivos y facturación electrónica aún no están operativas.
