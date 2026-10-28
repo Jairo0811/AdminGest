@@ -14,6 +14,7 @@ async function main(): Promise<void> {
     randomBytes(18).toString('base64url');
 
   const passwordHash = await hash(password, 12);
+  const starterPlan = await ensurePlans();
 
   const existingAdmin = await prisma.user.findFirst({
     where: {
@@ -46,6 +47,8 @@ async function main(): Promise<void> {
         },
       }),
     ]);
+
+    await ensureSubscription(existingAdmin.companyId, starterPlan.id);
 
     printCredentials(
       'El usuario administrador existente fue actualizado correctamente.',
@@ -87,6 +90,8 @@ async function main(): Promise<void> {
       }),
     ]);
 
+    await ensureSubscription(existingCompany.id, starterPlan.id);
+
     printCredentials(
       'El usuario administrador fue agregado a la empresa existente.',
       password,
@@ -101,6 +106,15 @@ async function main(): Promise<void> {
         name: DEMO_COMPANY_NAME,
         email: ADMIN_EMAIL,
         address: 'Dirección de demostración',
+      },
+    });
+
+    await transaction.subscription.create({
+      data: {
+        companyId: company.id,
+        planId: starterPlan.id,
+        status: 'TRIAL',
+        trialEndsAt: addDays(new Date(), 14),
       },
     });
 
@@ -257,6 +271,77 @@ async function main(): Promise<void> {
     'AdminGest fue inicializado correctamente.',
     password,
   );
+}
+
+async function ensurePlans() {
+  const plans = [
+    {
+      code: 'STARTER',
+      name: 'Starter',
+      description: 'Operación esencial para equipos pequeños.',
+      monthlyPrice: 0,
+      currency: 'DOP',
+      maxUsers: 3,
+      maxCustomers: 100,
+      maxProjects: 10,
+      storageMb: 1024,
+      advancedReports: false,
+      apiAccess: false,
+      isActive: true,
+    },
+    {
+      code: 'PRO',
+      name: 'Pro',
+      description: 'Mayor capacidad y reportes avanzados.',
+      monthlyPrice: 0,
+      currency: 'DOP',
+      maxUsers: 10,
+      maxCustomers: 1000,
+      maxProjects: 100,
+      storageMb: 10240,
+      advancedReports: true,
+      apiAccess: false,
+      isActive: true,
+    },
+    {
+      code: 'BUSINESS',
+      name: 'Business',
+      description: 'Capacidad ampliada y acceso de integración.',
+      monthlyPrice: 0,
+      currency: 'DOP',
+      maxUsers: 50,
+      maxCustomers: 10000,
+      maxProjects: 1000,
+      storageMb: 51200,
+      advancedReports: true,
+      apiAccess: true,
+      isActive: true,
+    },
+  ];
+
+  for (const plan of plans) {
+    await prisma.plan.upsert({
+      where: { code: plan.code },
+      create: plan,
+      update: plan,
+    });
+  }
+
+  return prisma.plan.findUniqueOrThrow({ where: { code: 'STARTER' } });
+}
+
+async function ensureSubscription(companyId: string, planId: string) {
+  const existing = await prisma.subscription.findUnique({ where: { companyId } });
+  if (existing) return existing;
+
+  return prisma.subscription.create({
+    data: {
+      companyId,
+      planId,
+      status: 'TRIAL',
+      trialEndsAt: addDays(new Date(), 14),
+    },
+  });
 }
 
 function addDays(date: Date, days: number): Date {
