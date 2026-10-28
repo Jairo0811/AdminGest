@@ -20,6 +20,9 @@ import { ReportsPage } from "./pages/ReportsPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { UsersPage } from "./pages/UsersPage";
+import { NotificationsPage } from "./pages/NotificationsPage";
+import { DocumentsPage } from "./pages/DocumentsPage";
+import { WorkflowsPage } from "./pages/WorkflowsPage";
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
@@ -65,6 +68,9 @@ export default function App() {
         <Route element={<PermissionRoute resource="projects"><ProjectsPage /></PermissionRoute>} path="projects" />
         <Route element={<PermissionRoute resource="reports"><ReportsPage /></PermissionRoute>} path="reports" />
         <Route element={<PermissionRoute resource="users"><UsersPage /></PermissionRoute>} path="users" />
+        <Route element={<PermissionRoute resource="notifications"><NotificationsPage /></PermissionRoute>} path="notifications" />
+        <Route element={<PermissionRoute resource="documents"><DocumentsPage /></PermissionRoute>} path="documents" />
+        <Route element={<PermissionRoute resource="workflows"><WorkflowsPage /></PermissionRoute>} path="workflows" />
         <Route element={<ProfilePage />} path="profile" />
         <Route element={<PermissionRoute resource="settings"><SettingsPage /></PermissionRoute>} path="settings" />
       </Route>
