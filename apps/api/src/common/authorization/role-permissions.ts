@@ -20,6 +20,7 @@ export type PermissionResource =
   | 'projects'
   | 'reports'
   | 'users'
+  | 'subscriptions'
   | 'settings'
   | 'profile';
 
@@ -93,6 +94,7 @@ const RESOURCE_ALIASES: Record<string, PermissionResource> = {
   projects: 'projects',
   reports: 'reports',
   users: 'users',
+  subscriptions: 'subscriptions',
   settings: 'settings',
 };
 

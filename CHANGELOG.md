@@ -2,6 +2,23 @@
 
 Todos los cambios relevantes de AdminGest se documentan en este archivo.
 
+## [1.1.0] - En desarrollo
+
+### Añadido
+
+- Catálogo de planes SaaS Starter, Pro y Business.
+- Suscripción única por empresa con trial Starter automático de 14 días.
+- Migración retrocompatible para provisionar tenants existentes.
+- Endpoint administrativo de estado, consumo y capacidad restante.
+- Documentación de la base SaaS.
+
+### Reglas comerciales
+
+- Límites de usuarios activos, clientes activos y proyectos aplicados desde la API.
+- Respuesta 403 al superar la capacidad del plan.
+- Nuevas altas bloqueadas cuando la suscripción no está utilizable.
+- Consulta de suscripción restringida a ADMIN y SUPER_ADMIN.
+
 ## [1.0.1] - 2026-08-02
 
 ### Añadido
