@@ -4,11 +4,9 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from 'react';
-import { api } from '../api/client';
-import { getTokenExpiration, isTokenExpired } from './token-expiration';
+import { api, closeSession, clearAccessToken, restoreSession, setAccessToken } from '../api/client';
 
 export interface SessionUser {
   id: string;
@@ -17,11 +15,7 @@ export interface SessionUser {
   firstName: string;
   lastName: string;
   role: string;
-  company: {
-    name: string;
-    currency: string;
-    timezone: string;
-  };
+  company: { name: string; currency: string; timezone: string };
 }
 
 interface SessionResponse {
@@ -52,87 +46,51 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const expirationTimer = useRef<number | null>(null);
-
-  const clearExpirationTimer = useCallback(() => {
-    if (expirationTimer.current !== null) {
-      window.clearTimeout(expirationTimer.current);
-      expirationTimer.current = null;
-    }
-  }, []);
 
   const logout = useCallback(() => {
-    clearExpirationTimer();
-    localStorage.removeItem('admingest_token');
+    clearAccessToken();
     setUser(null);
-  }, [clearExpirationTimer]);
-
-  const scheduleLogout = useCallback(
-    (token: string) => {
-      clearExpirationTimer();
-      const expiration = getTokenExpiration(token);
-      if (expiration === null || expiration <= Date.now()) {
-        logout();
-        return;
-      }
-
-      const delay = Math.min(expiration - Date.now(), 2_147_483_647);
-      expirationTimer.current = window.setTimeout(logout, delay);
-    },
-    [clearExpirationTimer, logout],
-  );
+    void closeSession();
+  }, []);
 
   const refreshUser = useCallback(async () => {
     setUser(await api<SessionUser>('/auth/me'));
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('admingest_token');
-    if (!token || isTokenExpired(token)) {
-      logout();
-      setLoading(false);
-      return;
-    }
-
-    scheduleLogout(token);
-    refreshUser()
-      .catch(logout)
-      .finally(() => setLoading(false));
-  }, [logout, refreshUser, scheduleLogout]);
+    // Drop old persistent JWTs; future access tokens live only in memory.
+    localStorage.removeItem('admingest_token');
+    let cancelled = false;
+    restoreSession().then((session) => {
+      if (!cancelled) {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     window.addEventListener('admingest:unauthorized', logout);
     return () => window.removeEventListener('admingest:unauthorized', logout);
   }, [logout]);
 
-  useEffect(() => clearExpirationTimer, [clearExpirationTimer]);
-
   const establishSession = (session: SessionResponse) => {
-    localStorage.setItem('admingest_token', session.accessToken);
-    scheduleLogout(session.accessToken);
+    setAccessToken(session.accessToken);
     setUser(session.user);
   };
 
   const value: AuthContextValue = {
-    user,
-    loading,
-    logout,
-    refreshUser,
+    user, loading, logout, refreshUser,
     async login(email, password) {
-      establishSession(
-        await api<SessionResponse>('/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({ email, password }),
-        }),
-      );
+      establishSession(await api<SessionResponse>('/auth/login', {
+        method: 'POST', body: JSON.stringify({ email, password }),
+      }));
     },
     async register(data) {
-      establishSession(
-        await api<SessionResponse>('/auth/register', {
-          method: 'POST',
-          body: JSON.stringify(data),
-        }),
-      );
+      establishSession(await api<SessionResponse>('/auth/register', {
+        method: 'POST', body: JSON.stringify(data),
+      }));
     },
   };
 

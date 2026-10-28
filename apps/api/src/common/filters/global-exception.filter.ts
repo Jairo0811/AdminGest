@@ -38,6 +38,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     response.status(status).json({
+      requestId: (request as Request & { requestId?: string }).requestId,
       ...payload,
       timestamp: new Date().toISOString(),
       path: request.originalUrl,
