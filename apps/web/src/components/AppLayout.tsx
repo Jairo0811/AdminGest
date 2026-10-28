@@ -275,7 +275,7 @@ export function AppLayout() {
                 <div className="popover-header"><strong>Notificaciones</strong><span>{notificationsQuery.data?.length ?? 0}</span></div>
                 {notificationsQuery.isLoading ? <div className="popover-state" role="status">Cargando…</div> : notificationsQuery.data?.length ? notificationsQuery.data.map((item) => (
                   <button key={item.id} onClick={() => goTo(item.path)} type="button">
-                    <span><strong>{item.title}</strong><small>{item.message}</small><time dateTime={item.createdAt}>{new Date(item.occurredAt).toLocaleString("es-DO")}</time></span>
+                    <span><strong>{item.title}</strong><small>{item.message}</small><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString("es-DO")}</time></span>
                   </button>
                 )) : <div className="popover-state" role="status">No tienes alertas próximas.</div>}
               </div>
