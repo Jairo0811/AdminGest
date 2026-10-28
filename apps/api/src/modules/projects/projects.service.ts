@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -11,6 +12,7 @@ export class ProjectsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly subscriptions: SubscriptionsService,
   ) {}
 
   findAll(companyId: string, status?: string) {
@@ -46,6 +48,7 @@ export class ProjectsService {
 
   async create(companyId: string, userId: string, dto: CreateProjectDto) {
     await this.validateReferences(companyId, dto.customerId, dto.opportunityId);
+    await this.subscriptions.assertCanCreate(companyId, 'projects');
     const project = await this.prisma.project.create({
       data: {
         companyId,
