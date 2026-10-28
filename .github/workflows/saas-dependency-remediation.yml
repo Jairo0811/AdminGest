@@ -1,0 +1,71 @@
+name: One-time dependency remediation
+
+on:
+  push:
+    branches:
+      - "feat/saas-foundation-phase1"
+
+permissions:
+  contents: write
+
+jobs:
+  remediate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=DependencyOnly_2026!;encrypt=true;trustServerCertificate=true"
+      JWT_SECRET: "dependency-remediation-only-secret-32-characters"
+      CORS_ORIGIN: "http://localhost:5173"
+      PASSWORD_RESET_URL: "http://localhost:5173/reset-password"
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: "feat/saas-foundation-phase1"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install current lockfile
+        run: npm ci
+
+      - name: Upgrade Vitest to patched major
+        run: npm install --save-dev vitest@^5.0.5 --workspace @admingest/web
+
+      - name: Apply compatible audit fixes
+        run: npm audit fix || true
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify no critical vulnerabilities remain
+        run: npm audit --audit-level=critical
+
+      - name: Commit dependency remediation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json apps/api/package.json apps/web/package.json
+          if git diff --cached --quiet; then
+            echo "No dependency files changed."
+            exit 0
+          fi
+          git commit -m "chore: remediate dependency vulnerabilities"
+          git push origin HEAD:feat/saas-foundation-phase1
