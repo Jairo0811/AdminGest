@@ -2,6 +2,18 @@
 
 Todos los cambios relevantes de AdminGest se documentan en este archivo.
 
+## [1.2.0] - En desarrollo
+
+### Añadido
+
+- Bandeja persistente de notificaciones por empresa y usuario.
+- Avisos de actividades y proyectos asignados, más recordatorios periódicos.
+- Reglas de automatización por empresa.
+- Plantillas reutilizables de tareas para proyectos.
+- Registro de referencias documentales HTTPS con filtros por tenant.
+- Vistas de Notificaciones, Documentos y Flujos.
+- Documentación de Business Automation.
+
 ## [1.1.0] - En desarrollo
 
 ### Añadido

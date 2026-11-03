@@ -31,6 +31,10 @@ model Company {
   projects       Project[]
   auditLogs      AuditLog[]
   subscription   Subscription?
+  notifications  Notification[]
+  workflowRules  WorkflowRule[]
+  templates      ProjectTemplate[]
+  documents      DocumentRecord[]
 }
 
 model Plan {
@@ -91,6 +95,7 @@ model User {
   auditLogs              AuditLog[]
   passwordResetTokens   PasswordResetToken[]
   sessions              AuthSession[]
+  notifications         Notification[]
 
   @@index([companyId, status])
   @@index([companyId, role])
@@ -383,3 +388,63 @@ model AuditLog {
   @@index([userId])
 }
 
+
+model Notification {
+  id        String    @id @default(uuid()) @db.NVarChar(36)
+  companyId String    @db.NVarChar(36)
+  userId    String    @db.NVarChar(36)
+  eventType String    @db.NVarChar(32)
+  title     String    @db.NVarChar(150)
+  message   String    @db.NVarChar(500)
+  path      String    @db.NVarChar(150)
+  dedupeKey String    @db.NVarChar(160)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  company   Company   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([companyId, userId, dedupeKey])
+  @@index([companyId, userId, readAt, createdAt])
+}
+
+model WorkflowRule {
+  id        String   @id @default(uuid()) @db.NVarChar(36)
+  companyId String   @db.NVarChar(36)
+  eventType String   @db.NVarChar(32)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([companyId, eventType])
+}
+
+model ProjectTemplate {
+  id          String   @id @default(uuid()) @db.NVarChar(36)
+  companyId   String   @db.NVarChar(36)
+  name        String   @db.NVarChar(120)
+  description String?  @db.NVarChar(500)
+  stepsJson   String   @db.NVarChar(4000)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([companyId, name])
+}
+
+model DocumentRecord {
+  id          String   @id @default(uuid()) @db.NVarChar(36)
+  companyId   String   @db.NVarChar(36)
+  creatorId   String   @db.NVarChar(36)
+  projectId   String?  @db.NVarChar(36)
+  customerId  String?  @db.NVarChar(36)
+  title       String   @db.NVarChar(150)
+  category    String   @default("OTHER") @db.NVarChar(32)
+  url         String   @db.NVarChar(1500)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([companyId, projectId])
+  @@index([companyId, customerId])
+}

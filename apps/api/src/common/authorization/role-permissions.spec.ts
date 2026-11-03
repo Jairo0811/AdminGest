@@ -18,6 +18,9 @@ describe('role permissions', () => {
     expect(roleHasPermission('PROJECT_MANAGER', 'users', 'write')).toBe(false);
     expect(roleHasPermission('VIEWER', 'users', 'read')).toBe(false);
     expect(roleHasPermission('SALES_REP', 'settings', 'read')).toBe(false);
+    expect(roleHasPermission('SALES_REP', 'workflows', 'write')).toBe(false);
+    expect(roleHasPermission('PROJECT_MANAGER', 'workflows', 'write')).toBe(true);
+    expect(roleHasPermission('VIEWER', 'documents', 'write')).toBe(false);
     expect(roleHasPermission('SALES_MANAGER', 'subscriptions', 'read')).toBe(false);
   });
 
@@ -90,6 +93,9 @@ describe('role permissions', () => {
     );
     expect(resolveResource('/api/projects/import/ms-project')).toBe('projects');
     expect(resolveResource('/api/users')).toBe('users');
+    expect(resolveResource('/api/notifications')).toBe('notifications');
+    expect(resolveResource('/api/documents')).toBe('documents');
+    expect(resolveResource('/api/workflows/templates')).toBe('workflows');
     expect(resolveResource('/api/subscriptions/current')).toBe('subscriptions');
     expect(resolveAction('GET')).toBe('read');
     expect(resolveAction('HEAD')).toBe('write');

@@ -21,6 +21,9 @@ export type PermissionResource =
   | 'reports'
   | 'users'
   | 'subscriptions'
+  | 'notifications'
+  | 'workflows'
+  | 'documents'
   | 'settings'
   | 'profile';
 
@@ -33,6 +36,8 @@ export const ROLE_PERMISSIONS: Record<AppRole, RolePermissions> = {
   SUPER_ADMIN: {},
   ADMIN: {},
   SALES_MANAGER: {
+    notifications: READ_WRITE,
+    documents: READ_WRITE,
     dashboard: READ,
     navigation: READ,
     leads: READ_WRITE,
@@ -46,6 +51,8 @@ export const ROLE_PERMISSIONS: Record<AppRole, RolePermissions> = {
     profile: READ_WRITE,
   },
   SALES_REP: {
+    notifications: READ_WRITE,
+    documents: READ,
     dashboard: READ,
     navigation: READ,
     leads: READ_WRITE,
@@ -57,6 +64,9 @@ export const ROLE_PERMISSIONS: Record<AppRole, RolePermissions> = {
     profile: READ_WRITE,
   },
   PROJECT_MANAGER: {
+    notifications: READ_WRITE,
+    documents: READ_WRITE,
+    workflows: READ_WRITE,
     dashboard: READ,
     navigation: READ,
     customers: READ,
@@ -68,6 +78,8 @@ export const ROLE_PERMISSIONS: Record<AppRole, RolePermissions> = {
     profile: READ_WRITE,
   },
   VIEWER: {
+    notifications: READ_WRITE,
+    documents: READ,
     dashboard: READ,
     navigation: READ,
     leads: READ,
@@ -95,6 +107,9 @@ const RESOURCE_ALIASES: Record<string, PermissionResource> = {
   reports: 'reports',
   users: 'users',
   subscriptions: 'subscriptions',
+  notifications: 'notifications',
+  workflows: 'workflows',
+  documents: 'documents',
   settings: 'settings',
 };
 

@@ -17,6 +17,9 @@ export type AppResource =
   | 'projects'
   | 'reports'
   | 'users'
+  | 'notifications'
+  | 'documents'
+  | 'workflows'
   | 'settings';
 
 export type AppAction = 'read' | 'write';
@@ -30,6 +33,8 @@ const ROLE_PERMISSIONS: Record<AppRole, RoleMatrix> = {
   SUPER_ADMIN: {},
   ADMIN: {},
   SALES_MANAGER: {
+    notifications: READ_WRITE,
+    documents: READ_WRITE,
     dashboard: READ,
     leads: READ_WRITE,
     customers: READ_WRITE,
@@ -41,6 +46,8 @@ const ROLE_PERMISSIONS: Record<AppRole, RoleMatrix> = {
     reports: READ,
   },
   SALES_REP: {
+    notifications: READ_WRITE,
+    documents: READ,
     dashboard: READ,
     leads: READ_WRITE,
     customers: READ,
@@ -50,6 +57,9 @@ const ROLE_PERMISSIONS: Record<AppRole, RoleMatrix> = {
     quotes: READ_WRITE,
   },
   PROJECT_MANAGER: {
+    notifications: READ_WRITE,
+    documents: READ_WRITE,
+    workflows: READ_WRITE,
     dashboard: READ,
     customers: READ,
     activities: READ,
@@ -59,6 +69,8 @@ const ROLE_PERMISSIONS: Record<AppRole, RoleMatrix> = {
     reports: READ,
   },
   VIEWER: {
+    notifications: READ_WRITE,
+    documents: READ,
     dashboard: READ,
     leads: READ,
     customers: READ,
@@ -97,6 +109,9 @@ export function resourceFromEndpoint(endpoint: string): AppResource | null {
     'reports',
     'users',
     'settings',
+    'notifications',
+    'documents',
+    'workflows',
   ];
 
   return resources.includes(segment as AppResource)

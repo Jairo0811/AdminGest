@@ -8,6 +8,8 @@ import {
   ChevronDown,
   ContactRound,
   FileText,
+  Files,
+  Workflow,
   FolderKanban,
   LayoutDashboard,
   LogOut,
@@ -47,6 +49,9 @@ const navigation: Array<{
   { icon: FileText, label: "Cotizaciones", to: "/quotes", resource: "quotes" },
   { icon: FolderKanban, label: "Proyectos", to: "/projects", resource: "projects" },
   { icon: BarChart3, label: "Reportes", to: "/reports", resource: "reports" },
+  { icon: Bell, label: "Notificaciones", to: "/notifications", resource: "notifications" },
+  { icon: Files, label: "Documentos", to: "/documents", resource: "documents" },
+  { icon: Workflow, label: "Flujos y plantillas", to: "/workflows", resource: "workflows" },
 ];
 
 type SearchResult = {
@@ -60,8 +65,9 @@ type SearchResult = {
 type NotificationItem = {
   id: string;
   title: string;
-  description: string;
-  occurredAt: string;
+  message: string;
+  createdAt: string;
+  readAt: string | null;
   path: string;
 };
 
@@ -109,8 +115,8 @@ export function AppLayout() {
   });
 
   const notificationsQuery = useQuery({
-    queryKey: ["navigation-notifications"],
-    queryFn: () => api<NotificationItem[]>("/navigation/notifications"),
+    queryKey: ["/notifications"],
+    queryFn: () => api<NotificationItem[]>("/notifications"),
     refetchInterval: 60_000,
   });
 
@@ -262,14 +268,14 @@ export function AppLayout() {
           <div className="topbar-popover-anchor">
             <button aria-controls="notifications-popover" aria-expanded={notificationsOpen} aria-label="Notificaciones" className="icon-button" onClick={() => { setNotificationsOpen((value) => !value); setProfileOpen(false); }} type="button">
               <Bell aria-hidden="true" size={20} />
-              {!!notificationsQuery.data?.length && <span aria-hidden="true" className="notification-dot" />}
+              {!!notificationsQuery.data?.some((item) => !item.readAt) && <span aria-hidden="true" className="notification-dot" />}
             </button>
             {notificationsOpen && (
               <div aria-label="Notificaciones" className="topbar-popover notifications-popover" id="notifications-popover" role="region">
                 <div className="popover-header"><strong>Notificaciones</strong><span>{notificationsQuery.data?.length ?? 0}</span></div>
                 {notificationsQuery.isLoading ? <div className="popover-state" role="status">Cargando…</div> : notificationsQuery.data?.length ? notificationsQuery.data.map((item) => (
                   <button key={item.id} onClick={() => goTo(item.path)} type="button">
-                    <span><strong>{item.title}</strong><small>{item.description}</small><time dateTime={item.occurredAt}>{new Date(item.occurredAt).toLocaleString("es-DO")}</time></span>
+                    <span><strong>{item.title}</strong><small>{item.message}</small><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString("es-DO")}</time></span>
                   </button>
                 )) : <div className="popover-state" role="status">No tienes alertas próximas.</div>}
               </div>
