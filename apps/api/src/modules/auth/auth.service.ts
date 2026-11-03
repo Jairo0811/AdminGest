@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import { createHash, randomBytes } from 'node:crypto';
 import { normalizeDominicanTaxId } from '../../common/validation/dominican-tax-id';
@@ -16,6 +15,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PasswordResetMailService } from './password-reset-mail.service';
+import { SessionsService, SessionMetadata } from './sessions.service';
 
 const PASSWORD_RESET_RESPONSE =
   'Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer tu contraseña.';
@@ -53,12 +53,12 @@ export class AuthService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly passwordResetMail: PasswordResetMailService,
+    private readonly sessions: SessionsService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, metadata: SessionMetadata = {}) {
     const email = dto.email.trim().toLowerCase();
     const exists = await this.prisma.user.findUnique({ where: { email } });
 
@@ -113,10 +113,10 @@ export class AuthService {
       });
     });
 
-    return this.createSession(user);
+    return this.createSession(user, metadata);
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, metadata: SessionMetadata = {}) {
     const email = dto.email.trim().toLowerCase();
     const userWithPassword = await this.prisma.user.findUnique({
       where: { email },
@@ -149,7 +149,7 @@ export class AuthService {
         currency: userWithPassword.company.currency,
         timezone: userWithPassword.company.timezone,
       },
-    });
+    }, metadata);
   }
 
   async forgotPassword(dto: ForgotPasswordDto, metadata: RequestMetadata) {
@@ -257,6 +257,10 @@ export class AuthService {
         where: { id: resetToken.userId },
         data: { passwordHash },
       });
+      await transaction.authSession.updateMany({
+        where: { userId: resetToken.userId, revokedAt: null },
+        data: { revokedAt: now },
+      });
 
       await transaction.passwordResetToken.updateMany({
         where: { userId: resetToken.userId, usedAt: null },
@@ -297,17 +301,8 @@ export class AuthService {
     lastName: string;
     role: string;
     company: { name: string; currency: string; timezone: string };
-  }) {
-    const expiresIn = this.config.get<string>('JWT_EXPIRES_IN', '8h');
-    const accessToken = await this.jwt.signAsync(
-      {
-        sub: user.id,
-        companyId: user.companyId,
-        role: user.role,
-      },
-      { expiresIn: expiresIn as never },
-    );
-
-    return { accessToken, user };
+  }, metadata: SessionMetadata) {
+    const tokens = await this.sessions.create(user, metadata);
+    return { ...tokens, user };
   }
 }

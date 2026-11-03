@@ -15,7 +15,7 @@ interface Profile {
 }
 
 export function ProfilePage() {
-  const { refreshUser } = useAuth();
+  const { refreshUser, logout } = useAuth();
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const profileQuery = useQuery({
@@ -46,9 +46,21 @@ export function ProfilePage() {
       api('/users/me/change-password', { method: 'POST', body: JSON.stringify(payload) }),
     onSuccess: () => {
       setError('');
-      setNotice('Contraseña actualizada correctamente.');
+      setNotice('Contraseña actualizada. Debes iniciar sesión nuevamente.');
+      logout();
     },
     onError: (mutationError: Error) => setError(mutationError.message),
+  });
+
+  const sessions = useQuery({
+    queryKey: ['/auth/sessions'],
+    queryFn: () => api<Array<{ id: string; createdAt: string; lastUsedAt: string; userAgent?: string | null }>>('/auth/sessions'),
+  });
+
+  const revoke = useMutation({
+    mutationFn: (id: string) => api('/auth/sessions/' + id, { method: 'DELETE' }),
+    onSuccess: () => { void sessions.refetch(); },
+    onError: (e: Error) => setError(e.message),
   });
 
   const submitProfile = (event: FormEvent<HTMLFormElement>) => {
@@ -111,6 +123,17 @@ export function ProfilePage() {
           </div>
           <div className="form-actions"><button className="primary-button" disabled={changePassword.isPending} type="submit"><KeyRound size={17} /> Actualizar contraseña</button></div>
         </form>
+        <div className="panel">
+          <div className="settings-title"><KeyRound /><div><h2>Sesiones activas</h2><p>Revoca el acceso de dispositivos que ya no utilizas.</p></div></div>
+          <ul>
+            {sessions.data?.map((session) => (
+              <li key={session.id}>
+                <span>{session.userAgent?.slice(0, 90) ?? 'Dispositivo desconocido'} — {new Date(session.lastUsedAt).toLocaleString('es-DO')}</span>{' '}
+                <button type="button" className="text-button" disabled={revoke.isPending} onClick={() => revoke.mutate(session.id)}>Revocar</button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );

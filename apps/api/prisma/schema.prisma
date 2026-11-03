@@ -90,9 +90,26 @@ model User {
   assignedTasks         ProjectTask[]        @relation("TaskAssignee")
   auditLogs              AuditLog[]
   passwordResetTokens   PasswordResetToken[]
+  sessions              AuthSession[]
 
   @@index([companyId, status])
   @@index([companyId, role])
+}
+
+model AuthSession {
+  id               String    @id @default(uuid()) @db.NVarChar(36)
+  userId           String    @db.NVarChar(36)
+  refreshTokenHash String    @db.NVarChar(64)
+  expiresAt        DateTime
+  lastUsedAt       DateTime  @default(now())
+  revokedAt        DateTime?
+  ipAddress        String?   @db.NVarChar(64)
+  userAgent        String?   @db.NVarChar(500)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  user             User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId, revokedAt, expiresAt])
 }
 
 model PasswordResetToken {
