@@ -9,6 +9,7 @@ describe('role permissions', () => {
     expect(roleHasPermission('ADMIN', 'users', 'write')).toBe(true);
     expect(roleHasPermission('SUPER_ADMIN', 'settings', 'write')).toBe(true);
     expect(roleHasPermission('ADMIN', 'projects', 'write')).toBe(true);
+    expect(roleHasPermission('ADMIN', 'subscriptions', 'read')).toBe(true);
     expect(roleHasPermission('SUPER_ADMIN', 'reports', 'read')).toBe(true);
   });
 
@@ -17,6 +18,7 @@ describe('role permissions', () => {
     expect(roleHasPermission('PROJECT_MANAGER', 'users', 'write')).toBe(false);
     expect(roleHasPermission('VIEWER', 'users', 'read')).toBe(false);
     expect(roleHasPermission('SALES_REP', 'settings', 'read')).toBe(false);
+    expect(roleHasPermission('SALES_MANAGER', 'subscriptions', 'read')).toBe(false);
   });
 
   it('mantiene al visor en modo de solo lectura', () => {
@@ -88,6 +90,7 @@ describe('role permissions', () => {
     );
     expect(resolveResource('/api/projects/import/ms-project')).toBe('projects');
     expect(resolveResource('/api/users')).toBe('users');
+    expect(resolveResource('/api/subscriptions/current')).toBe('subscriptions');
     expect(resolveAction('GET')).toBe('read');
     expect(resolveAction('HEAD')).toBe('write');
     expect(resolveAction('POST')).toBe('write');

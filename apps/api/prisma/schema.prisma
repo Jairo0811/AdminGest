@@ -30,6 +30,44 @@ model Company {
   quotes         Quote[]
   projects       Project[]
   auditLogs      AuditLog[]
+  subscription   Subscription?
+}
+
+model Plan {
+  id              String         @id @default(uuid()) @db.NVarChar(36)
+  code            String         @unique @db.NVarChar(32)
+  name            String         @db.NVarChar(80)
+  description     String?        @db.NVarChar(500)
+  monthlyPrice    Decimal        @default(0) @db.Decimal(18, 2)
+  currency        String         @default("DOP") @db.NVarChar(3)
+  maxUsers        Int
+  maxCustomers    Int
+  maxProjects     Int
+  storageMb       Int            @default(1024)
+  advancedReports Boolean        @default(false)
+  apiAccess       Boolean        @default(false)
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  subscriptions   Subscription[]
+}
+
+model Subscription {
+  id                  String    @id @default(uuid()) @db.NVarChar(36)
+  companyId           String    @unique @db.NVarChar(36)
+  planId              String    @db.NVarChar(36)
+  status              String    @default("TRIAL") @db.NVarChar(20)
+  trialEndsAt         DateTime?
+  currentPeriodStart  DateTime  @default(now())
+  currentPeriodEnd    DateTime?
+  cancelAtPeriodEnd   Boolean   @default(false)
+  canceledAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  company             Company   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plan                Plan      @relation(fields: [planId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([planId, status])
 }
 
 model User {

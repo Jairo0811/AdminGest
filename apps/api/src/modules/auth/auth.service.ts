@@ -20,6 +20,7 @@ import { PasswordResetMailService } from './password-reset-mail.service';
 const PASSWORD_RESET_RESPONSE =
   'Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer tu contraseña.';
 const PASSWORD_RESET_TTL_MINUTES = 30;
+const TRIAL_DAYS = 14;
 
 const USER_PUBLIC_SELECT = {
   id: true,
@@ -40,6 +41,10 @@ const USER_PUBLIC_SELECT = {
 interface RequestMetadata {
   ipAddress?: string;
   userAgent?: string;
+}
+
+function addDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 }
 
 @Injectable()
@@ -68,6 +73,19 @@ export class AuthService {
           name: dto.companyName.trim(),
           taxId: dto.taxId ? normalizeDominicanTaxId(dto.taxId) : null,
           email,
+        },
+      });
+
+      const starterPlan = await transaction.plan.findUniqueOrThrow({
+        where: { code: 'STARTER' },
+      });
+
+      await transaction.subscription.create({
+        data: {
+          companyId: company.id,
+          planId: starterPlan.id,
+          status: 'TRIAL',
+          trialEndsAt: addDays(new Date(), TRIAL_DAYS),
         },
       });
 

@@ -19,6 +19,7 @@ import { NavigationModule } from './modules/navigation/navigation.module';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -39,6 +40,7 @@ import { UsersModule } from './modules/users/users.module';
     AuditModule,
     HealthModule,
     AuthModule,
+    SubscriptionsModule,
     CompaniesModule,
     UsersModule,
     LeadsModule,

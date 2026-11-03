@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { normalizeDominicanTaxId } from '../../common/validation/dominican-tax-id';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreateContactDto, CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 
@@ -10,6 +11,7 @@ export class CustomersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly subscriptions: SubscriptionsService,
   ) {}
 
   findAll(companyId: string, search?: string) {
@@ -49,6 +51,7 @@ export class CustomersService {
   }
 
   async create(companyId: string, userId: string, dto: CreateCustomerDto) {
+    await this.subscriptions.assertCanCreate(companyId, 'customers');
     const taxId = dto.taxId ? normalizeDominicanTaxId(dto.taxId) : undefined;
 
     if (
