@@ -2,13 +2,15 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { API_VERSION } from './version';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
   const config = app.get(ConfigService);
@@ -16,6 +18,12 @@ async function bootstrap(): Promise<void> {
   const isProduction = nodeEnv === 'production';
 
   app.getHttpAdapter().getInstance().disable('x-powered-by');
+  // Behind an HTTPS reverse proxy, request.ip, throttling and audit IPs must come from
+  // X-Forwarded-For of the trusted proxy only (see docs/DEPLOYMENT.md).
+  const trustProxy = config.get<string>('TRUST_PROXY', '').trim();
+  if (trustProxy && trustProxy !== 'false') {
+    app.set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy === 'true' ? true : trustProxy);
+  }
   app.use(
     helmet({
       contentSecurityPolicy: isProduction ? undefined : false,
@@ -81,7 +89,7 @@ async function bootstrap(): Promise<void> {
       .setDescription(
         'API multiempresa para CRM, proyectos y gestión administrativa.',
       )
-      .setVersion('1.0.0')
+      .setVersion(API_VERSION)
       .addBearerAuth()
       .build();
 

@@ -111,6 +111,17 @@ export class ActivitiesService {
       oldValues: existing,
       newValues: dto,
     });
+    if (activity.ownerId && activity.ownerId !== existing.ownerId) {
+      await this.notifications.emit({
+        companyId,
+        userId: activity.ownerId,
+        eventType: 'ACTIVITY_ASSIGNED',
+        title: 'Actividad reasignada',
+        message: activity.subject,
+        path: '/activities',
+        dedupeKey: `activity-owner:${activity.id}:${activity.ownerId}`,
+      });
+    }
     return activity;
   }
 

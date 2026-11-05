@@ -31,4 +31,24 @@ describe('validateEnvironment', () => {
       validateEnvironment({ ...baseEnvironment, PORT: '70000' }),
     ).toThrow('PORT debe ser un número entero entre 1 y 65535.');
   });
+
+  it('aplica tokens de acceso de corta duración (15m por defecto, máximo 1h)', () => {
+    expect(validateEnvironment(baseEnvironment)).toMatchObject({ JWT_EXPIRES_IN: '15m' });
+    expect(validateEnvironment({ ...baseEnvironment, JWT_EXPIRES_IN: '1h' })).toMatchObject({
+      JWT_EXPIRES_IN: '1h',
+    });
+    expect(() => validateEnvironment({ ...baseEnvironment, JWT_EXPIRES_IN: '8h' })).toThrow(
+      /JWT_EXPIRES_IN/,
+    );
+    expect(() => validateEnvironment({ ...baseEnvironment, JWT_EXPIRES_IN: '30' })).toThrow(
+      /JWT_EXPIRES_IN/,
+    );
+  });
+
+  it('valida TRUST_PROXY', () => {
+    expect(() => validateEnvironment({ ...baseEnvironment, TRUST_PROXY: '1' })).not.toThrow();
+    expect(() => validateEnvironment({ ...baseEnvironment, TRUST_PROXY: 'todos' })).toThrow(
+      /TRUST_PROXY/,
+    );
+  });
 });

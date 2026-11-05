@@ -22,7 +22,9 @@ export async function acquireTransactionLock(
       @LockOwner = 'Transaction',
       @LockTimeout = ${timeoutMs};
     IF @lockResult < 0
+    BEGIN
       THROW 51001, 'No fue posible reservar el recurso solicitado. Inténtalo nuevamente.', 1;
+    END;
   `;
 }
 

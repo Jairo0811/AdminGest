@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { compare, hash } from 'bcrypt';
+import { compare, hash, hashSync } from 'bcrypt';
 import { createHash, randomBytes } from 'node:crypto';
 import { normalizeDominicanTaxId } from '../../common/validation/dominican-tax-id';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
@@ -21,6 +21,11 @@ const PASSWORD_RESET_RESPONSE =
   'Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer tu contraseña.';
 const PASSWORD_RESET_TTL_MINUTES = 30;
 const TRIAL_DAYS = 14;
+/**
+ * Compared when the e-mail does not exist so that the response time of a failed login
+ * does not reveal whether an account is registered.
+ */
+const TIMING_EQUALIZER_HASH = hashSync('admingest-timing-equalizer', 12);
 
 const USER_PUBLIC_SELECT = {
   id: true,
@@ -123,11 +128,15 @@ export class AuthService {
       include: { company: true },
     });
 
+    const passwordMatches = await compare(
+      dto.password,
+      userWithPassword?.passwordHash ?? TIMING_EQUALIZER_HASH,
+    );
     if (
       !userWithPassword ||
+      !passwordMatches ||
       userWithPassword.status !== 'ACTIVE' ||
-      !userWithPassword.company.isActive ||
-      !(await compare(dto.password, userWithPassword.passwordHash))
+      !userWithPassword.company.isActive
     ) {
       throw new UnauthorizedException('Correo o contraseña incorrectos.');
     }

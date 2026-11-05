@@ -23,8 +23,14 @@ describe('calculateQuote', () => {
     ]);
   });
 
-  it('never applies a discount above the subtotal', () => {
-    const result = calculateQuote([{ quantity: 1, unitPrice: 10 }], 100);
+  it('rejects a discount above the subtotal instead of silently changing it', () => {
+    expect(() => calculateQuote([{ quantity: 1, unitPrice: 10 }], 100)).toThrow(
+      BadRequestException,
+    );
+  });
+
+  it('accepts a discount equal to the subtotal (total 0, no ITBIS)', () => {
+    const result = calculateQuote([{ quantity: 1, unitPrice: 10 }], 10);
 
     expect(result.discount).toBe(10);
     expect(result.tax).toBe(0);
@@ -82,12 +88,14 @@ describe('calculateQuote', () => {
 
   it('handles fractional quantities and a zero subtotal', () => {
     expect(calculateQuote([{ quantity: 1.5, unitPrice: 99.99 }]).subtotal).toBe(149.99);
-    const zero = calculateQuote([{ quantity: 1, unitPrice: 0 }], 5);
+    const zero = calculateQuote([{ quantity: 1, unitPrice: 0 }], 0);
     expect(zero).toMatchObject({ subtotal: 0, discount: 0, tax: 0, total: 0 });
   });
 
-  it('ignores negative discounts', () => {
-    expect(calculateQuote([{ quantity: 1, unitPrice: 100 }], -50).discount).toBe(0);
+  it('rejects negative discounts', () => {
+    expect(() => calculateQuote([{ quantity: 1, unitPrice: 100 }], -50)).toThrow(
+      BadRequestException,
+    );
   });
 
   it('rejects empty quotes, invalid lines and out-of-range amounts', () => {

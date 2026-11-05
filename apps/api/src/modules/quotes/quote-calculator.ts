@@ -68,8 +68,13 @@ export function calculateQuote(
   });
 
   const subtotal = lines.reduce((sum, line) => sum + line.cents, 0n);
-  const requestedDiscount = toCents(Math.max(discount || 0, 0));
-  const discountCents = requestedDiscount > subtotal ? subtotal : requestedDiscount;
+  if (discount < 0) {
+    throw new BadRequestException('El descuento no puede ser negativo.');
+  }
+  const discountCents = toCents(discount || 0);
+  if (discountCents > subtotal) {
+    throw new BadRequestException('El descuento no puede ser mayor que el subtotal de la cotización.');
+  }
 
   // Proportional distribution with exact sum (largest remainder).
   const shares = lines.map((line, index) => {
