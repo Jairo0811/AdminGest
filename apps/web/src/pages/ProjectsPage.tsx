@@ -11,10 +11,12 @@ import {
 import { api } from '../api/client';
 import { Entity, EntityPage } from '../components/EntityPage';
 import { printDocument } from '../utils/export';
+import { buildGanttPrintBody, TASK_STATUS_LABELS } from '../utils/gantt-print';
 import {
   downloadMicrosoftProjectCsv,
   parseMicrosoftProjectCsv,
   ProjectCsvRow,
+  validateImportRows,
 } from '../utils/ms-project-csv';
 
 const money = new Intl.NumberFormat('es-DO', {
@@ -46,7 +48,7 @@ interface Project extends Entity {
 }
 
 const projectFields = [
-  { name: 'name', label: 'Nombre', required: true },
+  { name: 'name', label: 'Nombre', required: true, maxLength: 150 },
   {
     name: 'customerId',
     label: 'Cliente',
@@ -57,7 +59,7 @@ const projectFields = [
   },
   { name: 'startDate', label: 'Inicio', type: 'date' as const },
   { name: 'endDate', label: 'Finalización', type: 'date' as const },
-  { name: 'budget', label: 'Presupuesto', type: 'number' as const },
+  { name: 'budget', label: 'Presupuesto (RD$)', type: 'number' as const, min: 0, step: '0.01' },
   {
     name: 'status',
     label: 'Estado',
@@ -70,9 +72,15 @@ const projectFields = [
       { value: 'CANCELLED', label: 'Cancelado' },
     ],
   },
-  { name: 'progress', label: 'Progreso (%)', type: 'number' as const },
+  { name: 'progress', label: 'Progreso (%)', type: 'number' as const, min: 0, max: 100, step: '1' },
   { name: 'description', label: 'Descripción', type: 'textarea' as const },
 ];
+
+const PROJECT_STATUS_LABELS: Record<string, string> = Object.fromEntries(
+  projectFields
+    .find((field) => field.name === 'status')!
+    .options!.map((option) => [option.value, option.label]),
+);
 
 const daysBetween = (start?: string, finish?: string) => {
   if (!start || !finish) return 0;
@@ -186,6 +194,7 @@ export function ProjectsPage() {
 
     try {
       const rows = parseMicrosoftProjectCsv(await file.text());
+      validateImportRows(rows);
       const createdIds = new Map<number, string>();
 
       for (const row of rows) {
@@ -246,27 +255,14 @@ export function ProjectsPage() {
   const printTaskGantt = () => {
     const project = selectedProject.data;
     if (!project || !taskTimeline) return;
-
-    const rows = taskTimeline.tasks
-      .map((task) => {
-        const start = new Date(task.startDate!).getTime();
-        const end = new Date(task.dueDate!).getTime();
-        const left = ((start - taskTimeline.min) / taskTimeline.span) * 100;
-        const width = Math.max(
-          2,
-          ((end - start) / taskTimeline.span) * 100,
-        );
-        const late =
-          task.status !== 'COMPLETED' && new Date(task.dueDate!) < new Date();
-
-        return `<tr><td>${task.title}</td><td>${new Date(task.startDate!).toLocaleDateString('es-DO')}</td><td>${new Date(task.dueDate!).toLocaleDateString('es-DO')}</td><td>${task.progress}%</td><td><div style="position:relative;height:18px;background:#edf1f6;border-radius:5px"><span style="position:absolute;left:${left}%;width:${width}%;height:18px;border-radius:5px;background:${late ? '#c9344b' : '#1677df'}"></span></div></td></tr>`;
-      })
-      .join('');
-
-    printDocument(
-      `Cronograma ${project.name}`,
-      `<header><div class="brand">Admin<span>Gest</span></div><div><h1>${project.name}</h1><p class="muted">Cronograma compatible con Microsoft Project</p></div></header><table><thead><tr><th>Tarea</th><th>Inicio</th><th>Fin</th><th>Avance</th><th>Gantt</th></tr></thead><tbody>${rows}</tbody></table>`,
-    );
+    try {
+      printDocument(
+        `Cronograma ${project.name}`,
+        buildGanttPrintBody(project.name, taskTimeline.tasks),
+      );
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'No fue posible abrir la impresión.');
+    }
   };
 
   const renderViewSwitcher = () => (
@@ -313,7 +309,7 @@ export function ProjectsPage() {
           label: 'Estado',
           exportValue: (item) => String(item.status),
           render: (item) => (
-            <span className="status-badge blue">{String(item.status)}</span>
+            <span className="status-badge blue">{PROJECT_STATUS_LABELS[String(item.status)] ?? String(item.status)}</span>
           ),
         },
         {
@@ -401,7 +397,7 @@ export function ProjectsPage() {
                       <div className="timeline-project">
                         <strong>{project.name}</strong>
                         <small>
-                          {project.customer.name} · {project.status}
+                          {project.customer.name} · {PROJECT_STATUS_LABELS[project.status] ?? project.status}
                         </small>
                       </div>
                       <div className="timeline-track">
@@ -531,7 +527,7 @@ export function ProjectsPage() {
                           {milestone && <Milestone size={14} />} {task.title}
                         </strong>
                         <small>
-                          {task.status} · {task.progress}%
+                          {TASK_STATUS_LABELS[task.status] ?? task.status} · {task.progress}%
                           {late ? ' · Atrasada' : ''}
                         </small>
                       </div>

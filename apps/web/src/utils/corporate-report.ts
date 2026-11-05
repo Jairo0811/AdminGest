@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { escapeHtml, safeImageSource, SafeHtml } from './html';
 
 export interface CorporateReportColumn<T> {
   label: string;
@@ -37,9 +38,6 @@ const longDateTime = new Intl.DateTimeFormat('es-DO', {
   day: '2-digit', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit',
 });
 
-const escapeHtml = (value: unknown) => String(value ?? '')
-  .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 
 const statusLabels: Record<string, string> = {
   NEW: 'Nuevo', CONTACTED: 'Contactado', QUALIFIED: 'Calificado',
@@ -82,6 +80,7 @@ const formatValue = (value: string | number | null | undefined, format?: Corpora
 const createReportId = (date: Date) =>
   `REP-${date.toISOString().slice(0, 10).replaceAll('-', '')}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
+// Only generated geometry (numbers) is interpolated; the encoded text is never rendered.
 const createQrSvg = (text: string) => {
   const qr = QRCode.create(text, { errorCorrectionLevel: 'M' });
   const size = qr.modules.size;
@@ -114,7 +113,11 @@ const metricHtml = (metric: CorporateReportMetric) => `
     <strong>${escapeHtml(metric.value)}</strong>
   </article>`;
 
-export function buildCorporateReportHtml<T>(options: CorporateReportOptions<T>) {
+export function buildCorporateReport<T>(options: CorporateReportOptions<T>): {
+  title: string;
+  styles: string;
+  body: SafeHtml;
+} {
   const generatedAt = new Date();
   const reportId = createReportId(generatedAt);
   const companyName = options.companyName ?? 'AdminGest';
@@ -142,20 +145,27 @@ export function buildCorporateReportHtml<T>(options: CorporateReportOptions<T>) 
     <section class="page">
       <div class="watermark">ADMINGEST</div>
       <header>
-        <div class="brand"><img src="${escapeHtml(logoUrl)}" alt="AdminGest"/><div><strong>${escapeHtml(companyName)}</strong><span>Gestión Empresarial Inteligente</span><span>${options.generatedBy ? `Generado por ${escapeHtml(options.generatedBy)}` : 'Documento corporativo AdminGest'}</span><span class="folio">${escapeHtml(reportId)}</span></div></div>
+        <div class="brand"><img src="${escapeHtml(safeImageSource(logoUrl))}" alt="AdminGest"/><div><strong>${escapeHtml(companyName)}</strong><span>Gestión Empresarial Inteligente</span><span>${options.generatedBy ? `Generado por ${escapeHtml(options.generatedBy)}` : 'Documento corporativo AdminGest'}</span><span class="folio">${escapeHtml(reportId)}</span></div></div>
         <div class="title"><small>Reporte ejecutivo</small><h1>${escapeHtml(options.title)}</h1><p>${escapeHtml(options.subtitle ?? `Emitido el ${longDateTime.format(generatedAt)}`)}</p></div>
       </header>
       ${pageIndex === 0 && metrics.length ? `<div class="metrics">${metrics.map(metricHtml).join('')}</div>` : ''}
-      <div class="section-title"><h2>${pageIndex ? 'Continuación del reporte' : 'Detalle del reporte'}</h2><span>${options.items.length} registros</span></div>
+      <div class="section-title"><h2>${pageIndex ? 'Continuación del reporte' : 'Detalle del reporte'}</h2><span>${Number(options.items.length)} registros</span></div>
       ${table(items)}
       <footer>
-        <div><strong>AdminGest</strong><br/>Documento generado electrónicamente el ${escapeHtml(longDateTime.format(generatedAt))}.<br/>No requiere firma manuscrita.<span>Versión 1.0 · ${escapeHtml(companyName)} · ${escapeHtml(portalUrl)}</span></div>
+        <div><strong>AdminGest</strong><br/>Documento generado electrónicamente el ${escapeHtml(longDateTime.format(generatedAt))}.<br/>No requiere firma manuscrita.<span>AdminGest v1.2.0 · ${escapeHtml(companyName)} · ${escapeHtml(portalUrl)}</span></div>
         <div class="reference">${pageIndex === 0 ? qr : ''}<p><strong>${escapeHtml(reportId)}</strong><br/>Confidencial · Uso empresarial<br/>Página ${pageIndex + 1} de ${pages.length}</p></div>
       </footer>
     </section>`).join('');
 
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(options.title)} · ${escapeHtml(reportId)}</title><style>
+  const styles = `
     :root{--navy:#0b2441;--blue:#176fca;--green:#16805c;--ink:#17263a;--muted:#687b90;--line:#dce5ee}
     *{box-sizing:border-box}body{margin:0;background:#eaf0f6;color:var(--ink);font-family:Arial,sans-serif;line-height:1.45}.shell{width:min(1160px,calc(100% - 32px));margin:24px auto}.print{position:fixed;right:24px;top:20px;z-index:10;padding:10px 16px;border:0;border-radius:10px;color:#fff;background:#176fca;font-weight:700}.page{position:relative;min-height:770px;margin-bottom:24px;padding:30px;background:#fff;border-radius:22px;box-shadow:0 22px 60px #0f233c24;overflow:hidden;break-after:page}.page:last-child{break-after:auto}.watermark{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%) rotate(-24deg);color:#0b244109;font-size:78px;font-weight:900;letter-spacing:.14em}.page>*:not(.watermark){position:relative}header{display:grid;grid-template-columns:1fr auto;gap:24px;padding-bottom:18px;border-bottom:3px solid var(--green)}.brand{display:flex;gap:16px;align-items:center}.brand img{width:100px;height:100px;object-fit:contain}.brand div{display:grid;gap:3px}.brand strong{font-size:19px}.brand span{color:var(--muted);font-size:12px}.brand .folio{color:var(--blue);font-weight:700}.title{text-align:right}.title small{color:var(--green);font-weight:800;letter-spacing:.14em;text-transform:uppercase}.title h1{margin:4px 0 6px;font-size:30px}.title p{margin:0;color:var(--muted);font-size:12px}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}.metric{min-height:92px;padding:15px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}.metric span{display:block;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase}.metric strong{display:block;margin-top:8px;font-size:22px}.metric--blue{background:#f3f8fe}.metric--green{background:#f2faf6}.section-title{display:flex;justify-content:space-between;align-items:end;margin:22px 0 10px}.section-title h2{margin:0;color:var(--blue);font-size:15px;text-transform:uppercase;letter-spacing:.08em}.section-title span{color:var(--muted);font-size:11px}table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:10px}th{padding:11px;background:var(--navy);color:#fff;text-transform:uppercase}td{padding:10px;border-top:1px solid #e6edf4}tbody tr:nth-child(even){background:#f8fbfe}.center{text-align:center}.right{text-align:right}.status{display:inline-flex;padding:4px 8px;border-radius:999px}.status--success{color:#126142;background:#e8f7ef}.status--warning{color:#8a5700;background:#fff4d8}.status--danger{color:#9f2037;background:#fdecef}.status--info{color:#185f9f;background:#eaf4fd}.empty{padding:34px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}footer{display:grid;grid-template-columns:1fr auto;gap:20px;margin-top:24px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:10px}footer span{display:block;margin-top:3px}.reference{display:flex;align-items:center;gap:10px;text-align:right}.reference svg{width:58px;height:58px;padding:3px;border:1px solid var(--line);border-radius:7px}.reference p{margin:0}@page{size:A4 landscape;margin:8mm}@media print{body{background:#fff}.shell{width:100%;margin:0}.page{min-height:0;margin:0;padding:0;border-radius:0;box-shadow:none;overflow:visible}.print{display:none}}
-  </style></head><body><button class="print" onclick="window.print()">Guardar como PDF</button><main class="shell">${pageHtml}</main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),450));</script></body></html>`;
+`;
+
+  return {
+    title: `${options.title} · ${reportId}`,
+    styles,
+    // Every dynamic value above goes through escapeHtml; numbers are coerced.
+    body: new SafeHtml(`<button class="print" type="button" data-print>Guardar como PDF</button><main class="shell">${pageHtml}</main>`),
+  };
 }

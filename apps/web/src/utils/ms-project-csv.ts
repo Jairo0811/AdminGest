@@ -86,12 +86,13 @@ export function parseMicrosoftProjectCsv(content: string): ProjectCsvRow[] {
 
     return {
       id: Number.isFinite(id) ? id : rowIndex + 1,
-      name: values[indexes.name]?.trim(),
+      name: restoreFormulaText(values[indexes.name]?.trim() ?? ''),
       start: indexes.start >= 0 ? parseDate(values[indexes.start]) : undefined,
       finish: indexes.finish >= 0 ? parseDate(values[indexes.finish]) : undefined,
       durationDays,
       percentComplete: indexes.percent >= 0 ? parsePercent(values[indexes.percent]) : 0,
-      resourceNames: indexes.resources >= 0 ? values[indexes.resources]?.trim() : undefined,
+      resourceNames:
+        indexes.resources >= 0 ? restoreFormulaText(values[indexes.resources]?.trim() ?? '') : undefined,
       predecessors: predecessorText
         ? predecessorText.split(/[;,]/).map((value) => Number(value.trim())).filter(Number.isFinite)
         : [],
@@ -100,21 +101,54 @@ export function parseMicrosoftProjectCsv(content: string): ProjectCsvRow[] {
   }).filter((row) => row.name);
 }
 
+/** Characters that make spreadsheets interpret a cell as a formula (CSV injection). */
+const FORMULA_PREFIX = /^[=+\-@\t\r]/;
+
+/** Neutralises formulas in free-text cells by prefixing an apostrophe (OWASP). */
+export const neutralizeFormula = (text: string) => (FORMULA_PREFIX.test(text) ? `'${text}` : text);
+
+/** Reverts {@link neutralizeFormula} when AdminGest reads back its own export. */
+const restoreFormulaText = (text: string) =>
+  text.startsWith("'") && FORMULA_PREFIX.test(text.slice(1)) ? text.slice(1) : text;
+
 const csvValue = (value: unknown) => {
   const text = String(value ?? '');
-  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 };
+
+export const MAX_IMPORT_ROWS = 500;
+export const MAX_TASK_TITLE_LENGTH = 150;
+
+/** Validates every row before any task is created, so an import never stops halfway. */
+export function validateImportRows(rows: ProjectCsvRow[]): void {
+  if (!rows.length) throw new Error('El CSV no contiene tareas para importar.');
+  if (rows.length > MAX_IMPORT_ROWS) {
+    throw new Error(`El CSV supera el máximo de ${MAX_IMPORT_ROWS} tareas por importación.`);
+  }
+  const invalid = rows.findIndex((row) => row.name.length > MAX_TASK_TITLE_LENGTH);
+  if (invalid >= 0) {
+    throw new Error(
+      `La fila ${invalid + 2} tiene un nombre de tarea de más de ${MAX_TASK_TITLE_LENGTH} caracteres.`,
+    );
+  }
+  const reversed = rows.findIndex(
+    (row) => row.start && row.finish && new Date(row.finish) < new Date(row.start),
+  );
+  if (reversed >= 0) {
+    throw new Error(`La fila ${reversed + 2} termina antes de su fecha de inicio.`);
+  }
+}
 
 export function buildMicrosoftProjectCsv(rows: ProjectCsvRow[]) {
   const headers = ['ID', 'Name', 'Start', 'Finish', 'Duration', '% Complete', 'Resource Names', 'Predecessors', 'Milestone'];
   const body = rows.map((row) => [
     row.id,
-    row.name,
+    neutralizeFormula(row.name),
     row.start ? new Date(row.start).toLocaleDateString('en-US') : '',
     row.finish ? new Date(row.finish).toLocaleDateString('en-US') : '',
     `${row.durationDays} days`,
     `${row.percentComplete}%`,
-    row.resourceNames ?? '',
+    neutralizeFormula(row.resourceNames ?? ''),
     row.predecessors?.join(',') ?? '',
     row.milestone ? 'Yes' : 'No',
   ].map(csvValue).join(','));
