@@ -19,9 +19,7 @@ export function CatalogPage() {
           label: 'Tipo',
           exportValue: (item) => String(item.type),
           exportFormat: 'status',
-          render: (item) => (
-            <span className="status-badge blue">{String(item.type)}</span>
-          ),
+          render: (item) => <span className="status-badge blue">{String(item.type)}</span>,
         },
         {
           label: 'Precio',

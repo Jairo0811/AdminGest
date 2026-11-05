@@ -42,8 +42,8 @@ export class CustomersService {
       where: { id, companyId },
       include: {
         contacts: true,
-        opportunities: { include: { pipelineStage: true } },
-        projects: true,
+        opportunities: { where: { companyId }, include: { pipelineStage: true } },
+        projects: { where: { companyId } },
       },
     });
     if (!customer) throw new NotFoundException('Cliente no encontrado.');
@@ -51,28 +51,24 @@ export class CustomersService {
   }
 
   async create(companyId: string, userId: string, dto: CreateCustomerDto) {
-    await this.subscriptions.assertCanCreate(companyId, 'customers');
     const taxId = dto.taxId ? normalizeDominicanTaxId(dto.taxId) : undefined;
 
-    if (
-      taxId &&
-      (await this.prisma.customer.findFirst({ where: { companyId, taxId } }))
-    ) {
+    if (taxId && (await this.prisma.customer.findFirst({ where: { companyId, taxId } }))) {
       throw new ConflictException('Ya existe un cliente con esta cédula o RNC.');
     }
 
     const { primaryContact, ...data } = dto;
-    const customer = await this.prisma.customer.create({
-      data: {
-        companyId,
-        ...data,
-        taxId,
-        contacts: primaryContact
-          ? { create: { ...primaryContact, isPrimary: true } }
-          : undefined,
-      },
-      include: { contacts: true },
-    });
+    const customer = await this.subscriptions.runWithinQuota(companyId, 'customers', (tx) =>
+      tx.customer.create({
+        data: {
+          companyId,
+          ...data,
+          taxId,
+          contacts: primaryContact ? { create: { ...primaryContact, isPrimary: true } } : undefined,
+        },
+        include: { contacts: true },
+      }),
+    );
     await this.audit.record({
       companyId,
       userId,
@@ -84,12 +80,7 @@ export class CustomersService {
     return customer;
   }
 
-  async update(
-    companyId: string,
-    userId: string,
-    id: string,
-    dto: UpdateCustomerDto,
-  ) {
+  async update(companyId: string, userId: string, id: string, dto: UpdateCustomerDto) {
     const existing = await this.findOne(companyId, id);
     const taxId = dto.taxId ? normalizeDominicanTaxId(dto.taxId) : dto.taxId;
 

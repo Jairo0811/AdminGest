@@ -22,15 +22,7 @@
   transform: translateY(0);
 }
 
-:where(
-  a,
-  button,
-  input,
-  select,
-  textarea,
-  summary,
-  [tabindex]:not([tabindex="-1"])
-):focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
   outline: 3px solid var(--a11y-focus-color);
   outline-offset: 3px;
   box-shadow: var(--a11y-focus-shadow);
@@ -52,13 +44,13 @@
   border: 0 !important;
 }
 
-[aria-disabled="true"],
+[aria-disabled='true'],
 :disabled {
   cursor: not-allowed;
 }
 
-.alert[role="alert"],
-[role="status"] {
+.alert[role='alert'],
+[role='status'] {
   scroll-margin-top: 5rem;
 }
 
@@ -90,4 +82,44 @@
   table {
     max-width: 100%;
   }
+}
+
+/*
+ * v1.2.0 — WCAG 2.2 AA contrast adjustments found with axe-core (see docs/ACCESSIBILITY.md).
+ * Only the lightness of existing brand tones changes; hues and layout are preserved.
+ */
+:root:not([data-theme='dark']) {
+  --muted: #586a7d;
+  --text-muted: #586a7d;
+}
+:root:not([data-theme='dark']) .eyebrow,
+:root:not([data-theme='dark']) .feature-grid svg {
+  color: #36668f;
+}
+:root:not([data-theme='dark']) .metric-trend.neutral {
+  color: #5f7184;
+}
+:root[data-theme='dark'] .icon-button,
+:root[data-theme='dark'] .record-count,
+:root[data-theme='dark'] .bar-row,
+:root[data-theme='dark'] .security-panel ul,
+:root[data-theme='dark'] .sidebar-toggle {
+  color: var(--text-secondary);
+}
+:root[data-theme='dark'] .metric-trend.positive {
+  color: #5fc79a;
+}
+:root[data-theme='dark'] .metric-trend.negative {
+  color: #ff8a9b;
+}
+:root[data-theme='dark'] .view-switcher button.active,
+:root[data-theme='dark'] .search-result-type,
+:root[data-theme='dark'] .popover-header span,
+:root[data-theme='dark'] .calendar-event,
+:root[data-theme='dark'] .text-button,
+:root[data-theme='dark'] .table-action:hover {
+  color: #9cc4ee;
+}
+:root:not([data-theme='dark']) .table-header {
+  color: #52657a;
 }

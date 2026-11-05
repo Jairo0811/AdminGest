@@ -7,4 +7,3 @@ import { ProjectsService } from './projects.service';
   providers: [ProjectsService],
 })
 export class ProjectsModule {}
-

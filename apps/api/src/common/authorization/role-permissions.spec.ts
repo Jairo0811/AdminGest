@@ -1,8 +1,4 @@
-import {
-  resolveAction,
-  resolveResource,
-  roleHasPermission,
-} from './role-permissions';
+import { resolveAction, resolveResource, roleHasPermission } from './role-permissions';
 
 describe('role permissions', () => {
   it('permite acceso total a administradores', () => {
@@ -88,11 +84,12 @@ describe('role permissions', () => {
   });
 
   it('resuelve recurso y acción desde una solicitud HTTP', () => {
-    expect(resolveResource('/api/opportunities/123?include=customer')).toBe(
-      'opportunities',
-    );
+    expect(resolveResource('/api/opportunities/123?include=customer')).toBe('opportunities');
     expect(resolveResource('/api/projects/import/ms-project')).toBe('projects');
     expect(resolveResource('/api/users')).toBe('users');
+    expect(resolveResource('/api/users/me')).toBe('profile');
+    expect(resolveResource('/api/users/me/change-password')).toBe('profile');
+    expect(resolveResource('/api/users/merge')).toBe('users');
     expect(resolveResource('/api/notifications')).toBe('notifications');
     expect(resolveResource('/api/documents')).toBe('documents');
     expect(resolveResource('/api/workflows/templates')).toBe('workflows');

@@ -4,32 +4,25 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Length,
+  MaxLength,
 } from 'class-validator';
 
-export const ACTIVITY_TYPES = [
-  'CALL',
-  'EMAIL',
-  'MEETING',
-  'VISIT',
-  'TASK',
-  'FOLLOW_UP',
-] as const;
+export const ACTIVITY_TYPES = ['CALL', 'EMAIL', 'MEETING', 'VISIT', 'TASK', 'FOLLOW_UP'] as const;
 
-export const ACTIVITY_STATUSES = [
-  'PENDING',
-  'COMPLETED',
-  'CANCELLED',
-] as const;
+export const ACTIVITY_STATUSES = ['PENDING', 'COMPLETED', 'CANCELLED'] as const;
 
 export class CreateActivityDto {
   @IsIn(ACTIVITY_TYPES)
   type!: (typeof ACTIVITY_TYPES)[number];
 
   @IsString()
+  @Length(2, 150)
   subject!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   description?: string;
 
   @IsDateString()

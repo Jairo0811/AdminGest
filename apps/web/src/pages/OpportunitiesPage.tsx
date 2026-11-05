@@ -74,7 +74,15 @@ export function OpportunitiesPage() {
   });
 
   const move = useMutation({
-    mutationFn: ({ id, pipelineStageId, probability }: { id: string; pipelineStageId: string; probability: number }) =>
+    mutationFn: ({
+      id,
+      pipelineStageId,
+      probability,
+    }: {
+      id: string;
+      pipelineStageId: string;
+      probability: number;
+    }) =>
       api(`/opportunities/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ pipelineStageId, probability }),
@@ -95,10 +103,18 @@ export function OpportunitiesPage() {
 
   const renderViewSwitcher = () => (
     <div className="view-switcher" role="group" aria-label="Vista de oportunidades">
-      <button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')} type="button">
+      <button
+        className={view === 'table' ? 'active' : ''}
+        onClick={() => setView('table')}
+        type="button"
+      >
         <List size={17} /> Tabla
       </button>
-      <button className={view === 'kanban' ? 'active' : ''} onClick={() => setView('kanban')} type="button">
+      <button
+        className={view === 'kanban' ? 'active' : ''}
+        onClick={() => setView('kanban')}
+        type="button"
+      >
         <KanbanSquare size={17} /> Kanban
       </button>
     </div>
@@ -127,7 +143,9 @@ export function OpportunitiesPage() {
           label: 'Etapa',
           exportValue: (item) => String((item.pipelineStage as Entity)?.name ?? ''),
           render: (item) => (
-            <span className="status-badge blue">{String((item.pipelineStage as Entity)?.name ?? '—')}</span>
+            <span className="status-badge blue">
+              {String((item.pipelineStage as Entity)?.name ?? '—')}
+            </span>
           ),
         },
         {
@@ -151,7 +169,11 @@ export function OpportunitiesPage() {
           render: (item) => <span className="status-badge">{String(item.status)}</span>,
         },
       ]}
-      description={view === 'table' ? 'Administra el pipeline y concentra el esfuerzo en los negocios con mayor potencial.' : 'Arrastra cada negocio entre etapas para mantener actualizado el embudo comercial.'}
+      description={
+        view === 'table'
+          ? 'Administra el pipeline y concentra el esfuerzo en los negocios con mayor potencial.'
+          : 'Arrastra cada negocio entre etapas para mantener actualizado el embudo comercial.'
+      }
       endpoint="/opportunities"
       fields={opportunityFields}
       reportMetrics={(items) => {
@@ -180,24 +202,60 @@ export function OpportunitiesPage() {
     <>
       <div className="entity-page-controller-only">{entityPage}</div>
       <section className="page kanban-page custom-view-content">
-        {move.isPending && <div className="custom-view-status"><span className="record-count"><LoaderCircle className="spin" size={16} /> Actualizando</span></div>}
+        {move.isPending && (
+          <div className="custom-view-status">
+            <span className="record-count">
+              <LoaderCircle className="spin" size={16} /> Actualizando
+            </span>
+          </div>
+        )}
         {opportunities.isLoading || stages.isLoading ? (
           <div className="board-skeleton">Cargando pipeline…</div>
         ) : (
           <div className="kanban-board">
             {stages.data?.map((stage) => {
-              const items = opportunities.data?.filter((item) => item.pipelineStageId === stage.id) ?? [];
+              const items =
+                opportunities.data?.filter((item) => item.pipelineStageId === stage.id) ?? [];
               const total = items.reduce((sum, item) => sum + Number(item.estimatedValue), 0);
               return (
-                <div className="kanban-column" key={stage.id} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, stage)}>
-                  <header><div><strong>{stage.name}</strong><small>{items.length} oportunidades</small></div><span>{money.format(total)}</span></header>
+                <div
+                  className="kanban-column"
+                  key={stage.id}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => onDrop(event, stage)}
+                >
+                  <header>
+                    <div>
+                      <strong>{stage.name}</strong>
+                      <small>{items.length} oportunidades</small>
+                    </div>
+                    <span>{money.format(total)}</span>
+                  </header>
                   <div className="kanban-stack">
-                    {items.length ? items.map((item) => (
-                      <article className={draggingId === item.id ? 'kanban-card dragging' : 'kanban-card'} draggable key={item.id} onDragEnd={() => setDraggingId(null)} onDragStart={(event) => { event.dataTransfer.setData('text/opportunity-id', item.id); event.dataTransfer.effectAllowed = 'move'; setDraggingId(item.id); }}>
-                        <span className="status-badge blue">{item.probability}%</span>
-                        <strong>{item.name}</strong><small>{item.customer.name}</small><b>{money.format(Number(item.estimatedValue))}</b>
-                      </article>
-                    )) : <div className="kanban-empty">Suelta aquí una oportunidad</div>}
+                    {items.length ? (
+                      items.map((item) => (
+                        <article
+                          className={
+                            draggingId === item.id ? 'kanban-card dragging' : 'kanban-card'
+                          }
+                          draggable
+                          key={item.id}
+                          onDragEnd={() => setDraggingId(null)}
+                          onDragStart={(event) => {
+                            event.dataTransfer.setData('text/opportunity-id', item.id);
+                            event.dataTransfer.effectAllowed = 'move';
+                            setDraggingId(item.id);
+                          }}
+                        >
+                          <span className="status-badge blue">{item.probability}%</span>
+                          <strong>{item.name}</strong>
+                          <small>{item.customer.name}</small>
+                          <b>{money.format(Number(item.estimatedValue))}</b>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="kanban-empty">Suelta aquí una oportunidad</div>
+                    )}
                   </div>
                 </div>
               );

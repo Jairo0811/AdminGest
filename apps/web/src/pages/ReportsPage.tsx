@@ -39,9 +39,7 @@ export function ReportsPage() {
   const pendingQuotes = metrics?.pendingQuotes.value ?? 0;
   const activeProjects = metrics?.activeProjects.value ?? 0;
   const conversionBase = newLeads + customers;
-  const customerShare = conversionBase
-    ? Math.round((customers / conversionBase) * 100)
-    : 0;
+  const customerShare = conversionBase ? Math.round((customers / conversionBase) * 100) : 0;
 
   const distribution = [
     ['Prospectos nuevos', newLeads],

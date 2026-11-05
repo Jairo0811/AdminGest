@@ -1,11 +1,13 @@
-import { IsIn, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, Length, Max, MaxLength, Min } from 'class-validator';
 
 export class CreateCatalogItemDto {
   @IsString()
+  @Length(2, 150)
   name!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   description?: string;
 
   @IsIn(['PRODUCT', 'SERVICE'])
@@ -13,6 +15,7 @@ export class CreateCatalogItemDto {
 
   @IsNumber()
   @Min(0)
+  @Max(1_000_000_000)
   unitPrice!: number;
 
   @IsOptional()
@@ -21,4 +24,3 @@ export class CreateCatalogItemDto {
   @Max(100)
   taxRate?: number;
 }
-

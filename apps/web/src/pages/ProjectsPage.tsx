@@ -1,20 +1,15 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  CalendarRange,
-  Download,
-  FileUp,
-  List,
-  Milestone,
-  Printer,
-} from 'lucide-react';
+import { CalendarRange, Download, FileUp, List, Milestone, Printer } from 'lucide-react';
 import { api } from '../api/client';
 import { Entity, EntityPage } from '../components/EntityPage';
 import { printDocument } from '../utils/export';
+import { buildGanttPrintBody, TASK_STATUS_LABELS } from '../utils/gantt-print';
 import {
   downloadMicrosoftProjectCsv,
   parseMicrosoftProjectCsv,
   ProjectCsvRow,
+  validateImportRows,
 } from '../utils/ms-project-csv';
 
 const money = new Intl.NumberFormat('es-DO', {
@@ -46,7 +41,7 @@ interface Project extends Entity {
 }
 
 const projectFields = [
-  { name: 'name', label: 'Nombre', required: true },
+  { name: 'name', label: 'Nombre', required: true, maxLength: 150 },
   {
     name: 'customerId',
     label: 'Cliente',
@@ -57,7 +52,7 @@ const projectFields = [
   },
   { name: 'startDate', label: 'Inicio', type: 'date' as const },
   { name: 'endDate', label: 'Finalización', type: 'date' as const },
-  { name: 'budget', label: 'Presupuesto', type: 'number' as const },
+  { name: 'budget', label: 'Presupuesto (RD$)', type: 'number' as const, min: 0, step: '0.01' },
   {
     name: 'status',
     label: 'Estado',
@@ -70,9 +65,15 @@ const projectFields = [
       { value: 'CANCELLED', label: 'Cancelado' },
     ],
   },
-  { name: 'progress', label: 'Progreso (%)', type: 'number' as const },
+  { name: 'progress', label: 'Progreso (%)', type: 'number' as const, min: 0, max: 100, step: '1' },
   { name: 'description', label: 'Descripción', type: 'textarea' as const },
 ];
+
+const PROJECT_STATUS_LABELS: Record<string, string> = Object.fromEntries(
+  projectFields
+    .find((field) => field.name === 'status')!
+    .options!.map((option) => [option.value, option.label]),
+);
 
 const daysBetween = (start?: string, finish?: string) => {
   if (!start || !finish) return 0;
@@ -99,17 +100,11 @@ export function ProjectsPage() {
   });
 
   const timeline = useMemo(() => {
-    const dated = (projects.data ?? []).filter(
-      (project) => project.startDate && project.endDate,
-    );
+    const dated = (projects.data ?? []).filter((project) => project.startDate && project.endDate);
     if (!dated.length) return null;
 
-    const min = Math.min(
-      ...dated.map((project) => new Date(project.startDate!).getTime()),
-    );
-    const max = Math.max(
-      ...dated.map((project) => new Date(project.endDate!).getTime()),
-    );
+    const min = Math.min(...dated.map((project) => new Date(project.startDate!).getTime()));
+    const max = Math.max(...dated.map((project) => new Date(project.endDate!).getTime()));
 
     return {
       projects: dated,
@@ -125,12 +120,8 @@ export function ProjectsPage() {
     );
     if (!tasks.length) return null;
 
-    const min = Math.min(
-      ...tasks.map((task) => new Date(task.startDate!).getTime()),
-    );
-    const max = Math.max(
-      ...tasks.map((task) => new Date(task.dueDate!).getTime()),
-    );
+    const min = Math.min(...tasks.map((task) => new Date(task.startDate!).getTime()));
+    const max = Math.max(...tasks.map((task) => new Date(task.dueDate!).getTime()));
 
     return {
       tasks,
@@ -151,17 +142,10 @@ export function ProjectsPage() {
       finish: task.dueDate,
       durationDays: daysBetween(task.startDate, task.dueDate),
       percentComplete: Number(task.progress ?? 0),
-      resourceNames: task.assignee
-        ? `${task.assignee.firstName} ${task.assignee.lastName}`
-        : '',
-      predecessors:
-        task.parentId && idMap.has(task.parentId)
-          ? [idMap.get(task.parentId)!]
-          : [],
+      resourceNames: task.assignee ? `${task.assignee.firstName} ${task.assignee.lastName}` : '',
+      predecessors: task.parentId && idMap.has(task.parentId) ? [idMap.get(task.parentId)!] : [],
       milestone: Boolean(
-        task.startDate &&
-          task.dueDate &&
-          daysBetween(task.startDate, task.dueDate) === 0,
+        task.startDate && task.dueDate && daysBetween(task.startDate, task.dueDate) === 0,
       ),
     }));
   };
@@ -186,6 +170,7 @@ export function ProjectsPage() {
 
     try {
       const rows = parseMicrosoftProjectCsv(await file.text());
+      validateImportRows(rows);
       const createdIds = new Map<number, string>();
 
       for (const row of rows) {
@@ -193,26 +178,21 @@ export function ProjectsPage() {
           ? createdIds.get(row.predecessors[0])
           : undefined;
         const descriptionParts = [
-          row.resourceNames
-            ? `Recursos de Microsoft Project: ${row.resourceNames}`
-            : '',
+          row.resourceNames ? `Recursos de Microsoft Project: ${row.resourceNames}` : '',
           row.milestone ? 'Hito importado desde Microsoft Project.' : '',
         ].filter(Boolean);
 
-        const created = await api<ProjectTask>(
-          `/projects/${selectedProjectId}/tasks`,
-          {
-            method: 'POST',
-            body: JSON.stringify({
-              title: row.name,
-              description: descriptionParts.join(' '),
-              parentId: predecessorId,
-              startDate: row.start,
-              dueDate: row.finish ?? row.start,
-              priority: row.milestone ? 1 : 2,
-            }),
-          },
-        );
+        const created = await api<ProjectTask>(`/projects/${selectedProjectId}/tasks`, {
+          method: 'POST',
+          body: JSON.stringify({
+            title: row.name,
+            description: descriptionParts.join(' '),
+            parentId: predecessorId,
+            startDate: row.start,
+            dueDate: row.finish ?? row.start,
+            priority: row.milestone ? 1 : 2,
+          }),
+        });
 
         createdIds.set(row.id, created.id);
 
@@ -221,8 +201,7 @@ export function ProjectsPage() {
             method: 'PATCH',
             body: JSON.stringify({
               progress: row.percentComplete,
-              status:
-                row.percentComplete >= 100 ? 'COMPLETED' : 'IN_PROGRESS',
+              status: row.percentComplete >= 100 ? 'COMPLETED' : 'IN_PROGRESS',
             }),
           });
         }
@@ -234,9 +213,7 @@ export function ProjectsPage() {
       });
       setMessage(`${rows.length} tareas importadas desde el CSV.`);
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : 'No se pudo importar el CSV.',
-      );
+      setMessage(error instanceof Error ? error.message : 'No se pudo importar el CSV.');
     } finally {
       setImporting(false);
       event.target.value = '';
@@ -246,27 +223,14 @@ export function ProjectsPage() {
   const printTaskGantt = () => {
     const project = selectedProject.data;
     if (!project || !taskTimeline) return;
-
-    const rows = taskTimeline.tasks
-      .map((task) => {
-        const start = new Date(task.startDate!).getTime();
-        const end = new Date(task.dueDate!).getTime();
-        const left = ((start - taskTimeline.min) / taskTimeline.span) * 100;
-        const width = Math.max(
-          2,
-          ((end - start) / taskTimeline.span) * 100,
-        );
-        const late =
-          task.status !== 'COMPLETED' && new Date(task.dueDate!) < new Date();
-
-        return `<tr><td>${task.title}</td><td>${new Date(task.startDate!).toLocaleDateString('es-DO')}</td><td>${new Date(task.dueDate!).toLocaleDateString('es-DO')}</td><td>${task.progress}%</td><td><div style="position:relative;height:18px;background:#edf1f6;border-radius:5px"><span style="position:absolute;left:${left}%;width:${width}%;height:18px;border-radius:5px;background:${late ? '#c9344b' : '#1677df'}"></span></div></td></tr>`;
-      })
-      .join('');
-
-    printDocument(
-      `Cronograma ${project.name}`,
-      `<header><div class="brand">Admin<span>Gest</span></div><div><h1>${project.name}</h1><p class="muted">Cronograma compatible con Microsoft Project</p></div></header><table><thead><tr><th>Tarea</th><th>Inicio</th><th>Fin</th><th>Avance</th><th>Gantt</th></tr></thead><tbody>${rows}</tbody></table>`,
-    );
+    try {
+      printDocument(
+        `Cronograma ${project.name}`,
+        buildGanttPrintBody(project.name, taskTimeline.tasks),
+      );
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'No fue posible abrir la impresión.');
+    }
   };
 
   const renderViewSwitcher = () => (
@@ -313,7 +277,9 @@ export function ProjectsPage() {
           label: 'Estado',
           exportValue: (item) => String(item.status),
           render: (item) => (
-            <span className="status-badge blue">{String(item.status)}</span>
+            <span className="status-badge blue">
+              {PROJECT_STATUS_LABELS[String(item.status)] ?? String(item.status)}
+            </span>
           ),
         },
         {
@@ -379,9 +345,7 @@ export function ProjectsPage() {
               <div className="timeline-scale">
                 <span>{new Date(timeline.min).toLocaleDateString('es-DO')}</span>
                 <span>
-                  {new Date((timeline.min + timeline.max) / 2).toLocaleDateString(
-                    'es-DO',
-                  )}
+                  {new Date((timeline.min + timeline.max) / 2).toLocaleDateString('es-DO')}
                 </span>
                 <span>{new Date(timeline.max).toLocaleDateString('es-DO')}</span>
               </div>
@@ -391,17 +355,15 @@ export function ProjectsPage() {
                   const start = new Date(project.startDate!).getTime();
                   const end = new Date(project.endDate!).getTime();
                   const left = ((start - timeline.min) / timeline.span) * 100;
-                  const width = Math.max(
-                    4,
-                    ((end - start) / timeline.span) * 100,
-                  );
+                  const width = Math.max(4, ((end - start) / timeline.span) * 100);
 
                   return (
                     <article className="timeline-row" key={project.id}>
                       <div className="timeline-project">
                         <strong>{project.name}</strong>
                         <small>
-                          {project.customer.name} · {project.status}
+                          {project.customer.name} ·{' '}
+                          {PROJECT_STATUS_LABELS[project.status] ?? project.status}
                         </small>
                       </div>
                       <div className="timeline-track">
@@ -426,6 +388,7 @@ export function ProjectsPage() {
             <label className="form-field">
               <span>Proyecto</span>
               <select
+                aria-label="Proyecto"
                 onChange={(event) => setSelectedProjectId(event.target.value)}
                 value={selectedProjectId}
               >
@@ -479,9 +442,7 @@ export function ProjectsPage() {
           {!selectedProjectId ? (
             <div className="empty-state panel">
               <strong>Selecciona un proyecto.</strong>
-              <p>
-                Después podrás importar tareas desde Microsoft Project o exportarlas.
-              </p>
+              <p>Después podrás importar tareas desde Microsoft Project o exportarlas.</p>
             </div>
           ) : selectedProject.isLoading ? (
             <div className="board-skeleton">Cargando tareas…</div>
@@ -493,32 +454,20 @@ export function ProjectsPage() {
           ) : (
             <div className="timeline-card task-gantt">
               <div className="timeline-scale">
+                <span>{new Date(taskTimeline.min).toLocaleDateString('es-DO')}</span>
                 <span>
-                  {new Date(taskTimeline.min).toLocaleDateString('es-DO')}
+                  {new Date((taskTimeline.min + taskTimeline.max) / 2).toLocaleDateString('es-DO')}
                 </span>
-                <span>
-                  {new Date(
-                    (taskTimeline.min + taskTimeline.max) / 2,
-                  ).toLocaleDateString('es-DO')}
-                </span>
-                <span>
-                  {new Date(taskTimeline.max).toLocaleDateString('es-DO')}
-                </span>
+                <span>{new Date(taskTimeline.max).toLocaleDateString('es-DO')}</span>
               </div>
 
               <div className="timeline-list">
                 {taskTimeline.tasks.map((task) => {
                   const start = new Date(task.startDate!).getTime();
                   const end = new Date(task.dueDate!).getTime();
-                  const left =
-                    ((start - taskTimeline.min) / taskTimeline.span) * 100;
-                  const width = Math.max(
-                    2,
-                    ((end - start) / taskTimeline.span) * 100,
-                  );
-                  const late =
-                    task.status !== 'COMPLETED' &&
-                    new Date(task.dueDate!) < new Date();
+                  const left = ((start - taskTimeline.min) / taskTimeline.span) * 100;
+                  const width = Math.max(2, ((end - start) / taskTimeline.span) * 100);
+                  const late = task.status !== 'COMPLETED' && new Date(task.dueDate!) < new Date();
                   const milestone = start === end;
 
                   return (
@@ -531,17 +480,13 @@ export function ProjectsPage() {
                           {milestone && <Milestone size={14} />} {task.title}
                         </strong>
                         <small>
-                          {task.status} · {task.progress}%
+                          {TASK_STATUS_LABELS[task.status] ?? task.status} · {task.progress}%
                           {late ? ' · Atrasada' : ''}
                         </small>
                       </div>
                       <div className="timeline-track">
                         <div
-                          className={
-                            milestone
-                              ? 'timeline-bar timeline-milestone'
-                              : 'timeline-bar'
-                          }
+                          className={milestone ? 'timeline-bar timeline-milestone' : 'timeline-bar'}
                           style={{ left: `${left}%`, width: `${width}%` }}
                         >
                           <i style={{ width: `${task.progress}%` }} />

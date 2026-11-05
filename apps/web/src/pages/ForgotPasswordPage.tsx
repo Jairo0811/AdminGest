@@ -24,7 +24,11 @@ export function ForgotPasswordPage() {
       setMessage(result.message);
       event.currentTarget.reset();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'No fue posible procesar la solicitud.');
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : 'No fue posible procesar la solicitud.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -42,14 +46,22 @@ export function ForgotPasswordPage() {
           </div>
           <label className="form-field full">
             <span>Correo electrónico</span>
-            <input autoComplete="email" name="email" placeholder="tu@empresa.com" required type="email" />
+            <input
+              autoComplete="email"
+              name="email"
+              placeholder="tu@empresa.com"
+              required
+              type="email"
+            />
           </label>
           {message && <div className="alert success">{message}</div>}
           {error && <div className="alert error">{error}</div>}
           <button className="primary-button auth-submit" disabled={submitting} type="submit">
             <Mail size={18} /> {submitting ? 'Enviando…' : 'Enviar enlace'}
           </button>
-          <Link className="text-button" to="/login"><ArrowLeft size={16} /> Volver al inicio de sesión</Link>
+          <Link className="text-button" to="/login">
+            <ArrowLeft size={16} /> Volver al inicio de sesión
+          </Link>
         </form>
       </section>
     </div>

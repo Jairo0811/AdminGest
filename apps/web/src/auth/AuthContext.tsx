@@ -1,12 +1,13 @@
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
-import { api, closeSession, clearAccessToken, restoreSession, setAccessToken } from '../api/client';
+  api,
+  AUTH_CHANNEL,
+  closeSession,
+  clearAccessToken,
+  restoreSession,
+  setAccessToken,
+} from '../api/client';
 
 export interface SessionUser {
   id: string;
@@ -29,7 +30,10 @@ interface AuthContextValue {
   login(email: string, password: string): Promise<void>;
   register(data: RegisterData): Promise<void>;
   refreshUser(): Promise<void>;
-  logout(): void;
+  /** Ends the session; `notice` is shown once on the login page (for example after a password change). */
+  logout(notice?: string): void;
+  /** Message to show on the login page after a logout, if any. */
+  notice: string | null;
 }
 
 export interface RegisterData {
@@ -46,12 +50,31 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const logout = useCallback(() => {
+  /** Drops the session locally: token, user and every cached query of the tenant. */
+  const forgetSession = useCallback(() => {
     clearAccessToken();
     setUser(null);
-    void closeSession();
-  }, []);
+    queryClient.clear();
+  }, [queryClient]);
+
+  const logout = useCallback(
+    (message?: string) => {
+      setNotice(message ?? null);
+      forgetSession();
+      void closeSession();
+      try {
+        const channel = new BroadcastChannel(AUTH_CHANNEL);
+        channel.postMessage('logout');
+        channel.close();
+      } catch {
+        // BroadcastChannel is optional; other tabs will be rejected on their next request.
+      }
+    },
+    [forgetSession],
+  );
 
   const refreshUser = useCallback(async () => {
     setUser(await api<SessionUser>('/auth/me'));
@@ -67,30 +90,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
-    window.addEventListener('admingest:unauthorized', logout);
-    return () => window.removeEventListener('admingest:unauthorized', logout);
-  }, [logout]);
+    // The server already rejected the session: clear local state without calling
+    // /auth/logout, which could revoke a session another tab has just renewed.
+    window.addEventListener('admingest:unauthorized', forgetSession);
+    return () => window.removeEventListener('admingest:unauthorized', forgetSession);
+  }, [forgetSession]);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel(AUTH_CHANNEL);
+    channel.onmessage = (event) => {
+      if (event.data === 'logout') forgetSession();
+    };
+    return () => channel.close();
+  }, [forgetSession]);
 
   const establishSession = (session: SessionResponse) => {
+    // Never show data cached for a previous user or company.
+    queryClient.clear();
+    setNotice(null);
     setAccessToken(session.accessToken);
     setUser(session.user);
   };
 
   const value: AuthContextValue = {
-    user, loading, logout, refreshUser,
+    user,
+    loading,
+    logout,
+    refreshUser,
+    notice,
     async login(email, password) {
-      establishSession(await api<SessionResponse>('/auth/login', {
-        method: 'POST', body: JSON.stringify({ email, password }),
-      }));
+      establishSession(
+        await api<SessionResponse>('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        }),
+      );
     },
     async register(data) {
-      establishSession(await api<SessionResponse>('/auth/register', {
-        method: 'POST', body: JSON.stringify(data),
-      }));
+      establishSession(
+        await api<SessionResponse>('/auth/register', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }),
+      );
     },
   };
 

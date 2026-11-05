@@ -15,7 +15,9 @@ export class WorkflowsController {
   constructor(private readonly service: WorkflowsService) {}
 
   @Get('rules')
-  rules(@CurrentUser() user: AuthUser) { return this.service.rules(user.companyId); }
+  rules(@CurrentUser() user: AuthUser) {
+    return this.service.rules(user.companyId);
+  }
 
   @Patch('rules/:type')
   @Roles('ADMIN', 'SUPER_ADMIN')
@@ -24,7 +26,9 @@ export class WorkflowsController {
   }
 
   @Get('templates')
-  templates(@CurrentUser() user: AuthUser) { return this.service.templates(user.companyId); }
+  templates(@CurrentUser() user: AuthUser) {
+    return this.service.templates(user.companyId);
+  }
 
   @Post('templates')
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateTemplateDto) {
@@ -37,7 +41,11 @@ export class WorkflowsController {
   }
 
   @Post('templates/:id/apply/:projectId')
-  apply(@CurrentUser() user: AuthUser, @Param('id') id: string, @Param('projectId') projectId: string) {
+  apply(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Param('projectId') projectId: string,
+  ) {
     return this.service.applyTemplate(user.companyId, id, projectId);
   }
 }

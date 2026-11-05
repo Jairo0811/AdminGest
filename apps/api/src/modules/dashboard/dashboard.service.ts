@@ -103,10 +103,7 @@ export class DashboardService {
         newLeads: this.metric(newLeads, leadTrend),
         customers: this.metric(customers, customerTrend),
         openOpportunities: this.metric(openOpportunities, opportunityTrend),
-        pipelineValue: this.metric(
-          Number(pipeline._sum.estimatedValue ?? 0),
-          pipelineTrend,
-        ),
+        pipelineValue: this.metric(Number(pipeline._sum.estimatedValue ?? 0), pipelineTrend),
         pendingQuotes: this.metric(pendingQuotes, quoteTrend),
         activeProjects: this.metric(activeProjects, projectTrend),
       },
@@ -146,11 +143,7 @@ export class DashboardService {
       createdAt: { gte: previousStart, lt: currentStart },
     };
 
-    const [current, previous] = await this.countByModel(
-      model,
-      currentWhere,
-      previousWhere,
-    );
+    const [current, previous] = await this.countByModel(model, currentWhere, previousWhere);
 
     return { value: current, variation: this.variation(current, previous) };
   }

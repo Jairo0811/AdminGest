@@ -1,4 +1,4 @@
-type BrandLogoVariant = "login" | "sidebar" | "loader";
+type BrandLogoVariant = 'login' | 'sidebar' | 'loader';
 
 type BrandLogoProps = {
   variant?: BrandLogoVariant;
@@ -7,30 +7,24 @@ type BrandLogoProps = {
 };
 
 export function BrandLogo({
-  variant = "sidebar",
+  variant = 'sidebar',
   compact = false,
-  className = "",
+  className = '',
 }: BrandLogoProps) {
-  const imageSource = compact
-    ? "/brand/isotipo.png"
-    : "/brand/logo.png";
+  const imageSource = compact ? '/brand/isotipo.png' : '/brand/logo.png';
 
   return (
     <span
       className={[
-        "brand-logo",
+        'brand-logo',
         `brand-logo--${variant}`,
-        compact ? "brand-logo--compact" : "",
+        compact ? 'brand-logo--compact' : '',
         className,
       ]
         .filter(Boolean)
-        .join(" ")}
+        .join(' ')}
     >
-      <img
-        src={imageSource}
-        alt="AdminGest"
-        className="brand-logo__image"
-      />
+      <img src={imageSource} alt="AdminGest" className="brand-logo__image" />
     </span>
   );
 }

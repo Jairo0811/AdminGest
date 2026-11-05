@@ -1,13 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { TRANSACTION_OPTIONS } from '../../common/tenant/app-lock';
+import { nextCompanySequence, yearInTimeZone } from '../../common/tenant/company-sequence';
+import {
+  assertTenantCatalogItems,
+  assertTenantCustomer,
+  assertTenantOpportunity,
+} from '../../common/tenant/tenant-references';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
-import { calculateQuote } from './quote-calculator';
-
-interface PublicCodeRow {
-  publicCode: string;
-}
+import { calculateQuote, DEFAULT_ITBIS_RATE } from './quote-calculator';
 
 interface PublicQuoteVerificationRow {
   publicCode: string;
@@ -22,6 +25,10 @@ interface PublicQuoteVerificationRow {
   companyName: string;
   customerName: string;
 }
+
+export const quoteNumberPrefix = (year: number) => `COT-${year}-`;
+export const formatQuoteNumber = (year: number, sequence: number) =>
+  `${quoteNumberPrefix(year)}${String(sequence).padStart(5, '0')}`;
 
 @Injectable()
 export class QuotesService {
@@ -48,15 +55,13 @@ export class QuotesService {
       include: { customer: true, opportunity: true, items: true },
     });
     if (!quote) throw new NotFoundException('Cotización no encontrada.');
-
-    const [verification] = await this.prisma.$queryRaw<PublicCodeRow[]>(
-      Prisma.sql`SELECT [publicCode] FROM [Quote] WHERE [id] = ${id}`,
-    );
-
-    return { ...quote, publicCode: verification?.publicCode };
+    return quote;
   }
 
   async findPublicVerification(publicCode: string) {
+    if (!/^[0-9a-fA-F-]{36}$/.test(publicCode)) {
+      throw new NotFoundException('No existe una cotización asociada a este código.');
+    }
     const [quote] = await this.prisma.$queryRaw<PublicQuoteVerificationRow[]>(
       Prisma.sql`
         SELECT
@@ -66,6 +71,7 @@ export class QuotesService {
         FROM [Quote] q
         INNER JOIN [Company] c ON c.[id] = q.[companyId]
         INNER JOIN [Customer] customer ON customer.[id] = q.[customerId]
+          AND customer.[companyId] = q.[companyId]
         WHERE q.[publicCode] = ${publicCode}
       `,
     );
@@ -74,12 +80,9 @@ export class QuotesService {
       throw new NotFoundException('No existe una cotización asociada a este código.');
     }
 
-    const expiredByDate =
-      quote.validUntil !== null && quote.validUntil.getTime() < Date.now();
+    const expiredByDate = quote.validUntil !== null && quote.validUntil.getTime() < Date.now();
     const effectiveStatus =
-      expiredByDate && !['ACCEPTED', 'REJECTED'].includes(quote.status)
-        ? 'EXPIRED'
-        : quote.status;
+      expiredByDate && !['ACCEPTED', 'REJECTED'].includes(quote.status) ? 'EXPIRED' : quote.status;
 
     return {
       valid: !['REJECTED'].includes(effectiveStatus),
@@ -98,33 +101,54 @@ export class QuotesService {
   }
 
   async create(companyId: string, userId: string, dto: CreateQuoteDto) {
-    await this.validateReferences(companyId, dto.customerId, dto.opportunityId);
+    await assertTenantCustomer(this.prisma, companyId, dto.customerId);
+    await assertTenantOpportunity(this.prisma, companyId, dto.opportunityId, dto.customerId);
+    await assertTenantCatalogItems(
+      this.prisma,
+      companyId,
+      dto.items.map((item) => item.catalogItemId),
+    );
     const totals = calculateQuote(dto.items, dto.discount);
-    const count = await this.prisma.quote.count({ where: { companyId } });
-    const number = `COT-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
-
-    const quote = await this.prisma.quote.create({
-      data: {
-        companyId,
-        customerId: dto.customerId,
-        opportunityId: dto.opportunityId,
-        number,
-        validUntil: dto.validUntil ? new Date(dto.validUntil) : undefined,
-        notes: dto.notes,
-        subtotal: totals.subtotal,
-        discount: totals.discount,
-        tax: totals.tax,
-        total: totals.total,
-        items: {
-          create: dto.items.map((item, index) => ({
-            ...item,
-            taxRate: item.taxRate ?? 18,
-            lineTotal: totals.lines[index].lineTotal,
-          })),
-        },
-      },
-      include: { customer: true, items: true },
+    const company = await this.prisma.company.findUniqueOrThrow({
+      where: { id: companyId },
+      select: { timezone: true },
     });
+    const year = yearInTimeZone(new Date(), company.timezone);
+
+    const quote = await this.prisma.$transaction(async (tx) => {
+      const sequence = await nextCompanySequence(tx, companyId, `QUOTE-${year}`, () =>
+        this.highestExistingSequence(tx, companyId, year),
+      );
+
+      return tx.quote.create({
+        data: {
+          companyId,
+          customerId: dto.customerId,
+          opportunityId: dto.opportunityId,
+          number: formatQuoteNumber(year, sequence),
+          validUntil: dto.validUntil ? new Date(dto.validUntil) : undefined,
+          notes: dto.notes,
+          subtotal: totals.subtotal,
+          discount: totals.discount,
+          tax: totals.tax,
+          total: totals.total,
+          items: {
+            create: dto.items.map((item, index) => ({
+              catalogItemId: item.catalogItemId,
+              description: item.description.trim(),
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              taxRate: item.taxRate ?? DEFAULT_ITBIS_RATE,
+              lineTotal: totals.lines[index].lineTotal,
+              discountAmount: totals.lines[index].discount,
+              taxAmount: totals.lines[index].tax,
+            })),
+          },
+        },
+        select: { id: true },
+      });
+    }, TRANSACTION_OPTIONS);
+
     await this.audit.record({
       companyId,
       userId,
@@ -136,12 +160,7 @@ export class QuotesService {
     return this.findOne(companyId, quote.id);
   }
 
-  async updateStatus(
-    companyId: string,
-    userId: string,
-    id: string,
-    status: string,
-  ) {
+  async updateStatus(companyId: string, userId: string, id: string, status: string) {
     const existing = await this.findOne(companyId, id);
     const quote = await this.prisma.quote.update({
       where: { id },
@@ -177,21 +196,18 @@ export class QuotesService {
     return { deleted: true };
   }
 
-  private async validateReferences(
+  /** Continues numbering created before v1.2.0 (count + 1 strategy). */
+  private async highestExistingSequence(
+    tx: Prisma.TransactionClient,
     companyId: string,
-    customerId: string,
-    opportunityId?: string,
-  ) {
-    const customer = await this.prisma.customer.findFirst({
-      where: { id: customerId, companyId },
-    });
-    const opportunity = opportunityId
-      ? await this.prisma.opportunity.findFirst({
-          where: { id: opportunityId, companyId },
-        })
-      : true;
-    if (!customer || !opportunity) {
-      throw new NotFoundException('Cliente u oportunidad no válidos.');
-    }
+    year: number,
+  ): Promise<number> {
+    const prefix = quoteNumberPrefix(year);
+    const [row] = await tx.$queryRaw<Array<{ maxValue: number | null }>>`
+      SELECT MAX(TRY_CAST(SUBSTRING([number], ${prefix.length + 1}, 20) AS INT)) AS [maxValue]
+      FROM [Quote]
+      WHERE [companyId] = ${companyId} AND [number] LIKE ${prefix + '%'}
+    `;
+    return Number(row?.maxValue ?? 0);
   }
 }

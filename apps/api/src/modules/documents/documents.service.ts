@@ -12,7 +12,9 @@ export class DocumentsService {
 
   list(companyId: string) {
     return this.prisma.documentRecord.findMany({
-      where: { companyId }, orderBy: { createdAt: 'desc' }, take: 100,
+      where: { companyId },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
     });
   }
 
@@ -33,9 +35,13 @@ export class DocumentsService {
     }
     return this.prisma.documentRecord.create({
       data: {
-        companyId, creatorId, title: dto.title.trim(),
-        category: dto.category, url,
-        projectId: project?.id, customerId: customer?.id,
+        companyId,
+        creatorId,
+        title: dto.title.trim(),
+        category: dto.category,
+        url,
+        projectId: project?.id,
+        customerId: customer?.id,
       },
     });
   }
@@ -48,13 +54,19 @@ export class DocumentsService {
 
   private validateUrl(value: string) {
     let parsed: URL;
-    try { parsed = new URL(value); }
-    catch { throw new BadRequestException('URL de documento inválida.'); }
+    try {
+      parsed = new URL(value);
+    } catch {
+      throw new BadRequestException('URL de documento inválida.');
+    }
     if (parsed.protocol !== 'https:' || !parsed.hostname || parsed.username || parsed.password) {
       throw new BadRequestException('Solo se permiten enlaces HTTPS sin credenciales.');
     }
-    const allowList = this.config.get<string>('DOCUMENT_ALLOWED_HOSTS', '')
-      .split(',').map((host) => host.trim().toLowerCase()).filter(Boolean);
+    const allowList = this.config
+      .get<string>('DOCUMENT_ALLOWED_HOSTS', '')
+      .split(',')
+      .map((host) => host.trim().toLowerCase())
+      .filter(Boolean);
     const production = this.config.get<string>('NODE_ENV') === 'production';
     if (production && allowList.length === 0) {
       throw new BadRequestException('El repositorio documental requiere DOCUMENT_ALLOWED_HOSTS.');

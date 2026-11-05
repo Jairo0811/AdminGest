@@ -6,4 +6,3 @@ export interface AuthUser {
   lastName: string;
   role: string;
 }
-

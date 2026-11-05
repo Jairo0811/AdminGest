@@ -6,11 +6,11 @@ Esta fase convierte la arquitectura multiempresa existente en una base SaaS come
 
 ## Planes iniciales
 
-| Plan | Usuarios activos | Clientes activos | Proyectos | Almacenamiento | Reportes avanzados | API |
-|---|---:|---:|---:|---:|---|---|
-| Starter | 3 | 100 | 10 | 1 GB | No | No |
-| Pro | 10 | 1,000 | 100 | 10 GB | Sí | No |
-| Business | 50 | 10,000 | 1,000 | 50 GB | Sí | Sí |
+| Plan     | Usuarios activos | Clientes activos | Proyectos | Almacenamiento | Reportes avanzados | API |
+| -------- | ---------------: | ---------------: | --------: | -------------: | ------------------ | --- |
+| Starter  |                3 |              100 |        10 |           1 GB | No                 | No  |
+| Pro      |               10 |            1,000 |       100 |          10 GB | Sí                 | No  |
+| Business |               50 |           10,000 |     1,000 |          50 GB | Sí                 | Sí  |
 
 Los precios permanecen en 0 de forma intencional hasta integrar billing y definir la estrategia comercial definitiva.
 
@@ -21,13 +21,26 @@ La migración también provisiona un trial Starter para empresas existentes que 
 
 ## Enforcement
 
-Los límites se validan en la API antes de crear usuarios activos, clientes activos o proyectos.
-Al llegar al límite, la API responde 403 Forbidden. Un trial expirado o una suscripción no utilizable también impide nuevas altas de estos recursos.
+Los límites se validan en la API al crear usuarios activos, clientes activos o proyectos y al reactivar un
+usuario. La verificación y el alta ocurren en la misma transacción, protegida por un bloqueo de aplicación
+de SQL Server (`sp_getapplock`) por empresa y recurso, de modo que solicitudes simultáneas no superan la
+cuota (probado con 6-8 solicitudes paralelas en CI).
+Al llegar al límite, la API responde 403 Forbidden. Una suscripción `SUSPENDED` o `CANCELED`, un trial
+expirado o una suscripción `ACTIVE` cuyo `currentPeriodEnd` ya pasó impiden nuevas altas.
+
+Solo se aplican técnicamente los límites de usuarios, clientes y proyectos. `storageMb`, `advancedReports` y
+`apiAccess` son atributos informativos del plan en v1.2.0 (la API los devuelve en `informativeFeatures`).
 
 ## Consulta administrativa
 
 GET /api/subscriptions/current devuelve estado, vigencia, plan, límites, consumo real y capacidad restante del tenant.
-El endpoint está restringido a ADMIN y SUPER_ADMIN.
+El endpoint está restringido a ADMIN y SUPER_ADMIN. Configuración muestra el plan, el estado, el fin de la
+prueba, el consumo, los límites y la capacidad restante, sin botones de compra.
+
+## Facturación
+
+AdminGest **no integra cobros**: no hay checkout, pasarela de pago, renovación automática ni historial de
+facturación. El plan y el estado de la suscripción los asigna un operador directamente en la base de datos.
 
 ## Siguiente etapa
 

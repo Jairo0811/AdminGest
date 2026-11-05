@@ -7,7 +7,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/estado-Estable-18A96F?style=for-the-badge" alt="Estado estable" />
+  <img src="https://img.shields.io/badge/versi%C3%B3n-1.2.0-0057B8?style=for-the-badge" alt="Versión 1.2.0" />
+  <img src="https://img.shields.io/badge/estado-Congelado%20t%C3%A9cnicamente-18A96F?style=for-the-badge" alt="Congelado técnicamente" />
   <img src="https://img.shields.io/badge/arquitectura-Monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
 </p>
 
@@ -34,17 +35,19 @@ El proyecto reconstruye de forma independiente el trabajo final académico **Ges
 ## ✨ Funcionalidades principales
 
 - CRM multiempresa con prospectos, clientes, oportunidades, actividades y pipeline comercial.
-- Cotizaciones profesionales con descuentos, ITBIS, QR y verificación pública.
+- Cotizaciones con numeración por empresa, descuento proporcional, ITBIS por línea (18 % o exento), QR y verificación pública. Son propuestas comerciales, no facturas ni comprobantes fiscales.
 - Proyectos, tareas, cronograma, importación/exportación CSV y compatibilidad con Microsoft Project.
 - Dashboard ejecutivo, reportes, exportaciones y diseño responsive.
 - Gestión de usuarios, roles y permisos con RBAC.
 - Perfil, recuperación y cambio seguro de contraseña.
 - Validación dominicana de cédula y RNC.
-- Accesibilidad alineada con NORTIC B2:2017 y WCAG 2.0 nivel AA.
+- Planes SaaS con prueba gratuita y cuotas de usuarios, clientes y proyectos aplicadas de forma atómica.
+- Notificaciones internas, reglas de automatización, plantillas de tareas y registro de documentos externos.
+- Accesibilidad con objetivo WCAG 2.2 AA y NORTIC B2:2017, verificada con axe-core (sin certificación).
 
 ## 🛡️ Seguridad
 
-AdminGest incorpora autenticación JWT, contraseñas con bcrypt, autorización basada en roles, aislamiento multiempresa, recuperación de contraseña con tokens de un solo uso, rate limiting, Helmet, CORS configurable, validación estricta de DTO, auditoría de operaciones sensibles y gestión de secretos mediante variables de entorno.
+AdminGest incorpora tokens de acceso de 15 minutos en memoria, refresh tokens rotativos en cookie HttpOnly, sesiones revocables por dispositivo, contraseñas con bcrypt, autorización basada en roles, aislamiento multiempresa validado en la API y reforzado con claves foráneas compuestas en SQL Server, impresión protegida contra XSS, recuperación de contraseña con tokens de un solo uso, rate limiting, Helmet, CORS configurable, validación estricta de DTO, auditoría de operaciones sensibles y gestión de secretos mediante variables de entorno.
 
 La API es la fuente de verdad de autorización. Aunque la interfaz oculte una acción, el backend vuelve a validar el rol, recurso y tipo de operación antes de procesarla.
 
@@ -144,14 +147,25 @@ cd AdminGest
 npm ci
 ```
 
-Prepara los archivos de entorno, configura SQL Server y ejecuta:
+Prepara los archivos de entorno a partir de los ejemplos y define tus propios valores:
 
 ```bash
+cp .env.example .env                    # MSSQL_SA_PASSWORD para Docker
+cp apps/api/.env.example apps/api/.env  # DATABASE_URL, JWT_SECRET, SEED_ADMIN_PASSWORD…
+cp apps/web/.env.example apps/web/.env  # VITE_API_URL=/api usa el proxy de Vite
+```
+
+Levanta SQL Server (o usa una instancia local de SQL Server 2022), crea la base `AdminGestDb` y ejecuta:
+
+```bash
+docker compose up -d                    # opcional
 npm run db:generate
-npm run db:migrate
-npm run db:seed
+npm run db:deploy                       # aplica las migraciones versionadas
+npm run db:seed                         # planes y datos de demostración (solo fuera de producción)
 npm run dev
 ```
+
+`db:migrate` (`prisma migrate dev`) queda reservado para crear migraciones nuevas durante el desarrollo.
 
 ### 📱 Acceso desde un móvil en la red local
 
@@ -177,57 +191,71 @@ El backend continúa disponible localmente en el puerto `3000`. Si Windows solic
 
 ## 🔑 Credenciales de demostración
 
-| Campo | Valor |
-|---|---|
-| **Correo** | `admin@admingest.com.do` |
-| **Contraseña** | `AG2026AdminGest!` |
+| Campo          | Valor                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------- |
+| **Correo**     | `admin@admingest.com.do`                                                                        |
+| **Contraseña** | La definida en `SEED_ADMIN_PASSWORD`; si no se define, el seed genera una y la muestra una vez. |
 
-> Estas credenciales son para desarrollo y demostración. Deben cambiarse antes de publicar la aplicación.
+> El repositorio no contiene contraseñas reales. Ejecutar el seed de nuevo **no** modifica un
+> administrador existente; para restablecer su contraseña fuera de producción usa
+> `SEED_RESET_ADMIN_PASSWORD=true` junto con `SEED_ADMIN_PASSWORD`.
 
 ## ✅ Validación técnica
 
 ```bash
+npm ci
 npm run db:generate
 npm run db:validate
+npm run format:check
 npm run lint
 npm run test
 npm run build
+npm run security:audit
+npm run test:integration --workspace @admingest/api   # requiere SQL Server (ver docs/TESTING.md)
 ```
 
-GitHub Actions valida automáticamente Prisma, migraciones, lint, pruebas de API y web, autorización por roles, builds y auditoría de dependencias.
+GitHub Actions ejecuta además, sobre SQL Server 2022 real: migraciones desde una base limpia, el seed dos
+veces, pruebas de integración y E2E HTTP (aislamiento Empresa A / Empresa B, sesiones y concurrencia),
+la actualización desde el esquema v1.1.0 con datos heredados, el arranque de la API desde el build y
+pruebas E2E en navegador con Playwright.
 
 ## 📚 Documentación
 
+- [Notas de la versión 1.2.0 y congelamiento](docs/RELEASE-1.2.0.md)
 - [Arquitectura](docs/ARCHITECTURE.md)
+- [Pruebas](docs/TESTING.md)
 - [Accesibilidad](docs/ACCESSIBILITY.md)
 - [Matriz RBAC](docs/security/rbac-matrix.md)
 - [Despliegue](docs/DEPLOYMENT.md)
-- [Recuperación de contraseña](docs/PASSWORD_RESET.md)
+- [Seguridad en producción](docs/PRODUCTION-SECURITY.md)
+- [Base SaaS](docs/SAAS-FOUNDATION.md)
+- [Automatización de negocio](docs/BUSINESS-AUTOMATION.md)
+- [Recuperación de contraseña](docs/RC3.2-PASSWORD-RECOVERY.md)
 - [Política de seguridad](SECURITY.md)
 - [Componentes de terceros](THIRD_PARTY_NOTICES.md)
 - [Historial de cambios](CHANGELOG.md)
 
 ## 🎓 Información académica
 
-| Información | Detalle |
-|---|---|
-| 📖 Asignatura | **Administración de Proyectos de Software (SOF-013)** |
-| 👨‍🏫 Profesor | **Juan Martínez López** |
-| 🏫 Institución | **Instituto Tecnológico de Las Américas (ITLA)** |
-| 📅 Período académico | **2018-C3** |
-| 📁 Tipo de entrega | **Proyecto Final** |
+| Información          | Detalle                                               |
+| -------------------- | ----------------------------------------------------- |
+| 📖 Asignatura        | **Administración de Proyectos de Software (SOF-013)** |
+| 👨‍🏫 Profesor          | **Juan Martínez López**                               |
+| 🏫 Institución       | **Instituto Tecnológico de Las Américas (ITLA)**      |
+| 📅 Período académico | **2018-C3**                                           |
+| 📁 Tipo de entrega   | **Proyecto Final**                                    |
 
 ### 👥 Equipo académico original
 
-| 👤 Integrante | 🆔 Matrícula |
-|---|---|
-| 👨🏻‍💻 Francis Jairo Matías Rosario | 2015-2984 |
-| 👨🏻‍💻 Isaías Pérez Moya | 2016-3595 |
-| 👨🏻‍💻 Enmanuel Avilez Valoy | 2016-3789 |
-| 👩🏻‍💻 Diana Caroline Mejía Encarnación | 2016-3796 |
-| 👨🏻‍💻 Andrés Eudoro Pujols | 2016-3917 |
-| 👨🏻‍💻 Alexander Dionicio Mercedes | 2016-3962 |
-| 👨🏻‍💻 Raymundo Eduardo Peña Sánchez | 2016-4276 |
+| 👤 Integrante                       | 🆔 Matrícula |
+| ----------------------------------- | ------------ |
+| 👨🏻‍💻 Francis Jairo Matías Rosario     | 2015-2984    |
+| 👨🏻‍💻 Isaías Pérez Moya                | 2016-3595    |
+| 👨🏻‍💻 Enmanuel Avilez Valoy            | 2016-3789    |
+| 👩🏻‍💻 Diana Caroline Mejía Encarnación | 2016-3796    |
+| 👨🏻‍💻 Andrés Eudoro Pujols             | 2016-3917    |
+| 👨🏻‍💻 Alexander Dionicio Mercedes      | 2016-3962    |
+| 👨🏻‍💻 Raymundo Eduardo Peña Sánchez    | 2016-4276    |
 
 ## 🧭 Continuidad académica
 
@@ -237,10 +265,10 @@ AdminGest forma parte de **dos líneas académicas verificables** dentro de la t
 
 El profesor **Juan Martínez López** aparece en dos proyectos académicos de la colección:
 
-| Orden | Proyecto académico original | Evolución actual | Asignatura | Período |
-|---:|---|---|---|---|
-| 1 | RadioEmisora | [**RadioEmisora RD**](https://github.com/Jairo0811/RadioEmisora) | Diseño Centrado en el Usuario (SOF-010) | 2018-C1 |
-| 2 | GestorAdministrativo | **AdminGest** | Administración de Proyectos de Software (SOF-013) | 2018-C3 |
+| Orden | Proyecto académico original | Evolución actual                                                 | Asignatura                                        | Período |
+| ----: | --------------------------- | ---------------------------------------------------------------- | ------------------------------------------------- | ------- |
+|     1 | RadioEmisora                | [**RadioEmisora RD**](https://github.com/Jairo0811/RadioEmisora) | Diseño Centrado en el Usuario (SOF-010)           | 2018-C1 |
+|     2 | GestorAdministrativo        | **AdminGest**                                                    | Administración de Proyectos de Software (SOF-013) | 2018-C3 |
 
 La primera etapa estuvo enfocada en interacción, usabilidad y experiencia de usuario; la segunda amplió la formación hacia planificación, organización y gestión integral de proyectos de software.
 
@@ -248,10 +276,10 @@ La primera etapa estuvo enfocada en interacción, usabilidad y experiencia de us
 
 **Diana Caroline Mejía Encarnación (2016-3796)** coincidió con Francis Jairo Matías Rosario en dos proyectos académicos consecutivos durante 2018:
 
-| Orden | Asignatura | Proyecto actual | Período |
-|---:|---|---|---|
-| 1 | Programación 3 (SOF-005) | [**GamePoint POS**](https://github.com/Jairo0811/GamePointPOS) | 2018-C2 |
-| 2 | Administración de Proyectos de Software (SOF-013) | **AdminGest** | 2018-C3 |
+| Orden | Asignatura                                        | Proyecto actual                                                | Período |
+| ----: | ------------------------------------------------- | -------------------------------------------------------------- | ------- |
+|     1 | Programación 3 (SOF-005)                          | [**GamePoint POS**](https://github.com/Jairo0811/GamePointPOS) | 2018-C2 |
+|     2 | Administración de Proyectos de Software (SOF-013) | **AdminGest**                                                  | 2018-C3 |
 
 La recurrencia queda respaldada por el mismo **nombre completo y matrícula** en los equipos académicos originales de ambos repositorios.
 
@@ -259,14 +287,21 @@ Vistas en conjunto, estas relaciones permiten observar una trayectoria que combi
 
 ## 📄 Licencia
 
-Este proyecto se distribuye bajo la licencia incluida en el repositorio.
+El repositorio todavía no incluye un archivo de licencia. Mientras el propietario no defina una, se
+aplican por defecto todos los derechos reservados. Los componentes de terceros se detallan en
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-## Evolución SaaS (en revisión)
+## 🧊 Estado del producto (v1.2.0)
 
-Las fases comerciales se desarrollan de forma independiente de la reconstrucción académica.
+Las fases comerciales se desarrollaron de forma independiente de la reconstrucción académica y están
+integradas en `main`:
 
 - [Fase 1 — SaaS Foundation](docs/SAAS-FOUNDATION.md)
 - [Fase 2 — Production Security](docs/PRODUCTION-SECURITY.md)
 - [Fase 3 — Business Automation](docs/BUSINESS-AUTOMATION.md)
+- [Hardening final y congelamiento v1.2.0](docs/RELEASE-1.2.0.md)
 
-Las fases 2 y 3 requieren que las PR anteriores se fusionen en orden; las funcionalidades de cobros, MFA, almacenamiento privado de archivos y facturación electrónica aún no están operativas.
+AdminGest v1.2.0 está **congelado técnicamente**: funcionalidades definidas, pruebas y documentación
+alineadas con el código. **No está listo para comercialización**: no integra cobros ni renovación
+automática, MFA, almacenamiento privado de archivos, facturación electrónica (e-CF) ni operación
+productiva con respaldos y monitoreo. Las cotizaciones no son comprobantes fiscales.
