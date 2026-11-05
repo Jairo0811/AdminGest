@@ -16,6 +16,8 @@ export default defineConfig({
     },
   },
   test: {
+    // Browser E2E specs (e2e/) run with Playwright against the real stack.
+    include: ['src/**/*.{spec,test}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],
