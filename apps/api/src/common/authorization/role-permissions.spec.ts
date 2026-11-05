@@ -93,6 +93,9 @@ describe('role permissions', () => {
     );
     expect(resolveResource('/api/projects/import/ms-project')).toBe('projects');
     expect(resolveResource('/api/users')).toBe('users');
+    expect(resolveResource('/api/users/me')).toBe('profile');
+    expect(resolveResource('/api/users/me/change-password')).toBe('profile');
+    expect(resolveResource('/api/users/merge')).toBe('users');
     expect(resolveResource('/api/notifications')).toBe('notifications');
     expect(resolveResource('/api/documents')).toBe('documents');
     expect(resolveResource('/api/workflows/templates')).toBe('workflows');

@@ -118,6 +118,9 @@ export function resolveResource(url: string): PermissionResource | null {
   const firstSegment = cleanPath.split('/')[0];
 
   if (firstSegment === 'auth') return 'profile';
+  // The own profile (GET/PATCH /users/me, POST /users/me/change-password) belongs to
+  // every authenticated user, not to user administration.
+  if (/^users\/me(\/|$)/.test(cleanPath)) return 'profile';
   return RESOURCE_ALIASES[firstSegment] ?? null;
 }
 
