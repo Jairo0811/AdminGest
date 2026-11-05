@@ -12,6 +12,6 @@ module.exports = {
   testEnvironment: 'node',
   testTimeout: 90_000,
   maxWorkers: 1,
-  collectCoverageFrom: ['src/**/*.ts', '!src/main.ts', '!src/**/*.module.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.spec.ts', '!src/main.ts', '!src/**/*.module.ts'],
   coverageDirectory: 'coverage-integration',
 };

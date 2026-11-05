@@ -23,3 +23,9 @@ AdminGest aplica autorización por rol tanto en la API como en la interfaz. La A
 - Separación entre permisos de lectura y escritura.
 - Las rutas y el menú se adaptan al rol activo.
 - Los administradores y superadministradores conservan acceso total.
+- El perfil propio (`/api/auth/*` y `/api/users/me*`: consulta, edición, cambio de contraseña y sesiones)
+  está disponible para todos los roles autenticados.
+- Solo un SUPER_ADMIN puede modificar o restablecer la contraseña de otro SUPER_ADMIN; ningún usuario puede
+  cambiar su propio rol ni desactivarse, y la empresa conserva siempre un administrador activo.
+- `GET /api/company` es legible por todos los roles (datos usados en documentos impresos); `PATCH` solo por
+  ADMIN y SUPER_ADMIN.

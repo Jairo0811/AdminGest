@@ -5,7 +5,7 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)s$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
-  collectCoverageFrom: ['src/**/*.ts', '!src/main.ts', '!src/**/*.module.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.spec.ts', '!src/main.ts', '!src/**/*.module.ts'],
   coverageDirectory: 'coverage',
   // Business rules with unit coverage targets (tenant/DB rules are covered by the
   // SQL Server integration suite, see docs/TESTING.md).
