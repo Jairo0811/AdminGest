@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { KeyRound, Save, UserCircle } from 'lucide-react';
 import { api } from '../api/client';
@@ -14,8 +15,19 @@ interface Profile {
   lastLoginAt?: string | null;
 }
 
+/** Short, human readable device description from the stored user agent. */
+function describeDevice(userAgent?: string | null): string {
+  if (!userAgent) return 'Dispositivo desconocido';
+  const browser = /Edg\//.test(userAgent) ? 'Edge' : /Chrome\//.test(userAgent) ? 'Chrome'
+    : /Firefox\//.test(userAgent) ? 'Firefox' : /Safari\//.test(userAgent) ? 'Safari' : 'Navegador';
+  const system = /Windows/.test(userAgent) ? 'Windows' : /Android/.test(userAgent) ? 'Android'
+    : /iPhone|iPad/.test(userAgent) ? 'iOS' : /Mac OS X/.test(userAgent) ? 'macOS' : /Linux/.test(userAgent) ? 'Linux' : '';
+  return system ? `${browser} en ${system}` : browser;
+}
+
 export function ProfilePage() {
   const { refreshUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const profileQuery = useQuery({
@@ -46,8 +58,12 @@ export function ProfilePage() {
       api('/users/me/change-password', { method: 'POST', body: JSON.stringify(payload) }),
     onSuccess: () => {
       setError('');
-      setNotice('Contraseña actualizada. Debes iniciar sesión nuevamente.');
+      // The server revoked every session, including this one.
       logout();
+      navigate('/login', {
+        replace: true,
+        state: { notice: 'Contraseña actualizada. Inicia sesión con tu nueva contraseña.' },
+      });
     },
     onError: (mutationError: Error) => setError(mutationError.message),
   });
@@ -56,10 +72,15 @@ export function ProfilePage() {
     queryKey: ['/auth/sessions'],
     queryFn: () => api<Array<{ id: string; createdAt: string; lastUsedAt: string; userAgent?: string | null }>>('/auth/sessions'),
   });
+  const [pendingRevoke, setPendingRevoke] = useState<string | null>(null);
 
   const revoke = useMutation({
     mutationFn: (id: string) => api('/auth/sessions/' + id, { method: 'DELETE' }),
-    onSuccess: () => { void sessions.refetch(); },
+    onSuccess: () => {
+      setPendingRevoke(null);
+      setNotice('Sesión revocada. Ese dispositivo deberá iniciar sesión de nuevo.');
+      void sessions.refetch();
+    },
     onError: (e: Error) => setError(e.message),
   });
 
@@ -125,11 +146,25 @@ export function ProfilePage() {
         </form>
         <div className="panel">
           <div className="settings-title"><KeyRound /><div><h2>Sesiones activas</h2><p>Revoca el acceso de dispositivos que ya no utilizas.</p></div></div>
-          <ul>
+          {sessions.isLoading && <p className="muted-state" role="status">Cargando sesiones…</p>}
+          {sessions.isError && <p className="alert error" role="alert">No fue posible consultar las sesiones activas.</p>}
+          <ul className="item-list">
             {sessions.data?.map((session) => (
-              <li key={session.id}>
-                <span>{session.userAgent?.slice(0, 90) ?? 'Dispositivo desconocido'} — {new Date(session.lastUsedAt).toLocaleString('es-DO')}</span>{' '}
-                <button type="button" className="text-button" disabled={revoke.isPending} onClick={() => revoke.mutate(session.id)}>Revocar</button>
+              <li className="item-row" key={session.id}>
+                <div className="item-row__body">
+                  <strong>{describeDevice(session.userAgent)}</strong>
+                  <small>Último uso: {new Date(session.lastUsedAt).toLocaleString('es-DO')} · Inicio: {new Date(session.createdAt).toLocaleDateString('es-DO')}</small>
+                </div>
+                <div className="item-row__actions">
+                  {pendingRevoke === session.id ? (
+                    <>
+                      <button className="danger-button compact" disabled={revoke.isPending} onClick={() => revoke.mutate(session.id)} type="button">{revoke.isPending ? 'Revocando…' : 'Confirmar'}</button>
+                      <button className="secondary-button compact" onClick={() => setPendingRevoke(null)} type="button">Cancelar</button>
+                    </>
+                  ) : (
+                    <button aria-label={`Revocar sesión de ${describeDevice(session.userAgent)}`} className="secondary-button compact" onClick={() => setPendingRevoke(session.id)} type="button">Revocar</button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

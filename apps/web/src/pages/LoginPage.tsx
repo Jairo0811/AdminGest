@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   UsersRound,
 } from "lucide-react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { AppFooter } from "../components/AppFooter";
 import { BrandLogo } from "../components/BrandLogo";
@@ -40,8 +40,8 @@ const productPillars = [
   },
   {
     icon: CircleDollarSign,
-    title: "Finanzas controladas",
-    description: "Cotizaciones, facturas y pagos",
+    title: "Cotizaciones",
+    description: "ITBIS por línea y verificación QR",
   },
   {
     icon: Settings2,
@@ -52,6 +52,8 @@ const productPillars = [
 
 export function LoginPage() {
   const { user, login, register } = useAuth();
+  const location = useLocation();
+  const notice = (location.state as { notice?: string } | null)?.notice;
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState("");
@@ -113,7 +115,7 @@ export function LoginPage() {
             <p className="eyebrow">Gestión sin fricción</p>
             <h1 id="auth-product-title">La gestión inteligente para tu empresa</h1>
             <p>
-              CRM, proyectos, reportes, finanzas y administración en una sola
+              CRM, cotizaciones, proyectos, reportes y administración en una sola
               plataforma.
             </p>
           </div>
@@ -246,6 +248,7 @@ export function LoginPage() {
               </Link>
             )}
 
+            {notice && !error && <div className="alert success" role="status">{notice}</div>}
             {error && <div aria-live="assertive" className="alert error" id="auth-error" role="alert">{error}</div>}
 
             <button

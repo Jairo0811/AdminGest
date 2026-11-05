@@ -6,7 +6,15 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { api, closeSession, clearAccessToken, restoreSession, setAccessToken } from '../api/client';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  api,
+  AUTH_CHANNEL,
+  closeSession,
+  clearAccessToken,
+  restoreSession,
+  setAccessToken,
+} from '../api/client';
 
 export interface SessionUser {
   id: string;
@@ -46,12 +54,26 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const logout = useCallback(() => {
+  /** Drops the session locally: token, user and every cached query of the tenant. */
+  const forgetSession = useCallback(() => {
     clearAccessToken();
     setUser(null);
+    queryClient.clear();
+  }, [queryClient]);
+
+  const logout = useCallback(() => {
+    forgetSession();
     void closeSession();
-  }, []);
+    try {
+      const channel = new BroadcastChannel(AUTH_CHANNEL);
+      channel.postMessage('logout');
+      channel.close();
+    } catch {
+      // BroadcastChannel is optional; other tabs will be rejected on their next request.
+    }
+  }, [forgetSession]);
 
   const refreshUser = useCallback(async () => {
     setUser(await api<SessionUser>('/auth/me'));
@@ -71,11 +93,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('admingest:unauthorized', logout);
-    return () => window.removeEventListener('admingest:unauthorized', logout);
-  }, [logout]);
+    // The server already rejected the session: clear local state without calling
+    // /auth/logout, which could revoke a session another tab has just renewed.
+    window.addEventListener('admingest:unauthorized', forgetSession);
+    return () => window.removeEventListener('admingest:unauthorized', forgetSession);
+  }, [forgetSession]);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel(AUTH_CHANNEL);
+    channel.onmessage = (event) => {
+      if (event.data === 'logout') forgetSession();
+    };
+    return () => channel.close();
+  }, [forgetSession]);
 
   const establishSession = (session: SessionResponse) => {
+    // Never show data cached for a previous user or company.
+    queryClient.clear();
     setAccessToken(session.accessToken);
     setUser(session.user);
   };

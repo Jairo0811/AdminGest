@@ -1,5 +1,8 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 
+/** Message used across tabs so that a logout in one tab closes the others. */
+export const AUTH_CHANNEL = 'admingest-auth';
+
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
     super(message);
@@ -30,12 +33,35 @@ export function clearAccessToken(): void {
   accessToken = null;
 }
 
+const REFRESH_LOCK = 'admingest-session-refresh';
+const RETRY_DELAY_MS = 400;
+
+async function refreshOnce(): Promise<Response> {
+  return fetch(API_URL + '/auth/refresh', { method: 'POST', credentials: 'include' });
+}
+
+/**
+ * All tabs share the same rotating refresh cookie. Without coordination two tabs
+ * refreshing at the same time send the same token: one rotates it and the other is
+ * rejected. The Web Locks API serialises refreshes across tabs; where it is not
+ * available, a single delayed retry picks up the cookie rotated by the other tab.
+ */
+async function refreshSession(): Promise<SessionPayload | null> {
+  const run = async () => {
+    let response = await refreshOnce();
+    if (response.status === 401) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      response = await refreshOnce();
+    }
+    return response.ok ? ((await response.json()) as SessionPayload) : null;
+  };
+  const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
+  return locks ? locks.request(REFRESH_LOCK, run) : run();
+}
+
 export async function restoreSession(): Promise<SessionPayload | null> {
   if (!refreshInFlight) {
-    refreshInFlight = fetch(API_URL + '/auth/refresh', {
-      method: 'POST', credentials: 'include',
-    })
-      .then(async (response) => response.ok ? (await response.json()) as SessionPayload : null)
+    refreshInFlight = refreshSession()
       .then((session) => {
         accessToken = session?.accessToken ?? null;
         return session;

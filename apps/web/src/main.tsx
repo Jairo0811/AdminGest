@@ -16,6 +16,7 @@ import "./corporate-theme.css";
 import "./corporate-refinements.css";
 import "./login-cover.css";
 import "./accessibility.css";
+import "./modules.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

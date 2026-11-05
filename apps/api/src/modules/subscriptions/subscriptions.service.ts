@@ -68,8 +68,11 @@ export class SubscriptionsService {
         customers: remainingCapacity(limits.customers, usage.customers),
         projects: remainingCapacity(limits.projects, usage.projects),
       },
-      // Plan attributes that are informative only in v1.2.0 (no technical enforcement).
+      // Only these quotas are enforced in v1.2.0. storageMb, advancedReports and
+      // apiAccess are informative plan attributes without technical enforcement yet.
       enforcedLimits: ['users', 'customers', 'projects'] as LimitedResource[],
+      informativeFeatures: ['storageMb', 'advancedReports', 'apiAccess'] as const,
+      // No payment provider is integrated: plans are assigned by an operator.
       billing: { integrated: false, automaticRenewal: false },
     };
   }

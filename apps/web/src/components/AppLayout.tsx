@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
   Bell,
@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
+import { internalPath, NotificationItem, NOTIFICATIONS_KEY } from "../api/notifications";
 import { useAuth } from "../auth/AuthContext";
 import { AppResource, hasPermission } from "../auth/permissions";
 import { useTheme } from "../theme/useTheme";
@@ -62,14 +63,6 @@ type SearchResult = {
   path: string;
 };
 
-type NotificationItem = {
-  id: string;
-  title: string;
-  message: string;
-  createdAt: string;
-  readAt: string | null;
-  path: string;
-};
 
 const SIDEBAR_KEY = "admingest-sidebar-collapsed";
 
@@ -114,10 +107,16 @@ export function AppLayout() {
     staleTime: 15_000,
   });
 
+  const queryClient = useQueryClient();
   const notificationsQuery = useQuery({
-    queryKey: ["/notifications"],
+    queryKey: NOTIFICATIONS_KEY,
     queryFn: () => api<NotificationItem[]>("/notifications"),
     refetchInterval: 60_000,
+  });
+  const unreadCount = notificationsQuery.data?.filter((item) => !item.readAt).length ?? 0;
+  const markNotificationRead = useMutation({
+    mutationFn: (id: string) => api(`/notifications/${id}/read`, { method: "PATCH" }),
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY }),
   });
 
   const currentLabel = useMemo(() => {
@@ -266,18 +265,21 @@ export function AppLayout() {
           </button>
 
           <div className="topbar-popover-anchor">
-            <button aria-controls="notifications-popover" aria-expanded={notificationsOpen} aria-label="Notificaciones" className="icon-button" onClick={() => { setNotificationsOpen((value) => !value); setProfileOpen(false); }} type="button">
+            <button aria-controls="notifications-popover" aria-expanded={notificationsOpen} aria-label={unreadCount ? `Notificaciones: ${unreadCount} sin leer` : "Notificaciones"} className="icon-button" onClick={() => { setNotificationsOpen((value) => !value); setProfileOpen(false); }} type="button">
               <Bell aria-hidden="true" size={20} />
-              {!!notificationsQuery.data?.some((item) => !item.readAt) && <span aria-hidden="true" className="notification-dot" />}
+              {unreadCount > 0 && <span aria-hidden="true" className="notification-count">{unreadCount > 9 ? "9+" : unreadCount}</span>}
             </button>
             {notificationsOpen && (
               <div aria-label="Notificaciones" className="topbar-popover notifications-popover" id="notifications-popover" role="region">
-                <div className="popover-header"><strong>Notificaciones</strong><span>{notificationsQuery.data?.length ?? 0}</span></div>
-                {notificationsQuery.isLoading ? <div className="popover-state" role="status">Cargando…</div> : notificationsQuery.data?.length ? notificationsQuery.data.map((item) => (
-                  <button key={item.id} onClick={() => goTo(item.path)} type="button">
-                    <span><strong>{item.title}</strong><small>{item.message}</small><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString("es-DO")}</time></span>
+                <div className="popover-header"><strong>Notificaciones</strong><span>{unreadCount} sin leer</span></div>
+                {notificationsQuery.isLoading ? <div className="popover-state" role="status">Cargando…</div>
+                  : notificationsQuery.isError ? <div className="popover-state" role="alert">No fue posible cargar las notificaciones.</div>
+                  : notificationsQuery.data?.length ? notificationsQuery.data.slice(0, 6).map((item) => (
+                  <button key={item.id} onClick={() => { if (!item.readAt) markNotificationRead.mutate(item.id); goTo(internalPath(item.path)); }} type="button">
+                    <span><strong>{item.title}{!item.readAt && <><span aria-hidden="true" className="unread-dot" /><span className="sr-only"> (sin leer)</span></>}</strong><small>{item.message}</small><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString("es-DO")}</time></span>
                   </button>
-                )) : <div className="popover-state" role="status">No tienes alertas próximas.</div>}
+                )) : <div className="popover-state" role="status">No tienes notificaciones.</div>}
+                <div className="popover-footer"><button className="text-button" onClick={() => goTo("/notifications")} type="button">Ver todas</button></div>
               </div>
             )}
           </div>
