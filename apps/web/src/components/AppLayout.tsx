@@ -275,8 +275,10 @@ export function AppLayout() {
           <div className="global-search" role="search">
             <Search aria-hidden="true" size={18} />
             <input
+              aria-autocomplete="list"
               aria-controls="global-search-results"
               aria-expanded={search.trim().length >= 2}
+              role="combobox"
               aria-label="Buscar en AdminGest"
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Buscar clientes, proyectos..."

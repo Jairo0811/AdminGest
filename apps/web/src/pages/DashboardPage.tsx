@@ -222,8 +222,20 @@ function SalesChart({ data }: { data: Dashboard['salesEvolution'] }) {
   const area = `${padding.left},${padding.top + chartHeight} ${line} ${padding.left + chartWidth},${padding.top + chartHeight}`;
 
   return (
-    <div className="chart-shell" aria-label="Evolución mensual del valor de oportunidades">
-      <svg className="sales-chart" role="img" viewBox={`0 0 ${width} ${height}`}>
+    <div
+      className="chart-shell"
+      tabIndex={0}
+      role="region"
+      aria-label="Gráfico desplazable: evolución mensual"
+    >
+      <svg
+        aria-label={`Evolución mensual del valor de oportunidades: ${data
+          .map((item) => `${item.month} ${Math.round(item.value)}`)
+          .join(', ')}`}
+        className="sales-chart"
+        role="img"
+        viewBox={`0 0 ${width} ${height}`}
+      >
         <defs>
           <linearGradient id="salesArea" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stopColor="#1677df" stopOpacity="0.28" />

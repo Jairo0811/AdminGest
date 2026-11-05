@@ -54,6 +54,9 @@
 .chart-panel,
 .funnel-panel {
   min-height: 390px;
+  /* Grid items default to min-width:auto; without this the 560px chart widened the
+     whole page on phones instead of scrolling inside .chart-shell. */
+  min-width: 0;
 }
 .panel-caption {
   color: var(--muted);
