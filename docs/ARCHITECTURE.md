@@ -102,7 +102,32 @@ sequenceDiagram
     S-->>W: respuesta
 ```
 
-El cliente no envía un `companyId` confiable. Tras iniciar sesión, la API firma un JWT con el usuario, rol y empresa. Los servicios obtienen la empresa desde ese contexto y aplican el filtro en cada lectura o escritura.
+El cliente no envía un `companyId` confiable. Tras iniciar sesión, la API firma un JWT con el usuario, la empresa y el identificador de sesión (`sid`); en cada solicitud `JwtStrategy` comprueba que la sesión no esté revocada y relee usuario, rol y estado desde la base. Los servicios obtienen la empresa desde ese contexto y aplican el filtro en cada lectura o escritura.
+
+### Defensa en profundidad (v1.2.0)
+
+1. **API:** todo identificador recibido que apunta a otro registro (`ownerId`, `managerId`, `assigneeId`,
+   `parentId`, `catalogItemId`, `customerId`, `opportunityId`, `pipelineStageId`, `projectId`) se valida con
+   los helpers de `apps/api/src/common/tenant/tenant-references.ts`, tanto al crear como al actualizar. También
+   se verifica la coherencia comercial: la oportunidad de una cotización, proyecto o actividad debe pertenecer
+   al cliente indicado, y la tarea padre al mismo proyecto y sin ciclos.
+2. **Base de datos:** las tablas referenciadas exponen una clave `(companyId, id)` y las relaciones usan
+   claves foráneas compuestas `(companyId, xId) → (companyId, id)`. Una referencia a otra empresa es
+   imposible aunque un servicio omita la validación.
+3. **Concurrencia:** cuotas, numeración y aplicación de plantillas se ejecutan en transacciones con
+   `sp_getapplock` (bloqueo de aplicación ligado a la transacción, válido entre réplicas de la API).
+   La numeración usa `CompanySequence (companyId, scope)`.
+4. **Errores:** las violaciones de restricciones se traducen a 409/404 sin exponer nombres internos.
+
+`ProjectTask` y `QuoteItem` no tienen `companyId`; heredan el tenant de su proyecto o cotización, que
+siempre se verifica antes de leerlos o escribirlos.
+
+### Salida HTML
+
+Los documentos imprimibles (cotizaciones, Gantt, reportes, tablas) se construyen con la plantilla `html`
+de `apps/web/src/utils/html.ts`, que escapa toda interpolación; las funciones de impresión solo aceptan
+`SafeHtml`. Cada ventana de impresión declara una Content-Security-Policy sin acceso a red y con un único
+script identificado por nonce.
 
 ## Flujo de una operación
 
