@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { randomBytes } from 'node:crypto';
+import { resolveSeedOptions } from './seed-options';
 
 const prisma = new PrismaClient();
 
@@ -9,97 +10,70 @@ const LEGACY_ADMIN_EMAIL = 'admin@example.test';
 const DEMO_COMPANY_NAME = 'Empresa Demo SRL';
 
 async function main(): Promise<void> {
-  const password =
-    process.env.SEED_ADMIN_PASSWORD ??
-    randomBytes(18).toString('base64url');
+  const options = resolveSeedOptions(process.env);
+  await ensurePlans(options.syncPlans);
 
-  const passwordHash = await hash(password, 12);
-  const starterPlan = await ensurePlans();
+  if (!options.demoData) {
+    console.log('Catálogo de planes verificado. No se crearon datos de demostración.');
+    return;
+  }
 
   const existingAdmin = await prisma.user.findFirst({
-    where: {
-      email: {
-        in: [ADMIN_EMAIL, LEGACY_ADMIN_EMAIL],
-      },
-    },
+    where: { email: { in: [ADMIN_EMAIL, LEGACY_ADMIN_EMAIL] } },
+    select: { id: true, email: true, companyId: true },
   });
 
   if (existingAdmin) {
-    await prisma.$transaction([
-      prisma.user.update({
-        where: {
-          id: existingAdmin.id,
-        },
-        data: {
-          email: ADMIN_EMAIL,
-          passwordHash,
-          firstName: 'Usuario',
-          lastName: 'Administrador',
-          role: 'ADMIN',
-        },
-      }),
-      prisma.company.update({
-        where: {
-          id: existingAdmin.companyId,
-        },
-        data: {
-          email: ADMIN_EMAIL,
-        },
-      }),
-    ]);
-
-    await ensureSubscription(existingAdmin.companyId, starterPlan.id);
-
-    printCredentials(
-      'El usuario administrador existente fue actualizado correctamente.',
-      password,
+    // Existing accounts are never modified implicitly: no password, profile or role
+    // changes, and the subscription is only created when it is missing.
+    await ensureSubscription(existingAdmin.companyId);
+    if (options.resetAdminPassword && options.adminPassword) {
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id: existingAdmin.id },
+          data: { passwordHash: await hash(options.adminPassword, 12) },
+        }),
+        prisma.authSession.updateMany({
+          where: { userId: existingAdmin.id, revokedAt: null },
+          data: { revokedAt: new Date() },
+        }),
+      ]);
+      console.log(`Contraseña restablecida por solicitud explícita para ${existingAdmin.email}.`);
+      return;
+    }
+    console.log(
+      `El administrador ${existingAdmin.email} ya existe. Sus credenciales y datos no fueron modificados.`,
     );
-
     return;
   }
 
-  const existingCompany = await prisma.company.findFirst({
-    where: {
-      OR: [
-        { name: DEMO_COMPANY_NAME },
-        { email: ADMIN_EMAIL },
-        { email: LEGACY_ADMIN_EMAIL },
-      ],
-    },
+  const generatedPassword = options.adminPassword ? undefined : randomBytes(18).toString('base64url');
+  const password = options.adminPassword ?? generatedPassword!;
+  const passwordHash = await hash(password, 12);
+
+  // Only the demo company is reused; companies of real customers are never touched.
+  const demoCompany = await prisma.company.findFirst({
+    where: { name: DEMO_COMPANY_NAME },
+    select: { id: true },
   });
 
-  if (existingCompany) {
-    await prisma.$transaction([
-      prisma.user.create({
-        data: {
-          companyId: existingCompany.id,
-          email: ADMIN_EMAIL,
-          passwordHash,
-          firstName: 'Usuario',
-          lastName: 'Administrador',
-          role: 'ADMIN',
-        },
-      }),
-      prisma.company.update({
-        where: {
-          id: existingCompany.id,
-        },
-        data: {
-          email: ADMIN_EMAIL,
-        },
-      }),
-    ]);
-
-    await ensureSubscription(existingCompany.id, starterPlan.id);
-
-    printCredentials(
-      'El usuario administrador fue agregado a la empresa existente.',
-      password,
-    );
-
+  if (demoCompany) {
+    await prisma.user.create({
+      data: {
+        companyId: demoCompany.id,
+        email: ADMIN_EMAIL,
+        passwordHash,
+        firstName: 'Usuario',
+        lastName: 'Administrador',
+        role: 'ADMIN',
+      },
+    });
+    await ensureSubscription(demoCompany.id);
+    printCredentials('Se agregó el administrador a la empresa de demostración.', generatedPassword);
     return;
   }
 
+  const starterPlan = await prisma.plan.findUniqueOrThrow({ where: { code: 'STARTER' } });
   await prisma.$transaction(async (transaction) => {
     const company = await transaction.company.create({
       data: {
@@ -267,13 +241,10 @@ async function main(): Promise<void> {
     });
   });
 
-  printCredentials(
-    'AdminGest fue inicializado correctamente.',
-    password,
-  );
+  printCredentials('AdminGest fue inicializado con datos de demostración.', generatedPassword);
 }
 
-async function ensurePlans() {
+async function ensurePlans(syncPlans: boolean) {
   const plans = [
     {
       code: 'STARTER',
@@ -323,21 +294,21 @@ async function ensurePlans() {
     await prisma.plan.upsert({
       where: { code: plan.code },
       create: plan,
-      update: plan,
+      // Limits edited by an operator are preserved unless a sync is requested.
+      update: syncPlans ? plan : {},
     });
   }
-
-  return prisma.plan.findUniqueOrThrow({ where: { code: 'STARTER' } });
 }
 
-async function ensureSubscription(companyId: string, planId: string) {
+async function ensureSubscription(companyId: string) {
   const existing = await prisma.subscription.findUnique({ where: { companyId } });
   if (existing) return existing;
 
+  const starterPlan = await prisma.plan.findUniqueOrThrow({ where: { code: 'STARTER' } });
   return prisma.subscription.create({
     data: {
       companyId,
-      planId,
+      planId: starterPlan.id,
       status: 'TRIAL',
       trialEndsAt: addDays(new Date(), 14),
     },
@@ -350,13 +321,14 @@ function addDays(date: Date, days: number): Date {
   );
 }
 
-function printCredentials(
-  message: string,
-  password: string,
-): void {
+function printCredentials(message: string, generatedPassword?: string): void {
   console.log(message);
   console.log(`Usuario: ${ADMIN_EMAIL}`);
-  console.log(`Contraseña inicial: ${password}`);
+  console.log(
+    generatedPassword
+      ? `Contraseña inicial generada (cámbiala al iniciar sesión): ${generatedPassword}`
+      : 'Contraseña: la definida en SEED_ADMIN_PASSWORD.',
+  );
 }
 
 void main()
