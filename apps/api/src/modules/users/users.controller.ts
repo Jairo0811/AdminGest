@@ -50,7 +50,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
   ) {
-    return this.usersService.update(user.companyId, user.id, id, dto);
+    return this.usersService.update(user.companyId, user, id, dto);
   }
 
   @Post(':id/reset-password')
@@ -60,6 +60,6 @@ export class UsersController {
     @Param('id') id: string,
     @Body() dto: ResetPasswordDto,
   ) {
-    return this.usersService.resetPassword(user.companyId, user.id, id, dto);
+    return this.usersService.resetPassword(user.companyId, user, id, dto);
   }
 }
