@@ -539,7 +539,12 @@ export function EntityPage({
                       required={field.required}
                     />
                   ) : field.type === 'select' ? (
-                    <select defaultValue={defaultValue} name={field.name} required={field.required}>
+                    <select
+                      aria-label={field.label}
+                      defaultValue={defaultValue}
+                      name={field.name}
+                      required={field.required}
+                    >
                       <option value="">
                         {lookupFailed
                           ? 'No fue posible cargar las opciones'

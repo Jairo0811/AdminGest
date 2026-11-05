@@ -30,7 +30,10 @@ interface AuthContextValue {
   login(email: string, password: string): Promise<void>;
   register(data: RegisterData): Promise<void>;
   refreshUser(): Promise<void>;
-  logout(): void;
+  /** Ends the session; `notice` is shown once on the login page (for example after a password change). */
+  logout(notice?: string): void;
+  /** Message to show on the login page after a logout, if any. */
+  notice: string | null;
 }
 
 export interface RegisterData {
@@ -47,6 +50,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   /** Drops the session locally: token, user and every cached query of the tenant. */
@@ -56,17 +60,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear();
   }, [queryClient]);
 
-  const logout = useCallback(() => {
-    forgetSession();
-    void closeSession();
-    try {
-      const channel = new BroadcastChannel(AUTH_CHANNEL);
-      channel.postMessage('logout');
-      channel.close();
-    } catch {
-      // BroadcastChannel is optional; other tabs will be rejected on their next request.
-    }
-  }, [forgetSession]);
+  const logout = useCallback(
+    (message?: string) => {
+      setNotice(message ?? null);
+      forgetSession();
+      void closeSession();
+      try {
+        const channel = new BroadcastChannel(AUTH_CHANNEL);
+        channel.postMessage('logout');
+        channel.close();
+      } catch {
+        // BroadcastChannel is optional; other tabs will be rejected on their next request.
+      }
+    },
+    [forgetSession],
+  );
 
   const refreshUser = useCallback(async () => {
     setUser(await api<SessionUser>('/auth/me'));
@@ -106,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const establishSession = (session: SessionResponse) => {
     // Never show data cached for a previous user or company.
     queryClient.clear();
+    setNotice(null);
     setAccessToken(session.accessToken);
     setUser(session.user);
   };
@@ -115,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     logout,
     refreshUser,
+    notice,
     async login(email, password) {
       establishSession(
         await api<SessionResponse>('/auth/login', {

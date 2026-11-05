@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   UsersRound,
 } from 'lucide-react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AppFooter } from '../components/AppFooter';
 import { BrandLogo } from '../components/BrandLogo';
@@ -51,9 +51,7 @@ const productPillars = [
 ];
 
 export function LoginPage() {
-  const { user, login, register } = useAuth();
-  const location = useLocation();
-  const notice = (location.state as { notice?: string } | null)?.notice;
+  const { user, login, register, notice } = useAuth();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [error, setError] = useState('');

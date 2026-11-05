@@ -225,7 +225,12 @@ export function WorkflowsPage() {
               >
                 <label className="form-field">
                   <span>Aplicar al proyecto</span>
-                  <select defaultValue="" name="projectId" required>
+                  <select
+                    aria-label="Aplicar al proyecto"
+                    defaultValue=""
+                    name="projectId"
+                    required
+                  >
                     <option value="">
                       {projects.isError
                         ? 'No fue posible cargar los proyectos'

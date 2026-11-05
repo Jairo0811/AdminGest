@@ -388,6 +388,7 @@ export function ProjectsPage() {
             <label className="form-field">
               <span>Proyecto</span>
               <select
+                aria-label="Proyecto"
                 onChange={(event) => setSelectedProjectId(event.target.value)}
                 value={selectedProjectId}
               >

@@ -16,7 +16,7 @@ test.describe('Flujos principales en el navegador (API y SQL Server reales)', ()
   test('registra una empresa desde la interfaz @mobile', async ({ page }) => {
     await page.goto('/login');
     await page.getByRole('button', { name: /Crea una cuenta/ }).click();
-    await page.getByLabel('Empresa').fill(`Registro UI ${RUN}`);
+    await page.getByRole('textbox', { name: 'Empresa', exact: true }).fill(`Registro UI ${RUN}`);
     await page.getByLabel('Nombre', { exact: true }).fill('Laura');
     await page.getByLabel('Apellido').fill('Registro');
     await page

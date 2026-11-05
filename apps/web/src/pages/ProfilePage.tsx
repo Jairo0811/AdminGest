@@ -74,12 +74,10 @@ export function ProfilePage() {
       api('/users/me/change-password', { method: 'POST', body: JSON.stringify(payload) }),
     onSuccess: () => {
       setError('');
-      // The server revoked every session, including this one.
-      logout();
-      navigate('/login', {
-        replace: true,
-        state: { notice: 'Contraseña actualizada. Inicia sesión con tu nueva contraseña.' },
-      });
+      // The server revoked every session, including this one. The notice travels through
+      // the auth context: router state is lost in the protected-layout redirect.
+      logout('Contraseña actualizada. Inicia sesión con tu nueva contraseña.');
+      navigate('/login', { replace: true });
     },
     onError: (mutationError: Error) => setError(mutationError.message),
   });

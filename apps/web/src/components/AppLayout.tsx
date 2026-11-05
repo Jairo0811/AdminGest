@@ -226,7 +226,7 @@ export function AppLayout() {
           </NavLink>
         )}
 
-        <button className="nav-item logout" onClick={logout} type="button">
+        <button className="nav-item logout" onClick={() => logout()} type="button">
           <LogOut aria-hidden="true" size={19} />
           <span>Cerrar sesión</span>
         </button>
@@ -468,7 +468,7 @@ export function AppLayout() {
                   )}
                   Cambiar tema
                 </button>
-                <button className="danger" onClick={logout} role="menuitem" type="button">
+                <button className="danger" onClick={() => logout()} role="menuitem" type="button">
                   <LogOut aria-hidden="true" size={18} />
                   Cerrar sesión
                 </button>
