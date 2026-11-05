@@ -47,7 +47,9 @@ async function main(): Promise<void> {
     return;
   }
 
-  const generatedPassword = options.adminPassword ? undefined : randomBytes(18).toString('base64url');
+  const generatedPassword = options.adminPassword
+    ? undefined
+    : randomBytes(18).toString('base64url');
   const password = options.adminPassword ?? generatedPassword!;
   const passwordHash = await hash(password, 12);
 
@@ -316,9 +318,7 @@ async function ensureSubscription(companyId: string) {
 }
 
 function addDays(date: Date, days: number): Date {
-  return new Date(
-    date.getTime() + days * 24 * 60 * 60 * 1000,
-  );
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 }
 
 function printCredentials(message: string, generatedPassword?: string): void {

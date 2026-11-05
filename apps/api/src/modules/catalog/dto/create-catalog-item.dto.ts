@@ -1,13 +1,4 @@
-import {
-  IsIn,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Length,
-  Max,
-  MaxLength,
-  Min,
-} from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, Length, Max, MaxLength, Min } from 'class-validator';
 
 export class CreateCatalogItemDto {
   @IsString()
@@ -33,4 +24,3 @@ export class CreateCatalogItemDto {
   @Max(100)
   taxRate?: number;
 }
-

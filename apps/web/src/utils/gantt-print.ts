@@ -50,11 +50,28 @@ export function buildGanttPrintBody(
   });
 
   return html`<header class="gantt-header">
-      <div><span class="label">Cronograma del proyecto</span><h1>${projectName}</h1>
-      <p class="muted">${dated.length} tareas · ${dated.length ? `${date(new Date(min).toISOString())} – ${date(new Date(max).toISOString())}` : ''}</p></div>
+      <div>
+        <span class="label">Cronograma del proyecto</span>
+        <h1>${projectName}</h1>
+        <p class="muted">
+          ${dated.length} tareas ·
+          ${dated.length ? `${date(new Date(min).toISOString())} – ${date(new Date(max).toISOString())}` : ''}
+        </p>
+      </div>
     </header>
     <table class="gantt-table">
-      <thead><tr><th>Tarea</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Avance</th><th>Gantt</th></tr></thead>
-      <tbody>${rows}</tbody>
+      <thead>
+        <tr>
+          <th>Tarea</th>
+          <th>Estado</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Avance</th>
+          <th>Gantt</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
     </table>`;
 }

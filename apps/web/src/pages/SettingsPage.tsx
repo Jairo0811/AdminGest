@@ -99,98 +99,125 @@ export function SettingsPage() {
             {isError ? (
               <>
                 <p>No fue posible cargar la configuración de la empresa.</p>
-                <button className="secondary-button" onClick={() => void refetch()} type="button">Reintentar</button>
+                <button className="secondary-button" onClick={() => void refetch()} type="button">
+                  Reintentar
+                </button>
               </>
             ) : (
               <p>Cargando configuración…</p>
             )}
           </div>
         ) : (
-        // Keyed by the loaded record: uncontrolled inputs must never start empty and
-        // then be saved, because an empty optional field now clears the stored value.
-        <form className="panel settings-form" key={data.name + data.email + data.phone} onSubmit={submit}>
-          <div className="settings-title">
-            <Building2 />
-            <div>
-              <h2>Perfil de empresa</h2>
-              <p>Información mostrada en documentos y reportes.</p>
+          // Keyed by the loaded record: uncontrolled inputs must never start empty and
+          // then be saved, because an empty optional field now clears the stored value.
+          <form
+            className="panel settings-form"
+            key={data.name + data.email + data.phone}
+            onSubmit={submit}
+          >
+            <div className="settings-title">
+              <Building2 />
+              <div>
+                <h2>Perfil de empresa</h2>
+                <p>Información mostrada en documentos y reportes.</p>
+              </div>
             </div>
-          </div>
 
-          <div className="form-grid">
-            <label className="form-field">
-              <span>Empresa</span>
-              <input defaultValue={data?.name} name="name" required />
-            </label>
+            <div className="form-grid">
+              <label className="form-field">
+                <span>Empresa</span>
+                <input defaultValue={data?.name} name="name" required />
+              </label>
 
-            <label className="form-field">
-              <span>RNC</span>
-              <input
-                aria-describedby="rnc-help"
-                aria-invalid={showRncError}
-                autoComplete="off"
-                inputMode="numeric"
-                maxLength={11}
-                name="taxId"
-                onBlur={() => setRncTouched(true)}
-                onChange={(event) => {
-                  const digits = normalizeDominicanTaxId(event.target.value).slice(0, 9);
-                  setRnc(formatDominicanTaxId(digits));
-                  setMessage('');
-                }}
-                pattern="\d{3}-\d{5}-\d"
-                placeholder="000-00000-0"
-                value={rnc}
-              />
-              <small id="rnc-help">
-                {hasRnc ? `${normalizedRnc.length}/9 dígitos` : 'Formato: 000-00000-0'}
-              </small>
-              {rncTouched && hasRnc && (
-                <small className={isRncValid ? 'field-success' : 'field-error'}>
-                  {isRncValid ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                  {isRncValid
-                    ? 'RNC válido.'
-                    : isRncComplete
-                      ? 'El dígito verificador del RNC no es válido.'
-                      : 'El RNC debe contener exactamente 9 dígitos.'}
+              <label className="form-field">
+                <span>RNC</span>
+                <input
+                  aria-describedby="rnc-help"
+                  aria-invalid={showRncError}
+                  autoComplete="off"
+                  inputMode="numeric"
+                  maxLength={11}
+                  name="taxId"
+                  onBlur={() => setRncTouched(true)}
+                  onChange={(event) => {
+                    const digits = normalizeDominicanTaxId(event.target.value).slice(0, 9);
+                    setRnc(formatDominicanTaxId(digits));
+                    setMessage('');
+                  }}
+                  pattern="\d{3}-\d{5}-\d"
+                  placeholder="000-00000-0"
+                  value={rnc}
+                />
+                <small id="rnc-help">
+                  {hasRnc ? `${normalizedRnc.length}/9 dígitos` : 'Formato: 000-00000-0'}
                 </small>
-              )}
-            </label>
+                {rncTouched && hasRnc && (
+                  <small className={isRncValid ? 'field-success' : 'field-error'}>
+                    {isRncValid ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                    {isRncValid
+                      ? 'RNC válido.'
+                      : isRncComplete
+                        ? 'El dígito verificador del RNC no es válido.'
+                        : 'El RNC debe contener exactamente 9 dígitos.'}
+                  </small>
+                )}
+              </label>
 
-            <label className="form-field">
-              <span>Correo</span>
-              <input defaultValue={data?.email} name="email" type="email" />
-            </label>
-            <label className="form-field">
-              <span>Teléfono</span>
-              <input defaultValue={data?.phone} name="phone" />
-            </label>
-            <label className="form-field">
-              <span>Moneda</span>
-              <input defaultValue={data?.currency ?? 'DOP'} maxLength={3} minLength={3} name="currency" pattern="[A-Za-z]{3}" required />
-            </label>
-            <label className="form-field">
-              <span>Zona horaria</span>
-              <input defaultValue={data?.timezone} name="timezone" placeholder="America/Santo_Domingo" required />
-            </label>
-            <label className="form-field full">
-              <span>Dirección</span>
-              <textarea defaultValue={data?.address} name="address" />
-            </label>
-          </div>
+              <label className="form-field">
+                <span>Correo</span>
+                <input defaultValue={data?.email} name="email" type="email" />
+              </label>
+              <label className="form-field">
+                <span>Teléfono</span>
+                <input defaultValue={data?.phone} name="phone" />
+              </label>
+              <label className="form-field">
+                <span>Moneda</span>
+                <input
+                  defaultValue={data?.currency ?? 'DOP'}
+                  maxLength={3}
+                  minLength={3}
+                  name="currency"
+                  pattern="[A-Za-z]{3}"
+                  required
+                />
+              </label>
+              <label className="form-field">
+                <span>Zona horaria</span>
+                <input
+                  defaultValue={data?.timezone}
+                  name="timezone"
+                  placeholder="America/Santo_Domingo"
+                  required
+                />
+              </label>
+              <label className="form-field full">
+                <span>Dirección</span>
+                <textarea defaultValue={data?.address} name="address" />
+              </label>
+            </div>
 
-          <p className="field-hint">Deja vacío un campo opcional y guarda para eliminar su valor.</p>
-          {message && <div className={save.isError ? 'alert error' : 'alert success'} role={save.isError ? 'alert' : 'status'}>{message}</div>}
-          <div className="form-actions">
-            <button
-              className="primary-button"
-              disabled={save.isPending || (hasRnc && !isRncValid)}
-              type="submit"
-            >
-              <Save size={17} /> {save.isPending ? 'Guardando…' : 'Guardar'}
-            </button>
-          </div>
-        </form>
+            <p className="field-hint">
+              Deja vacío un campo opcional y guarda para eliminar su valor.
+            </p>
+            {message && (
+              <div
+                className={save.isError ? 'alert error' : 'alert success'}
+                role={save.isError ? 'alert' : 'status'}
+              >
+                {message}
+              </div>
+            )}
+            <div className="form-actions">
+              <button
+                className="primary-button"
+                disabled={save.isPending || (hasRnc && !isRncValid)}
+                type="submit"
+              >
+                <Save size={17} /> {save.isPending ? 'Guardando…' : 'Guardar'}
+              </button>
+            </div>
+          </form>
         )}
 
         <aside className="panel security-panel">

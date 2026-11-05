@@ -1,10 +1,4 @@
-import {
-  createNonce,
-  escapeHtml,
-  html,
-  printContentSecurityPolicy,
-  SafeHtml,
-} from './html';
+import { createNonce, escapeHtml, html, printContentSecurityPolicy, SafeHtml } from './html';
 
 export interface ExportColumn<T> {
   label: string;
@@ -21,7 +15,10 @@ const escapeXml = (value: unknown) =>
 
 /** Excel sheet names: at most 31 characters and none of : \\ / ? * [ ] */
 export const sheetName = (value: string) =>
-  value.replace(/[:\\/?*[\]]/g, ' ').trim().slice(0, 31) || 'Datos';
+  value
+    .replace(/[:\\/?*[\]]/g, ' ')
+    .trim()
+    .slice(0, 31) || 'Datos';
 
 const safeFileName = (value: string) =>
   value
@@ -31,11 +28,7 @@ const safeFileName = (value: string) =>
     .replace(/^-+|-+$/g, '')
     .toLowerCase();
 
-export function exportToExcel<T>(
-  title: string,
-  items: T[],
-  columns: ExportColumn<T>[],
-) {
+export function exportToExcel<T>(title: string, items: T[], columns: ExportColumn<T>[]) {
   const header = columns
     .map((column) => `<Cell><Data ss:Type="String">${escapeXml(column.label)}</Data></Cell>`)
     .join('');
@@ -69,11 +62,7 @@ export function exportToExcel<T>(
   );
 }
 
-export function printTable<T>(
-  title: string,
-  items: T[],
-  columns: ExportColumn<T>[],
-) {
+export function printTable<T>(title: string, items: T[], columns: ExportColumn<T>[]) {
   const styles = `
   body{font-family:Arial,sans-serif;color:#17263a;margin:32px}
   header{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}
@@ -84,10 +73,28 @@ export function printTable<T>(
   th{background:#edf5ff;color:#153452}
   @page{size:landscape;margin:12mm}
   @media print{body{margin:0}button{display:none}}`;
-  const body = html`<header><div><h1>${title}</h1><small>AdminGest · ${new Date().toLocaleString('es-DO')}</small></div><button type="button" data-print>Guardar como PDF</button></header>
-<table><thead><tr>${columns.map((column) => html`<th>${column.label}</th>`)}</tr></thead><tbody>${items.map(
-    (item) => html`<tr>${columns.map((column) => html`<td>${column.value(item)}</td>`)}</tr>`,
-  )}</tbody></table>`;
+  const body = html`<header>
+      <div>
+        <h1>${title}</h1>
+        <small>AdminGest · ${new Date().toLocaleString('es-DO')}</small>
+      </div>
+      <button type="button" data-print>Guardar como PDF</button>
+    </header>
+    <table>
+      <thead>
+        <tr>
+          ${columns.map((column) => html`<th>${column.label}</th>`)}
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(
+          (item) =>
+            html`<tr>
+              ${columns.map((column) => html`<td>${column.value(item)}</td>`)}
+            </tr>`,
+        )}
+      </tbody>
+    </table>`;
 
   openPrintWindow(buildPrintableDocument({ title, styles, body, autoPrintDelayMs: 300 }));
 }
@@ -117,7 +124,9 @@ export function printDocument(title: string, body: SafeHtml) {
     buildPrintableDocument({
       title,
       styles,
-      body: html`<div class="document"><button class="no-print" type="button" data-print>Guardar como PDF</button>${body}</div>`,
+      body: html`<div class="document">
+        <button class="no-print" type="button" data-print>Guardar como PDF</button>${body}
+      </div>`,
       autoPrintDelayMs: 350,
     }),
   );

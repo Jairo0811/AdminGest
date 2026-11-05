@@ -12,14 +12,18 @@ describe('HealthController', () => {
   });
 
   it('returns ready when SQL is available', async () => {
-    const prisma = { $queryRawUnsafe: jest.fn().mockResolvedValue([1]) } as unknown as PrismaService;
+    const prisma = {
+      $queryRawUnsafe: jest.fn().mockResolvedValue([1]),
+    } as unknown as PrismaService;
     await expect(new HealthController(prisma).readiness()).resolves.toEqual(
       expect.objectContaining({ status: 'ready' }),
     );
   });
 
   it('returns 503 when SQL is unavailable', async () => {
-    const prisma = { $queryRawUnsafe: jest.fn().mockRejectedValue(new Error('connection down')) } as unknown as PrismaService;
+    const prisma = {
+      $queryRawUnsafe: jest.fn().mockRejectedValue(new Error('connection down')),
+    } as unknown as PrismaService;
     await expect(new HealthController(prisma).readiness()).rejects.toBeInstanceOf(
       ServiceUnavailableException,
     );

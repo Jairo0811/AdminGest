@@ -39,7 +39,10 @@ const render = (value: HtmlValue): string => {
 /** Tagged template: `html\`<td>${userValue}</td>\`` escapes `userValue`. */
 export function html(strings: TemplateStringsArray, ...values: HtmlValue[]): SafeHtml {
   return new SafeHtml(
-    strings.reduce((result, part, index) => result + part + (index < values.length ? render(values[index]) : ''), ''),
+    strings.reduce(
+      (result, part, index) => result + part + (index < values.length ? render(values[index]) : ''),
+      '',
+    ),
   );
 }
 

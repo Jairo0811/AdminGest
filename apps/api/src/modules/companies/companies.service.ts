@@ -29,7 +29,9 @@ export class CompaniesService {
   update(companyId: string, dto: UpdateCompanyDto) {
     const taxId = dto.taxId ? normalizeDominicanTaxId(dto.taxId) : dto.taxId;
     if (dto.timezone !== undefined && !isValidTimeZone(dto.timezone)) {
-      throw new BadRequestException('La zona horaria no es válida (formato IANA, por ejemplo America/Santo_Domingo).');
+      throw new BadRequestException(
+        'La zona horaria no es válida (formato IANA, por ejemplo America/Santo_Domingo).',
+      );
     }
 
     return this.prisma.company.update({

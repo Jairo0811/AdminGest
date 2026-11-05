@@ -4,7 +4,11 @@ import { buildCorporateReport } from './corporate-report';
 import { buildPrintableDocument } from './export';
 import { buildGanttPrintBody } from './gantt-print';
 import { escapeHtml, html, safeImageSource, SafeHtml } from './html';
-import { neutralizeFormula, buildMicrosoftProjectCsv, parseMicrosoftProjectCsv } from './ms-project-csv';
+import {
+  neutralizeFormula,
+  buildMicrosoftProjectCsv,
+  parseMicrosoftProjectCsv,
+} from './ms-project-csv';
 import { buildQuotePrintBody, PrintableQuote, summarizeQuote } from './quote-print';
 
 const PAYLOADS = [
@@ -34,14 +38,18 @@ describe('html escaping', () => {
 
   it('escapes interpolations but keeps nested SafeHtml', () => {
     const inner = html`<b>${'<i>'}</b>`;
-    expect(String(html`<p>${inner}${'<script>'}</p>`)).toBe('<p><b>&lt;i&gt;</b>&lt;script&gt;</p>');
-    expect(String(html`${['<a>', html`<br/>`]}`)).toBe('&lt;a&gt;<br/>');
+    expect(String(html`<p>${inner}${'<script>'}</p>`)).toBe(
+      '<p><b>&lt;i&gt;</b>&lt;script&gt;</p>',
+    );
+    expect(String(html`${['<a>', html`<br />`]}`)).toBe('&lt;a&gt;<br />');
   });
 
   it('only allows same-origin, HTTPS or image data URLs as image sources', () => {
     const origin = 'https://app.admingest.test';
     expect(safeImageSource('/brand/logo.png', origin)).toBe(`${origin}/brand/logo.png`);
-    expect(safeImageSource('data:image/png;base64,iVBORw0KGgo=', origin)).toMatch(/^data:image\/png/);
+    expect(safeImageSource('data:image/png;base64,iVBORw0KGgo=', origin)).toMatch(
+      /^data:image\/png/,
+    );
     expect(safeImageSource('javascript:alert(1)', origin)).toBe('');
     expect(safeImageSource('data:text/html;base64,PHNjcmlwdD4=', origin)).toBe('');
     expect(safeImageSource('http://evil.test/x.png', origin)).toBe('');
@@ -56,13 +64,12 @@ describe('printable documents', () => {
       body: html`<p>${PAYLOADS[0]}</p>`,
       autoPrintDelayMs: 100,
     });
-    const csp = (/http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(page)?.[1] ?? '').replaceAll(
-      '&#39;',
-      "'",
-    );
+    const csp = (
+      /http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(page)?.[1] ?? ''
+    ).replaceAll('&#39;', "'");
     expect(csp).toContain("default-src 'none'");
     expect(csp).toMatch(/script-src 'nonce-[a-f0-9]{32}'/);
-    expect(csp).not.toContain('unsafe-inline\' \'unsafe-eval');
+    expect(csp).not.toContain("unsafe-inline' 'unsafe-eval");
     expect(page.match(/<script/g)).toHaveLength(1);
     expect(page).not.toContain('onclick=');
     expectInert(page);
@@ -80,7 +87,9 @@ describe('printable documents', () => {
     expectInert(output);
     expect(output).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
     expect(output).toContain('100 %');
-    const percentages = [...output.matchAll(/(?:left|width):(-?[\d.]+)%/g)].map((match) => Number(match[1]));
+    const percentages = [...output.matchAll(/(?:left|width):(-?[\d.]+)%/g)].map((match) =>
+      Number(match[1]),
+    );
     expect(percentages.length).toBeGreaterThan(0);
     expect(percentages.every((value) => value >= 0 && value <= 100)).toBe(true);
   });
@@ -116,8 +125,26 @@ const baseQuote: PrintableQuote = {
   notes: null,
   customer: { name: PAYLOADS[1], taxId: PAYLOADS[0], address: PAYLOADS[2] },
   items: [
-    { id: '1', description: PAYLOADS[0], quantity: '2', unitPrice: '100', taxRate: '18', lineTotal: '200', discountAmount: '20', taxAmount: '32.40' },
-    { id: '2', description: 'Servicio exento', quantity: '1', unitPrice: '50', taxRate: '0', lineTotal: '50', discountAmount: '5', taxAmount: '0' },
+    {
+      id: '1',
+      description: PAYLOADS[0],
+      quantity: '2',
+      unitPrice: '100',
+      taxRate: '18',
+      lineTotal: '200',
+      discountAmount: '20',
+      taxAmount: '32.40',
+    },
+    {
+      id: '2',
+      description: 'Servicio exento',
+      quantity: '1',
+      unitPrice: '50',
+      taxRate: '0',
+      lineTotal: '50',
+      discountAmount: '5',
+      taxAmount: '0',
+    },
   ],
 };
 
@@ -162,9 +189,17 @@ describe('quote printing', () => {
     const summary = summarizeQuote(legacy);
     expect(summary.legacy).toBe(true);
     expect(summary.lines.every((line) => line.tax === null && line.total === null)).toBe(true);
-    expect(String(buildQuotePrintBody({ quote: legacy, company: { name: 'A' }, verificationUrl: 'https://x.test', qrDataUrl: '', logoUrl: '' }))).toContain(
-      'antes de la versión 1.2.0',
-    );
+    expect(
+      String(
+        buildQuotePrintBody({
+          quote: legacy,
+          company: { name: 'A' },
+          verificationUrl: 'https://x.test',
+          qrDataUrl: '',
+          logoUrl: '',
+        }),
+      ),
+    ).toContain('antes de la versión 1.2.0');
   });
 });
 
@@ -173,10 +208,20 @@ describe('CSV formula injection', () => {
     expect(neutralizeFormula('=HYPERLINK("http://evil")')).toBe('\'=HYPERLINK("http://evil")');
     expect(neutralizeFormula('Diseño')).toBe('Diseño');
     const csv = buildMicrosoftProjectCsv([
-      { id: 1, name: '=1+1', durationDays: 1, percentComplete: 0, resourceNames: '@SUM(A1)', milestone: false },
+      {
+        id: 1,
+        name: '=1+1',
+        durationDays: 1,
+        percentComplete: 0,
+        resourceNames: '@SUM(A1)',
+        milestone: false,
+      },
     ]);
     expect(csv).toContain("'=1+1");
     expect(csv).toContain("'@SUM(A1)");
-    expect(parseMicrosoftProjectCsv(csv)[0]).toMatchObject({ name: '=1+1', resourceNames: '@SUM(A1)' });
+    expect(parseMicrosoftProjectCsv(csv)[0]).toMatchObject({
+      name: '=1+1',
+      resourceNames: '@SUM(A1)',
+    });
   });
 });

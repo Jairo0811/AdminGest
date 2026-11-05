@@ -146,19 +146,22 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    return this.createSession({
-      id: userWithPassword.id,
-      companyId: userWithPassword.companyId,
-      email: userWithPassword.email,
-      firstName: userWithPassword.firstName,
-      lastName: userWithPassword.lastName,
-      role: userWithPassword.role,
-      company: {
-        name: userWithPassword.company.name,
-        currency: userWithPassword.company.currency,
-        timezone: userWithPassword.company.timezone,
+    return this.createSession(
+      {
+        id: userWithPassword.id,
+        companyId: userWithPassword.companyId,
+        email: userWithPassword.email,
+        firstName: userWithPassword.firstName,
+        lastName: userWithPassword.lastName,
+        role: userWithPassword.role,
+        company: {
+          name: userWithPassword.company.name,
+          currency: userWithPassword.company.currency,
+          timezone: userWithPassword.company.timezone,
+        },
       },
-    }, metadata);
+      metadata,
+    );
   }
 
   async forgotPassword(dto: ForgotPasswordDto, metadata: RequestMetadata) {
@@ -302,15 +305,18 @@ export class AuthService {
     return createHash('sha256').update(token).digest('hex');
   }
 
-  private async createSession(user: {
-    id: string;
-    companyId: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    company: { name: string; currency: string; timezone: string };
-  }, metadata: SessionMetadata) {
+  private async createSession(
+    user: {
+      id: string;
+      companyId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      company: { name: string; currency: string; timezone: string };
+    },
+    metadata: SessionMetadata,
+  ) {
     const tokens = await this.sessions.create(user, metadata);
     return { ...tokens, user };
   }

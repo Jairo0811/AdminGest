@@ -27,10 +27,22 @@ interface ApplyResult {
 const MAX_STEPS = 20;
 
 const EVENT_LABELS: Record<string, { label: string; description: string }> = {
-  ACTIVITY_ASSIGNED: { label: 'Actividad asignada', description: 'Avisa al responsable cuando se le asigna o reasigna una actividad.' },
-  PROJECT_ASSIGNED: { label: 'Proyecto asignado', description: 'Avisa al gerente cuando se le asigna un proyecto.' },
-  ACTIVITY_DUE: { label: 'Actividad próxima a vencer', description: 'Recordatorio 24 horas antes de una actividad pendiente.' },
-  QUOTE_EXPIRING: { label: 'Cotización próxima a vencer', description: 'Avisa a los administradores 24 horas antes del vencimiento.' },
+  ACTIVITY_ASSIGNED: {
+    label: 'Actividad asignada',
+    description: 'Avisa al responsable cuando se le asigna o reasigna una actividad.',
+  },
+  PROJECT_ASSIGNED: {
+    label: 'Proyecto asignado',
+    description: 'Avisa al gerente cuando se le asigna un proyecto.',
+  },
+  ACTIVITY_DUE: {
+    label: 'Actividad próxima a vencer',
+    description: 'Recordatorio 24 horas antes de una actividad pendiente.',
+  },
+  QUOTE_EXPIRING: {
+    label: 'Cotización próxima a vencer',
+    description: 'Avisa a los administradores 24 horas antes del vencimiento.',
+  },
 };
 
 export function WorkflowsPage() {
@@ -39,15 +51,23 @@ export function WorkflowsPage() {
   const client = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
   const [notice, setNotice] = useState('');
-  const [pendingApply, setPendingApply] = useState<{ template: Template; project: Project } | null>(null);
+  const [pendingApply, setPendingApply] = useState<{ template: Template; project: Project } | null>(
+    null,
+  );
   const [pendingDelete, setPendingDelete] = useState<Template | null>(null);
 
-  const rules = useQuery({ queryKey: ['/workflows/rules'], queryFn: () => api<Rule[]>('/workflows/rules') });
+  const rules = useQuery({
+    queryKey: ['/workflows/rules'],
+    queryFn: () => api<Rule[]>('/workflows/rules'),
+  });
   const templates = useQuery({
     queryKey: ['/workflows/templates'],
     queryFn: () => api<Template[]>('/workflows/templates'),
   });
-  const projects = useQuery({ queryKey: ['/projects'], queryFn: () => api<Project[]>('/projects') });
+  const projects = useQuery({
+    queryKey: ['/projects'],
+    queryFn: () => api<Project[]>('/projects'),
+  });
 
   const changeRule = useMutation({
     mutationFn: (rule: Rule) =>
@@ -105,7 +125,11 @@ export function WorkflowsPage() {
     setFormError('');
     setNotice('');
     const description = String(data.get('description') ?? '').trim();
-    create.mutate({ name: String(data.get('name')).trim(), ...(description ? { description } : {}), steps });
+    create.mutate({
+      name: String(data.get('name')).trim(),
+      ...(description ? { description } : {}),
+      steps,
+    });
   };
 
   const mutationError = (changeRule.error ?? null) as Error | null;
@@ -137,11 +161,19 @@ export function WorkflowsPage() {
             </div>
           </div>
 
-          {templates.isLoading && <p className="muted-state" role="status">Cargando plantillas…</p>}
+          {templates.isLoading && (
+            <p className="muted-state" role="status">
+              Cargando plantillas…
+            </p>
+          )}
           {templates.isError && (
             <div className="empty-state empty-state--error" role="alert">
               <strong>No fue posible cargar las plantillas</strong>
-              <button className="secondary-button" onClick={() => void templates.refetch()} type="button">
+              <button
+                className="secondary-button"
+                onClick={() => void templates.refetch()}
+                type="button"
+              >
                 <RefreshCw aria-hidden="true" size={16} /> Reintentar
               </button>
             </div>
@@ -181,7 +213,9 @@ export function WorkflowsPage() {
                 className="template-apply"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  const projectId = String(new FormData(event.currentTarget).get('projectId') ?? '');
+                  const projectId = String(
+                    new FormData(event.currentTarget).get('projectId') ?? '',
+                  );
                   const project = projects.data?.find((item) => item.id === projectId);
                   if (project) {
                     apply.reset();
@@ -192,7 +226,11 @@ export function WorkflowsPage() {
                 <label className="form-field">
                   <span>Aplicar al proyecto</span>
                   <select defaultValue="" name="projectId" required>
-                    <option value="">{projects.isError ? 'No fue posible cargar los proyectos' : 'Selecciona un proyecto'}</option>
+                    <option value="">
+                      {projects.isError
+                        ? 'No fue posible cargar los proyectos'
+                        : 'Selecciona un proyecto'}
+                    </option>
                     {projects.data?.map((project) => (
                       <option key={project.id} value={project.id}>
                         {project.name}
@@ -215,14 +253,33 @@ export function WorkflowsPage() {
                 <h2>
                   <Settings2 aria-hidden="true" size={19} /> Reglas de notificación
                 </h2>
-                <p>{isAdmin ? 'Activa o desactiva cada aviso para toda la empresa.' : 'Solo un administrador puede modificar las reglas.'}</p>
+                <p>
+                  {isAdmin
+                    ? 'Activa o desactiva cada aviso para toda la empresa.'
+                    : 'Solo un administrador puede modificar las reglas.'}
+                </p>
               </div>
             </div>
-            {rules.isLoading && <p className="muted-state" role="status">Cargando reglas…</p>}
-            {rules.isError && <div className="alert error" role="alert">No fue posible cargar las reglas.</div>}
-            {mutationError && <div className="alert error" role="alert">{mutationError.message}</div>}
+            {rules.isLoading && (
+              <p className="muted-state" role="status">
+                Cargando reglas…
+              </p>
+            )}
+            {rules.isError && (
+              <div className="alert error" role="alert">
+                No fue posible cargar las reglas.
+              </div>
+            )}
+            {mutationError && (
+              <div className="alert error" role="alert">
+                {mutationError.message}
+              </div>
+            )}
             {rules.data?.map((rule) => {
-              const meta = EVENT_LABELS[rule.eventType] ?? { label: rule.eventType, description: '' };
+              const meta = EVENT_LABELS[rule.eventType] ?? {
+                label: rule.eventType,
+                description: '',
+              };
               const id = `rule-${rule.eventType}`;
               return (
                 <div className="rule-row" key={rule.eventType}>
@@ -260,7 +317,13 @@ export function WorkflowsPage() {
             </div>
             <div className="form-grid">
               <label className="form-field full">
-                <span>Nombre<span aria-hidden="true" className="required-mark"> *</span></span>
+                <span>
+                  Nombre
+                  <span aria-hidden="true" className="required-mark">
+                    {' '}
+                    *
+                  </span>
+                </span>
                 <input maxLength={120} name="name" required />
               </label>
               <label className="form-field full">
@@ -268,8 +331,19 @@ export function WorkflowsPage() {
                 <input maxLength={500} name="description" />
               </label>
               <label className="form-field full">
-                <span>Tareas<span aria-hidden="true" className="required-mark"> *</span></span>
-                <textarea name="steps" placeholder={'Levantamiento de requisitos\nDiseño\nPruebas'} required rows={6} />
+                <span>
+                  Tareas
+                  <span aria-hidden="true" className="required-mark">
+                    {' '}
+                    *
+                  </span>
+                </span>
+                <textarea
+                  name="steps"
+                  placeholder={'Levantamiento de requisitos\nDiseño\nPruebas'}
+                  required
+                  rows={6}
+                />
               </label>
             </div>
             {(formError || create.isError) && (
@@ -290,20 +364,32 @@ export function WorkflowsPage() {
         <Modal onClose={() => setPendingApply(null)} title="Aplicar plantilla">
           <div className="confirm-dialog">
             <p>
-              Se agregarán al proyecto «{pendingApply.project.name}» las tareas de «{pendingApply.template.name}» que
-              todavía no existan ({pendingApply.template.steps.length} en la plantilla). Las tareas con el mismo nombre
+              Se agregarán al proyecto «{pendingApply.project.name}» las tareas de «
+              {pendingApply.template.name}» que todavía no existan (
+              {pendingApply.template.steps.length} en la plantilla). Las tareas con el mismo nombre
               se omiten, por lo que aplicarla de nuevo no crea duplicados.
             </p>
-            {apply.isError && <div className="alert error" role="alert">{(apply.error as Error).message}</div>}
+            {apply.isError && (
+              <div className="alert error" role="alert">
+                {(apply.error as Error).message}
+              </div>
+            )}
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => setPendingApply(null)} type="button">
+              <button
+                className="secondary-button"
+                onClick={() => setPendingApply(null)}
+                type="button"
+              >
                 Cancelar
               </button>
               <button
                 className="primary-button"
                 disabled={apply.isPending}
                 onClick={() =>
-                  apply.mutate({ templateId: pendingApply.template.id, projectId: pendingApply.project.id })
+                  apply.mutate({
+                    templateId: pendingApply.template.id,
+                    projectId: pendingApply.project.id,
+                  })
                 }
                 type="button"
               >
@@ -317,13 +403,29 @@ export function WorkflowsPage() {
       {pendingDelete && (
         <Modal onClose={() => setPendingDelete(null)} title="Eliminar plantilla">
           <div className="confirm-dialog">
-            <p>Se eliminará la plantilla «{pendingDelete.name}». Las tareas ya creadas en proyectos no se modifican.</p>
-            {remove.isError && <div className="alert error" role="alert">{(remove.error as Error).message}</div>}
+            <p>
+              Se eliminará la plantilla «{pendingDelete.name}». Las tareas ya creadas en proyectos
+              no se modifican.
+            </p>
+            {remove.isError && (
+              <div className="alert error" role="alert">
+                {(remove.error as Error).message}
+              </div>
+            )}
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => setPendingDelete(null)} type="button">
+              <button
+                className="secondary-button"
+                onClick={() => setPendingDelete(null)}
+                type="button"
+              >
                 Cancelar
               </button>
-              <button className="danger-button" disabled={remove.isPending} onClick={() => remove.mutate(pendingDelete.id)} type="button">
+              <button
+                className="danger-button"
+                disabled={remove.isPending}
+                onClick={() => remove.mutate(pendingDelete.id)}
+                type="button"
+              >
                 {remove.isPending ? 'Eliminando…' : 'Eliminar'}
               </button>
             </footer>

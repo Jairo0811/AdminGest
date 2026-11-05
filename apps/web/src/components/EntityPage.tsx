@@ -1,10 +1,5 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import {
-  useMutation,
-  useQueries,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,26 +11,23 @@ import {
   RefreshCw,
   Search,
   Trash2,
-} from "lucide-react";
-import { api } from "../api/client";
-import { useAuth } from "../auth/AuthContext";
-import {
-  hasPermission,
-  resourceFromEndpoint,
-} from "../auth/permissions";
+} from 'lucide-react';
+import { api } from '../api/client';
+import { useAuth } from '../auth/AuthContext';
+import { hasPermission, resourceFromEndpoint } from '../auth/permissions';
 import {
   buildCorporateReport,
   CorporateReportColumn,
   CorporateReportMetric,
-} from "../utils/corporate-report";
+} from '../utils/corporate-report';
 import {
   buildPrintableDocument,
   ExportColumn,
   exportToExcel,
   openPrintWindow,
-} from "../utils/export";
-import { normalizeValue, toInputValue } from "../utils/form-values";
-import { Modal } from "./Modal";
+} from '../utils/export';
+import { normalizeValue, toInputValue } from '../utils/form-values';
+import { Modal } from './Modal';
 
 export interface Entity extends Record<string, unknown> {
   id: string;
@@ -45,8 +37,8 @@ interface Column {
   label: string;
   render(item: Entity): ReactNode;
   exportValue?: (item: Entity) => string | number | null | undefined;
-  exportFormat?: CorporateReportColumn<Entity>["format"];
-  exportAlign?: CorporateReportColumn<Entity>["align"];
+  exportFormat?: CorporateReportColumn<Entity>['format'];
+  exportAlign?: CorporateReportColumn<Entity>['align'];
 }
 
 interface Option {
@@ -57,14 +49,7 @@ interface Option {
 interface Field {
   name: string;
   label: string;
-  type?:
-    | "text"
-    | "email"
-    | "number"
-    | "date"
-    | "datetime-local"
-    | "textarea"
-    | "select";
+  type?: 'text' | 'email' | 'number' | 'date' | 'datetime-local' | 'textarea' | 'select';
   required?: boolean;
   options?: Option[];
   optionsEndpoint?: string;
@@ -92,13 +77,12 @@ interface EntityPageProps {
   itemActions?: (item: Entity) => ReactNode;
   reportMetrics?: (items: Entity[]) => CorporateReportMetric[];
   /** Grammatical gender of `singular`, for messages ("Nueva cotización guardada"). */
-  gender?: "m" | "f";
+  gender?: 'm' | 'f';
   /** Message shown under the heading (for example, a print error of the page). */
   pageAlert?: ReactNode;
 }
 
-const humanize = (value: string) =>
-  value.replace(/([a-z])([A-Z])/g, "$1 $2").replaceAll("_", " ");
+const humanize = (value: string) => value.replace(/([a-z])([A-Z])/g, '$1 $2').replaceAll('_', ' ');
 
 export function EntityPage({
   title,
@@ -113,30 +97,28 @@ export function EntityPage({
   buildPayload,
   itemActions,
   reportMetrics,
-  gender = "m",
+  gender = 'm',
   pageAlert,
 }: EntityPageProps) {
   const label = `${singular[0].toUpperCase()}${singular.slice(1)}`;
-  const suffix = gender === "f" ? "a" : "o";
+  const suffix = gender === 'f' ? 'a' : 'o';
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const resource = resourceFromEndpoint(endpoint);
-  const canWrite = resource
-    ? hasPermission(user?.role, resource, "write")
-    : false;
+  const canWrite = resource ? hasPermission(user?.role, resource, 'write') : false;
   const allowEdit = canWrite && canEdit;
   const allowDelete = canWrite && canDelete;
   const allowItemActions = canWrite && Boolean(itemActions);
   const showActionsColumn = allowEdit || allowDelete || allowItemActions;
 
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("ALL");
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('ALL');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [editing, setEditing] = useState<Entity | null | undefined>(undefined);
   const [pendingDelete, setPendingDelete] = useState<Entity | null>(null);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const queryKey = [endpoint];
 
   const submitting = useRef(false);
@@ -148,9 +130,7 @@ export function EntityPage({
   const data = useMemo(() => list.data ?? [], [list.data]);
 
   const lookupEndpoints = useMemo(
-    () => [
-      ...new Set(fields.map((field) => field.optionsEndpoint).filter(Boolean)),
-    ],
+    () => [...new Set(fields.map((field) => field.optionsEndpoint).filter(Boolean))],
     [fields],
   ) as string[];
 
@@ -163,23 +143,22 @@ export function EntityPage({
   });
 
   const lookups = lookupEndpoints.map(
-    (lookupEndpoint, index) =>
-      [lookupEndpoint, lookupQueries[index].data ?? []] as const,
+    (lookupEndpoint, index) => [lookupEndpoint, lookupQueries[index].data ?? []] as const,
   );
 
   const save = useMutation({
     mutationFn: async (values: Record<string, string | number>) => {
-      if (!canWrite) throw new Error("No tienes permiso para modificar este módulo.");
+      if (!canWrite) throw new Error('No tienes permiso para modificar este módulo.');
       const payload = buildPayload ? buildPayload(values) : values;
       return api<Entity>(editing ? `${endpoint}/${editing.id}` : endpoint, {
-        method: editing ? "PATCH" : "POST",
+        method: editing ? 'PATCH' : 'POST',
         body: JSON.stringify(payload),
       });
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
       setEditing(undefined);
-      setError("");
+      setError('');
       setNotice(`${label} guardad${suffix} correctamente.`);
     },
     onError: (mutationError: Error) => setError(mutationError.message),
@@ -190,8 +169,8 @@ export function EntityPage({
 
   const remove = useMutation({
     mutationFn: (id: string) => {
-      if (!canWrite) throw new Error("No tienes permiso para eliminar en este módulo.");
-      return api(`${endpoint}/${id}`, { method: "DELETE" });
+      if (!canWrite) throw new Error('No tienes permiso para eliminar en este módulo.');
+      return api(`${endpoint}/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
@@ -204,7 +183,7 @@ export function EntityPage({
 
   useEffect(() => {
     if (!notice) return;
-    const timeout = window.setTimeout(() => setNotice(""), 3200);
+    const timeout = window.setTimeout(() => setNotice(''), 3200);
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
@@ -216,23 +195,15 @@ export function EntityPage({
   }, [canWrite]);
 
   const statuses = useMemo(
-    () =>
-      [
-        ...new Set(
-          data.map((item) => String(item.status ?? "")).filter(Boolean),
-        ),
-      ].sort(),
+    () => [...new Set(data.map((item) => String(item.status ?? '')).filter(Boolean))].sort(),
     [data],
   );
 
   const filtered = useMemo(
     () =>
       data.filter((item) => {
-        const matchesSearch = JSON.stringify(item)
-          .toLowerCase()
-          .includes(search.toLowerCase());
-        const matchesStatus =
-          status === "ALL" || String(item.status) === status;
+        const matchesSearch = JSON.stringify(item).toLowerCase().includes(search.toLowerCase());
+        const matchesStatus = status === 'ALL' || String(item.status) === status;
         return matchesSearch && matchesStatus;
       }),
     [data, search, status],
@@ -245,7 +216,7 @@ export function EntityPage({
     () =>
       columns.map((column) => ({
         label: column.label,
-        value: column.exportValue ?? (() => ""),
+        value: column.exportValue ?? (() => ''),
       })),
     [columns],
   );
@@ -272,7 +243,7 @@ export function EntityPage({
     const values = Object.fromEntries(
       fields.map((field) => [
         field.name,
-        normalizeValue(field, String(formData.get(field.name) ?? "")),
+        normalizeValue(field, String(formData.get(field.name) ?? '')),
       ]),
     ) as Record<string, string | number>;
     save.mutate(values);
@@ -282,26 +253,30 @@ export function EntityPage({
     const report = buildCorporateReport({
       title,
       subtitle: description,
-      companyName: user?.company.name ?? "AdminGest",
-      generatedBy: user
-        ? `${user.firstName} ${user.lastName}`.trim() || user.email
-        : undefined,
+      companyName: user?.company.name ?? 'AdminGest',
+      generatedBy: user ? `${user.firstName} ${user.lastName}`.trim() || user.email : undefined,
       items: filtered,
       columns: reportColumns,
       metrics: reportMetrics?.(filtered) ?? [
-        { label: "Registros", value: filtered.length, tone: "blue" },
+        { label: 'Registros', value: filtered.length, tone: 'blue' },
       ],
     });
     try {
       openPrintWindow(buildPrintableDocument({ ...report, autoPrintDelayMs: 450 }));
     } catch (printError) {
-      setError(printError instanceof Error ? printError.message : "No fue posible abrir el reporte.");
+      setError(
+        printError instanceof Error ? printError.message : 'No fue posible abrir el reporte.',
+      );
     }
   };
 
   return (
     <section className="page">
-      {notice && <div className="toast toast--success" role="status">{notice}</div>}
+      {notice && (
+        <div className="toast toast--success" role="status">
+          {notice}
+        </div>
+      )}
 
       <div className="page-heading">
         <div>
@@ -312,7 +287,15 @@ export function EntityPage({
         <div className="page-heading-actions">
           {headerActions}
           {canWrite && (
-            <button className="primary-button" onClick={() => { save.reset(); setError(""); setEditing(null); }} type="button">
+            <button
+              className="primary-button"
+              onClick={() => {
+                save.reset();
+                setError('');
+                setEditing(null);
+              }}
+              type="button"
+            >
               <Plus aria-hidden="true" size={18} /> Nuev{suffix} {singular}
             </button>
           )}
@@ -333,20 +316,36 @@ export function EntityPage({
         {statuses.length > 0 && (
           <label className="filter-select">
             <Filter size={16} />
-            <select aria-label="Filtrar por estado" onChange={(event) => setStatus(event.target.value)} value={status}>
+            <select
+              aria-label="Filtrar por estado"
+              onChange={(event) => setStatus(event.target.value)}
+              value={status}
+            >
               <option value="ALL">Todos los estados</option>
               {statuses.map((itemStatus) => (
-                <option key={itemStatus} value={itemStatus}>{humanize(itemStatus)}</option>
+                <option key={itemStatus} value={itemStatus}>
+                  {humanize(itemStatus)}
+                </option>
               ))}
             </select>
           </label>
         )}
 
         <div className="export-actions">
-          <button className="secondary-button" disabled={!filtered.length} onClick={() => exportToExcel(title, filtered, exportColumns)} type="button">
+          <button
+            className="secondary-button"
+            disabled={!filtered.length}
+            onClick={() => exportToExcel(title, filtered, exportColumns)}
+            type="button"
+          >
             <FileSpreadsheet size={17} /> Excel
           </button>
-          <button className="secondary-button" disabled={!filtered.length || reportColumns.length === 0} onClick={printCorporateReport} type="button">
+          <button
+            className="secondary-button"
+            disabled={!filtered.length || reportColumns.length === 0}
+            onClick={printCorporateReport}
+            type="button"
+          >
             <FileDown size={17} /> PDF
           </button>
         </div>
@@ -354,52 +353,95 @@ export function EntityPage({
       </div>
 
       {pageAlert}
-      {error && editing === undefined && <div className="alert error" role="alert">{error}</div>}
+      {error && editing === undefined && (
+        <div className="alert error" role="alert">
+          {error}
+        </div>
+      )}
 
       <div className="table-card" aria-busy={isLoading || isFetching}>
         <div className="data-table table-header">
-          {columns.map((column) => <strong key={column.label}>{column.label}</strong>)}
+          {columns.map((column) => (
+            <strong key={column.label}>{column.label}</strong>
+          ))}
           {showActionsColumn && <strong>Acciones</strong>}
         </div>
         {isLoading ? (
           <div className="table-skeleton" aria-label="Cargando información">
-            {Array.from({ length: 5 }, (_, index) => <span key={index} />)}
+            {Array.from({ length: 5 }, (_, index) => (
+              <span key={index} />
+            ))}
           </div>
         ) : isError ? (
           <div className="empty-state empty-state--error" role="alert">
             <strong>No fue posible cargar {title.toLowerCase()}</strong>
-            <p>{list.error instanceof Error ? list.error.message : "Verifica tu conexión e inténtalo nuevamente."}</p>
-            <button className="secondary-button" disabled={isFetching} onClick={() => void refetch()} type="button">
-              <RefreshCw aria-hidden="true" size={16} /> {isFetching ? "Reintentando…" : "Reintentar"}
+            <p>
+              {list.error instanceof Error
+                ? list.error.message
+                : 'Verifica tu conexión e inténtalo nuevamente.'}
+            </p>
+            <button
+              className="secondary-button"
+              disabled={isFetching}
+              onClick={() => void refetch()}
+              type="button"
+            >
+              <RefreshCw aria-hidden="true" size={16} />{' '}
+              {isFetching ? 'Reintentando…' : 'Reintentar'}
             </button>
           </div>
         ) : visibleItems.length === 0 ? (
           <div className="empty-state">
-            <strong>{data.length === 0 ? `Todavía no hay registros de ${title.toLowerCase()}` : "No hay resultados"}</strong>
+            <strong>
+              {data.length === 0
+                ? `Todavía no hay registros de ${title.toLowerCase()}`
+                : 'No hay resultados'}
+            </strong>
             <p>
               {data.length === 0
                 ? canWrite
-                  ? `Crea ${gender === "f" ? "la primera" : "el primer"} ${singular} con el botón «Nuev${suffix} ${singular}».`
-                  : "No hay información disponible para tu rol."
-                : "Ningún registro coincide con la búsqueda o el filtro seleccionados."}
+                  ? `Crea ${gender === 'f' ? 'la primera' : 'el primer'} ${singular} con el botón «Nuev${suffix} ${singular}».`
+                  : 'No hay información disponible para tu rol.'
+                : 'Ningún registro coincide con la búsqueda o el filtro seleccionados.'}
             </p>
           </div>
         ) : (
           visibleItems.map((item) => (
             <div className="data-table table-row" key={item.id}>
               {columns.map((column) => (
-                <div data-label={column.label} key={column.label}>{column.render(item)}</div>
+                <div data-label={column.label} key={column.label}>
+                  {column.render(item)}
+                </div>
               ))}
               {showActionsColumn && (
                 <div className="row-actions" data-label="Acciones">
                   {allowItemActions && itemActions?.(item)}
                   {allowEdit && (
-                    <button aria-label={`Editar ${singular}`} className="table-action" onClick={() => { save.reset(); setError(""); setEditing(item); }} title={`Editar ${singular}`} type="button">
+                    <button
+                      aria-label={`Editar ${singular}`}
+                      className="table-action"
+                      onClick={() => {
+                        save.reset();
+                        setError('');
+                        setEditing(item);
+                      }}
+                      title={`Editar ${singular}`}
+                      type="button"
+                    >
                       <Edit3 aria-hidden="true" size={17} />
                     </button>
                   )}
                   {allowDelete && (
-                    <button aria-label={`Eliminar ${singular}`} className="table-action danger" onClick={() => { remove.reset(); setPendingDelete(item); }} title={`Eliminar ${singular}`} type="button">
+                    <button
+                      aria-label={`Eliminar ${singular}`}
+                      className="table-action danger"
+                      onClick={() => {
+                        remove.reset();
+                        setPendingDelete(item);
+                      }}
+                      title={`Eliminar ${singular}`}
+                      type="button"
+                    >
                       <Trash2 aria-hidden="true" size={17} />
                     </button>
                   )}
@@ -414,64 +456,137 @@ export function EntityPage({
         <div className="pagination">
           <label>
             Mostrar
-            <select aria-label="Registros por página" onChange={(event) => setPageSize(Number(event.target.value))} value={pageSize}>
-              {[10, 25, 50].map((size) => <option key={size} value={size}>{size}</option>)}
+            <select
+              aria-label="Registros por página"
+              onChange={(event) => setPageSize(Number(event.target.value))}
+              value={pageSize}
+            >
+              {[10, 25, 50].map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
             </select>
           </label>
-          <span aria-live="polite">Página {page} de {totalPages}</span>
+          <span aria-live="polite">
+            Página {page} de {totalPages}
+          </span>
           <div>
-            <button aria-label="Página anterior" disabled={page === 1} onClick={() => setPage((value) => value - 1)} type="button"><ChevronLeft size={18} /></button>
-            <button aria-label="Página siguiente" disabled={page === totalPages} onClick={() => setPage((value) => value + 1)} type="button"><ChevronRight size={18} /></button>
+            <button
+              aria-label="Página anterior"
+              disabled={page === 1}
+              onClick={() => setPage((value) => value - 1)}
+              type="button"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              aria-label="Página siguiente"
+              disabled={page === totalPages}
+              onClick={() => setPage((value) => value + 1)}
+              type="button"
+            >
+              <ChevronRight size={18} />
+            </button>
           </div>
         </div>
       )}
 
       {canWrite && editing !== undefined && (
-        <Modal onClose={() => { setEditing(undefined); setError(""); }} title={editing ? `Editar ${singular}` : `Nuev${suffix} ${singular}`}>
+        <Modal
+          onClose={() => {
+            setEditing(undefined);
+            setError('');
+          }}
+          title={editing ? `Editar ${singular}` : `Nuev${suffix} ${singular}`}
+        >
           <form className="entity-form" onSubmit={submit}>
             {fields.map((field) => {
               const lookup = lookups.find(([key]) => key === field.optionsEndpoint)?.[1] ?? [];
-              const options = field.options ?? lookup.map((item) => ({
-                value: item.id,
-                label: field.optionLabel?.(item) ?? String(item.name ?? item.id),
-              }));
-              const lookupFailed = Boolean(field.optionsEndpoint) &&
+              const options =
+                field.options ??
+                lookup.map((item) => ({
+                  value: item.id,
+                  label: field.optionLabel?.(item) ?? String(item.name ?? item.id),
+                }));
+              const lookupFailed =
+                Boolean(field.optionsEndpoint) &&
                 lookupQueries[lookupEndpoints.indexOf(field.optionsEndpoint!)]?.isError;
               const defaultValue = editing
                 ? toInputValue(field, editing[field.name] ?? field.defaultValue)
-                : String(field.defaultValue ?? "");
+                : String(field.defaultValue ?? '');
 
               return (
-                <label className={field.type === "textarea" ? "form-field full" : "form-field"} key={field.name}>
-                  <span>{field.label}{field.required && <span aria-hidden="true" className="required-mark"> *</span>}</span>
-                  {field.type === "textarea" ? (
-                    <textarea defaultValue={defaultValue} maxLength={field.maxLength ?? 2000} name={field.name} placeholder={field.placeholder} required={field.required} />
-                  ) : field.type === "select" ? (
+                <label
+                  className={field.type === 'textarea' ? 'form-field full' : 'form-field'}
+                  key={field.name}
+                >
+                  <span>
+                    {field.label}
+                    {field.required && (
+                      <span aria-hidden="true" className="required-mark">
+                        {' '}
+                        *
+                      </span>
+                    )}
+                  </span>
+                  {field.type === 'textarea' ? (
+                    <textarea
+                      defaultValue={defaultValue}
+                      maxLength={field.maxLength ?? 2000}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                    />
+                  ) : field.type === 'select' ? (
                     <select defaultValue={defaultValue} name={field.name} required={field.required}>
-                      <option value="">{lookupFailed ? "No fue posible cargar las opciones" : "Selecciona una opción"}</option>
-                      {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                      <option value="">
+                        {lookupFailed
+                          ? 'No fue posible cargar las opciones'
+                          : 'Selecciona una opción'}
+                      </option>
+                      {options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   ) : (
                     <input
                       defaultValue={defaultValue}
-                      inputMode={field.type === "number" ? "decimal" : undefined}
+                      inputMode={field.type === 'number' ? 'decimal' : undefined}
                       max={field.max}
                       maxLength={field.maxLength}
                       min={field.min}
                       name={field.name}
                       placeholder={field.placeholder}
                       required={field.required}
-                      step={field.type === "number" ? field.step ?? "any" : undefined}
-                      type={field.type ?? "text"}
+                      step={field.type === 'number' ? (field.step ?? 'any') : undefined}
+                      type={field.type ?? 'text'}
                     />
                   )}
                 </label>
               );
             })}
-            {error && <div className="alert error form-alert" role="alert">{error}</div>}
+            {error && (
+              <div className="alert error form-alert" role="alert">
+                {error}
+              </div>
+            )}
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => { setEditing(undefined); setError(""); }} type="button">Cancelar</button>
-              <button className="primary-button" disabled={save.isPending} type="submit">{save.isPending ? "Guardando…" : "Guardar"}</button>
+              <button
+                className="secondary-button"
+                onClick={() => {
+                  setEditing(undefined);
+                  setError('');
+                }}
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button className="primary-button" disabled={save.isPending} type="submit">
+                {save.isPending ? 'Guardando…' : 'Guardar'}
+              </button>
             </footer>
           </form>
         </Modal>
@@ -481,10 +596,29 @@ export function EntityPage({
         <Modal onClose={() => setPendingDelete(null)} title={`Eliminar ${singular}`}>
           <div className="confirm-dialog">
             <p>Esta acción no se puede deshacer. ¿Deseas eliminar el registro seleccionado?</p>
-            {remove.error && <div className="alert error" role="alert">{remove.error.message}</div>}
+            {remove.error && (
+              <div className="alert error" role="alert">
+                {remove.error.message}
+              </div>
+            )}
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => setPendingDelete(null)} type="button">Cancelar</button>
-              <button className="danger-button" disabled={remove.isPending} onClick={() => { if (!remove.isPending) remove.mutate(pendingDelete.id); }} type="button">{remove.isPending ? "Eliminando…" : "Eliminar"}</button>
+              <button
+                className="secondary-button"
+                onClick={() => setPendingDelete(null)}
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button
+                className="danger-button"
+                disabled={remove.isPending}
+                onClick={() => {
+                  if (!remove.isPending) remove.mutate(pendingDelete.id);
+                }}
+                type="button"
+              >
+                {remove.isPending ? 'Eliminando…' : 'Eliminar'}
+              </button>
             </footer>
           </div>
         </Modal>

@@ -149,20 +149,24 @@ export function buildQuotePrintBody({
   const summary = summarizeQuote(quote);
   const statusLabel = QUOTE_STATUS_LABELS[quote.status] ?? quote.status;
   const discount = Number(quote.discount);
-  const discountPercentage = Number(quote.subtotal) > 0 ? (discount / Number(quote.subtotal)) * 100 : 0;
+  const discountPercentage =
+    Number(quote.subtotal) > 0 ? (discount / Number(quote.subtotal)) * 100 : 0;
   const dash = '—';
 
   const rows = summary.lines.map(
-    (line) => html`<tr>
-      <td>${line.description}</td>
-      <td>${line.quantity.toLocaleString('es-DO', { maximumFractionDigits: 2 })}</td>
-      <td>${formatMoney(line.unitPrice)}</td>
-      <td>${formatMoney(line.subtotal)}</td>
-      <td>${line.discount === null ? dash : line.discount ? `-${formatMoney(line.discount)}` : dash}</td>
-      <td>${formatRate(line.rate)}</td>
-      <td>${line.tax === null ? dash : formatMoney(line.tax)}</td>
-      <td><strong>${line.total === null ? dash : formatMoney(line.total)}</strong></td>
-    </tr>`,
+    (line) =>
+      html`<tr>
+        <td>${line.description}</td>
+        <td>${line.quantity.toLocaleString('es-DO', { maximumFractionDigits: 2 })}</td>
+        <td>${formatMoney(line.unitPrice)}</td>
+        <td>${formatMoney(line.subtotal)}</td>
+        <td>
+          ${line.discount === null ? dash : line.discount ? `-${formatMoney(line.discount)}` : dash}
+        </td>
+        <td>${formatRate(line.rate)}</td>
+        <td>${line.tax === null ? dash : formatMoney(line.tax)}</td>
+        <td><strong>${line.total === null ? dash : formatMoney(line.total)}</strong></td>
+      </tr>`,
   );
 
   const taxLabel =
@@ -178,9 +182,11 @@ export function buildQuotePrintBody({
           <strong>${company.name}</strong>
           ${company.taxId ? html`<span>RNC: ${company.taxId}</span>` : ''}
           ${company.address ? html`<span>${company.address}</span>` : ''}
-          ${company.email || company.phone
-            ? html`<span>${[company.email, company.phone].filter(Boolean).join(' · ')}</span>`
-            : ''}
+          ${
+            company.email || company.phone
+              ? html`<span>${[company.email, company.phone].filter(Boolean).join(' · ')}</span>`
+              : ''
+          }
         </div>
       </div>
       <div class="quote-title">
@@ -202,21 +208,42 @@ export function buildQuotePrintBody({
       <article class="quote-card">
         <h3>Información del documento</h3>
         <div class="quote-dates">
-          <div class="quote-date"><small>Fecha de emisión</small><strong>${formatDate(quote.issueDate)}</strong></div>
-          <div class="quote-date"><small>Válida hasta</small><strong>${quote.validUntil ? formatDate(quote.validUntil) : 'Sin vencimiento'}</strong></div>
+          <div class="quote-date">
+            <small>Fecha de emisión</small><strong>${formatDate(quote.issueDate)}</strong>
+          </div>
+          <div class="quote-date">
+            <small>Válida hasta</small
+            ><strong>${quote.validUntil ? formatDate(quote.validUntil) : 'Sin vencimiento'}</strong>
+          </div>
         </div>
       </article>
     </section>
 
     <table class="quote-table">
       <thead>
-        <tr><th>Concepto</th><th>Cantidad</th><th>Precio unitario</th><th>Subtotal</th><th>Descuento</th><th>Tasa</th><th>ITBIS</th><th>Total</th></tr>
+        <tr>
+          <th>Concepto</th>
+          <th>Cantidad</th>
+          <th>Precio unitario</th>
+          <th>Subtotal</th>
+          <th>Descuento</th>
+          <th>Tasa</th>
+          <th>ITBIS</th>
+          <th>Total</th>
+        </tr>
       </thead>
-      <tbody>${rows}</tbody>
+      <tbody>
+        ${rows}
+      </tbody>
     </table>
-    ${summary.legacy
-      ? html`<p class="muted">Cotización emitida antes de la versión 1.2.0: el descuento y el ITBIS se muestran únicamente en los totales registrados.</p>`
-      : ''}
+    ${
+      summary.legacy
+        ? html`<p class="muted">
+            Cotización emitida antes de la versión 1.2.0: el descuento y el ITBIS se muestran
+            únicamente en los totales registrados.
+          </p>`
+        : ''
+    }
 
     <section class="quote-financials">
       <article class="quote-notes">
@@ -224,16 +251,41 @@ export function buildQuotePrintBody({
         <p>${quote.notes?.trim() ? quote.notes : defaultNotes}</p>
       </article>
       <table class="totals">
-        <tr><th>Subtotal</th><td>${formatMoney(quote.subtotal)}</td></tr>
-        <tr><th>Descuento${discount ? ` (${discountPercentage.toFixed(2)} %)` : ''}</th><td>${discount ? `-${formatMoney(discount)}` : formatMoney(0)}</td></tr>
-        ${summary.taxableBase !== null
-          ? html`<tr><th>Base gravada</th><td>${formatMoney(summary.taxableBase)}</td></tr>`
-          : html`<tr><th>Base imponible</th><td>${formatMoney(Number(quote.subtotal) - discount)}</td></tr>`}
-        ${summary.exemptBase
-          ? html`<tr><th>Base exenta</th><td>${formatMoney(summary.exemptBase)}</td></tr>`
-          : ''}
-        <tr><th>${taxLabel}</th><td>${formatMoney(quote.tax)}</td></tr>
-        <tr class="grand-total"><th>Total</th><td><strong>${formatMoney(quote.total)}</strong></td></tr>
+        <tr>
+          <th>Subtotal</th>
+          <td>${formatMoney(quote.subtotal)}</td>
+        </tr>
+        <tr>
+          <th>Descuento${discount ? ` (${discountPercentage.toFixed(2)} %)` : ''}</th>
+          <td>${discount ? `-${formatMoney(discount)}` : formatMoney(0)}</td>
+        </tr>
+        ${
+          summary.taxableBase !== null
+            ? html`<tr>
+                <th>Base gravada</th>
+                <td>${formatMoney(summary.taxableBase)}</td>
+              </tr>`
+            : html`<tr>
+                <th>Base imponible</th>
+                <td>${formatMoney(Number(quote.subtotal) - discount)}</td>
+              </tr>`
+        }
+        ${
+          summary.exemptBase
+            ? html`<tr>
+                <th>Base exenta</th>
+                <td>${formatMoney(summary.exemptBase)}</td>
+              </tr>`
+            : ''
+        }
+        <tr>
+          <th>${taxLabel}</th>
+          <td>${formatMoney(quote.tax)}</td>
+        </tr>
+        <tr class="grand-total">
+          <th>Total</th>
+          <td><strong>${formatMoney(quote.total)}</strong></td>
+        </tr>
       </table>
     </section>
 

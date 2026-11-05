@@ -15,9 +15,12 @@ export function hashPasswordResetToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
-export function isPasswordResetTokenUsable(token: {
-  expiresAt: Date;
-  usedAt: Date | null;
-}, now = new Date()): boolean {
+export function isPasswordResetTokenUsable(
+  token: {
+    expiresAt: Date;
+    usedAt: Date | null;
+  },
+  now = new Date(),
+): boolean {
   return token.usedAt === null && token.expiresAt > now;
 }

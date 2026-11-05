@@ -44,10 +44,7 @@ const divideRounded = (numerator: bigint, denominator: bigint): bigint =>
  *    (0 % for exempt lines) and rounded to cents;
  * 4. totals are the exact sum of the line amounts.
  */
-export function calculateQuote(
-  items: QuoteCalculationItem[],
-  discount = 0,
-): QuoteTotals {
+export function calculateQuote(items: QuoteCalculationItem[], discount = 0): QuoteTotals {
   if (!items.length) {
     throw new BadRequestException('La cotización debe contener al menos una línea.');
   }
@@ -73,7 +70,9 @@ export function calculateQuote(
   }
   const discountCents = toCents(discount || 0);
   if (discountCents > subtotal) {
-    throw new BadRequestException('El descuento no puede ser mayor que el subtotal de la cotización.');
+    throw new BadRequestException(
+      'El descuento no puede ser mayor que el subtotal de la cotización.',
+    );
   }
 
   // Proportional distribution with exact sum (largest remainder).
@@ -87,7 +86,9 @@ export function calculateQuote(
     .sort((left, right) =>
       right.remainder === left.remainder
         ? left.index - right.index
-        : right.remainder > left.remainder ? 1 : -1,
+        : right.remainder > left.remainder
+          ? 1
+          : -1,
     )
     .forEach((share) => {
       if (pending > 0n) {

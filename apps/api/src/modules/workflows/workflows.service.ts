@@ -29,7 +29,8 @@ export class WorkflowsService {
   async rules(companyId: string) {
     const saved = await this.prisma.workflowRule.findMany({ where: { companyId } });
     return EVENT_TYPES.map((eventType) => ({
-      eventType, enabled: saved.find((rule) => rule.eventType === eventType)?.enabled ?? true,
+      eventType,
+      enabled: saved.find((rule) => rule.eventType === eventType)?.enabled ?? true,
     }));
   }
 
@@ -46,9 +47,13 @@ export class WorkflowsService {
 
   async templates(companyId: string) {
     const records = await this.prisma.projectTemplate.findMany({
-      where: { companyId }, orderBy: { name: 'asc' },
+      where: { companyId },
+      orderBy: { name: 'asc' },
     });
-    return records.map(({ stepsJson, ...row }) => ({ ...row, steps: parseTemplateSteps(stepsJson) }));
+    return records.map(({ stepsJson, ...row }) => ({
+      ...row,
+      steps: parseTemplateSteps(stepsJson),
+    }));
   }
 
   createTemplate(companyId: string, dto: CreateTemplateDto) {
@@ -64,7 +69,9 @@ export class WorkflowsService {
     if (!name) throw new BadRequestException('El nombre de la plantilla es obligatorio.');
     return this.prisma.projectTemplate.create({
       data: {
-        companyId, name, description: dto.description?.trim() || null,
+        companyId,
+        name,
+        description: dto.description?.trim() || null,
         stepsJson: JSON.stringify(steps),
       },
     });
@@ -95,7 +102,8 @@ export class WorkflowsService {
     return this.prisma.$transaction(async (tx) => {
       await acquireTransactionLock(tx, `project-tasks:${projectId}`);
       const existing = await tx.projectTask.findMany({
-        where: { projectId }, select: { title: true },
+        where: { projectId },
+        select: { title: true },
       });
       const known = new Set(existing.map((task) => normalizeTitle(task.title)));
       const missing = steps.filter((title) => !known.has(normalizeTitle(title)));

@@ -29,7 +29,9 @@ describe('Notification privacy and idempotency', () => {
       },
     } as unknown as PrismaService;
     const service = new NotificationsService(prisma);
-    await expect(service.markRead('company-a', 'user-a', 'n1')).resolves.toEqual({ updated: false });
+    await expect(service.markRead('company-a', 'user-a', 'n1')).resolves.toEqual({
+      updated: false,
+    });
     expect(prisma.notification.updateMany).not.toHaveBeenCalled();
   });
 
@@ -53,9 +55,13 @@ describe('Notification privacy and idempotency', () => {
     } as unknown as PrismaService;
     const service = new NotificationsService(prisma);
     await service.emit({
-      companyId: 'company-a', userId: 'user-b',
-      eventType: 'PROJECT_ASSIGNED', title: 'Proyecto', message: 'Asignado',
-      path: '/projects', dedupeKey: 'assigned-1',
+      companyId: 'company-a',
+      userId: 'user-b',
+      eventType: 'PROJECT_ASSIGNED',
+      title: 'Proyecto',
+      message: 'Asignado',
+      path: '/projects',
+      dedupeKey: 'assigned-1',
     });
     expect(prisma.user.findFirst).toHaveBeenCalledWith({
       where: { id: 'user-b', companyId: 'company-a', status: 'ACTIVE' },
@@ -71,19 +77,28 @@ describe('Notification privacy and idempotency', () => {
       notification: { create: jest.fn() },
     } as unknown as PrismaService;
     await new NotificationsService(prisma).emit({
-      companyId: 'company-a', userId: 'user-a',
-      eventType: 'ACTIVITY_ASSIGNED', title: 'A', message: 'B', path: '/activities', dedupeKey: 'k',
+      companyId: 'company-a',
+      userId: 'user-a',
+      eventType: 'ACTIVITY_ASSIGNED',
+      title: 'A',
+      message: 'B',
+      path: '/activities',
+      dedupeKey: 'k',
     });
     expect(prisma.notification.create).not.toHaveBeenCalled();
   });
 
   it('pages through every due reminder instead of stopping at a fixed limit', async () => {
     const due = Array.from({ length: 250 }, (_, index) => ({
-      id: `a${index}`, companyId: 'company-a', ownerId: 'user-a',
-      subject: 'Llamada', scheduledAt: new Date('2026-11-04T10:00:00Z'),
+      id: `a${index}`,
+      companyId: 'company-a',
+      ownerId: 'user-a',
+      subject: 'Llamada',
+      scheduledAt: new Date('2026-11-04T10:00:00Z'),
     }));
     const activityFindMany = jest.fn(({ skip, take }: { skip: number; take: number }) =>
-      Promise.resolve(due.slice(skip, skip + take)));
+      Promise.resolve(due.slice(skip, skip + take)),
+    );
     const prisma = {
       activity: { findMany: activityFindMany },
       quote: { findMany: jest.fn().mockResolvedValue([]) },
@@ -91,7 +106,9 @@ describe('Notification privacy and idempotency', () => {
       workflowRule: { findUnique: jest.fn().mockResolvedValue(null) },
       notification: { create: jest.fn() },
     } as unknown as PrismaService;
-    const result = await new NotificationsService(prisma).scanReminders(new Date('2026-11-04T00:00:00Z'));
+    const result = await new NotificationsService(prisma).scanReminders(
+      new Date('2026-11-04T00:00:00Z'),
+    );
     expect(result.activities).toBe(250);
     expect(activityFindMany).toHaveBeenCalledTimes(2);
   });

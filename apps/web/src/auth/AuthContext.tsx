@@ -1,11 +1,4 @@
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   api,
@@ -89,7 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -116,16 +111,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const value: AuthContextValue = {
-    user, loading, logout, refreshUser,
+    user,
+    loading,
+    logout,
+    refreshUser,
     async login(email, password) {
-      establishSession(await api<SessionResponse>('/auth/login', {
-        method: 'POST', body: JSON.stringify({ email, password }),
-      }));
+      establishSession(
+        await api<SessionResponse>('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        }),
+      );
     },
     async register(data) {
-      establishSession(await api<SessionResponse>('/auth/register', {
-        method: 'POST', body: JSON.stringify(data),
-      }));
+      establishSession(
+        await api<SessionResponse>('/auth/register', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }),
+      );
     },
   };
 

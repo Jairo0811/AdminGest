@@ -14,27 +14,19 @@ async function bootstrap(): Promise<void> {
   const config = app.get(ConfigService);
   const isProduction = config.get<string>('NODE_ENV', 'development') === 'production';
 
-  const swaggerEnabled =
-    !isProduction || config.get<string>('SWAGGER_ENABLED', 'false') === 'true';
+  const swaggerEnabled = !isProduction || config.get<string>('SWAGGER_ENABLED', 'false') === 'true';
 
   if (swaggerEnabled) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('AdminGest API')
-      .setDescription(
-        'API multiempresa para CRM, proyectos y gestión administrativa.',
-      )
+      .setDescription('API multiempresa para CRM, proyectos y gestión administrativa.')
       .setVersion(API_VERSION)
       .addBearerAuth()
       .build();
 
-    SwaggerModule.setup(
-      'docs',
-      app,
-      SwaggerModule.createDocument(app, swaggerConfig),
-      {
-        swaggerOptions: { persistAuthorization: false },
-      },
-    );
+    SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, swaggerConfig), {
+      swaggerOptions: { persistAuthorization: false },
+    });
   }
 
   await app.listen(config.get<number>('PORT', 3000), '0.0.0.0');

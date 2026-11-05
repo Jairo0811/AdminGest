@@ -32,42 +32,79 @@ const money = new Intl.NumberFormat('es-DO', {
   maximumFractionDigits: 2,
 });
 const shortDate = new Intl.DateTimeFormat('es-DO', {
-  day: '2-digit', month: 'short', year: 'numeric',
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
 });
 const longDateTime = new Intl.DateTimeFormat('es-DO', {
-  day: '2-digit', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit',
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
 });
 
-
 const statusLabels: Record<string, string> = {
-  NEW: 'Nuevo', CONTACTED: 'Contactado', QUALIFIED: 'Calificado',
-  DISQUALIFIED: 'Descartado', CONVERTED: 'Convertido', OPEN: 'Abierta',
-  WON: 'Ganada', LOST: 'Perdida', PENDING: 'Pendiente', IN_PROGRESS: 'En progreso',
-  COMPLETED: 'Completada', CANCELLED: 'Cancelada', PLANNED: 'Planificado',
-  ACTIVE: 'Activo', ON_HOLD: 'En pausa', DRAFT: 'Borrador', SENT: 'Enviada',
-  ACCEPTED: 'Aceptada', APPROVED: 'Aprobada', REJECTED: 'Rechazada',
-  EXPIRED: 'Vencida', PRODUCT: 'Producto', SERVICE: 'Servicio',
+  NEW: 'Nuevo',
+  CONTACTED: 'Contactado',
+  QUALIFIED: 'Calificado',
+  DISQUALIFIED: 'Descartado',
+  CONVERTED: 'Convertido',
+  OPEN: 'Abierta',
+  WON: 'Ganada',
+  LOST: 'Perdida',
+  PENDING: 'Pendiente',
+  IN_PROGRESS: 'En progreso',
+  COMPLETED: 'Completada',
+  CANCELLED: 'Cancelada',
+  PLANNED: 'Planificado',
+  ACTIVE: 'Activo',
+  ON_HOLD: 'En pausa',
+  DRAFT: 'Borrador',
+  SENT: 'Enviada',
+  ACCEPTED: 'Aceptada',
+  APPROVED: 'Aprobada',
+  REJECTED: 'Rechazada',
+  EXPIRED: 'Vencida',
+  PRODUCT: 'Producto',
+  SERVICE: 'Servicio',
 };
 
 const inferFormat = (label: string): CorporateReportColumn<unknown>['format'] => {
-  const text = label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const text = label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
   if (text.includes('estado') || text.includes('tipo')) return 'status';
-  if (['presupuesto', 'precio', 'total', 'monto'].some((x) => text.includes(x)) || text === 'valor') return 'currency';
-  if (['progreso', 'probabilidad', 'itbis', 'porcentaje'].some((x) => text.includes(x))) return 'percent';
+  if (['presupuesto', 'precio', 'total', 'monto'].some((x) => text.includes(x)) || text === 'valor')
+    return 'currency';
+  if (['progreso', 'probabilidad', 'itbis', 'porcentaje'].some((x) => text.includes(x)))
+    return 'percent';
   if (text.includes('fecha y hora')) return 'datetime';
-  if (['fecha', 'emision', 'inicio', 'finalizacion', 'vencimiento'].some((x) => text.includes(x))) return 'date';
+  if (['fecha', 'emision', 'inicio', 'finalizacion', 'vencimiento'].some((x) => text.includes(x)))
+    return 'date';
   return 'text';
 };
 
 const statusTone = (value: unknown) => {
   const status = String(value ?? '').toUpperCase();
-  if (['ACTIVE', 'WON', 'COMPLETED', 'QUALIFIED', 'CONVERTED', 'ACCEPTED', 'APPROVED'].includes(status)) return 'success';
-  if (['PENDING', 'DRAFT', 'PLANNED', 'CONTACTED', 'SENT', 'IN_PROGRESS'].includes(status)) return 'warning';
-  if (['LOST', 'CANCELLED', 'REJECTED', 'EXPIRED', 'DISQUALIFIED'].includes(status)) return 'danger';
+  if (
+    ['ACTIVE', 'WON', 'COMPLETED', 'QUALIFIED', 'CONVERTED', 'ACCEPTED', 'APPROVED'].includes(
+      status,
+    )
+  )
+    return 'success';
+  if (['PENDING', 'DRAFT', 'PLANNED', 'CONTACTED', 'SENT', 'IN_PROGRESS'].includes(status))
+    return 'warning';
+  if (['LOST', 'CANCELLED', 'REJECTED', 'EXPIRED', 'DISQUALIFIED'].includes(status))
+    return 'danger';
   return 'info';
 };
 
-const formatValue = (value: string | number | null | undefined, format?: CorporateReportColumn<unknown>['format']) => {
+const formatValue = (
+  value: string | number | null | undefined,
+  format?: CorporateReportColumn<unknown>['format'],
+) => {
   if (value == null || value === '') return '—';
   if (format === 'currency') return money.format(Number(value));
   if (format === 'percent') return `${Number(value)}%`;
@@ -87,23 +124,41 @@ const createQrSvg = (text: string) => {
   const cells: string[] = [];
   for (let row = 0; row < size; row += 1) {
     for (let column = 0; column < size; column += 1) {
-      if (qr.modules.get(row, column)) cells.push(`<rect x="${column}" y="${row}" width="1" height="1"/>`);
+      if (qr.modules.get(row, column))
+        cells.push(`<rect x="${column}" y="${row}" width="1" height="1"/>`);
     }
   }
   return `<svg viewBox="-2 -2 ${size + 4} ${size + 4}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="QR de referencia"><rect x="-2" y="-2" width="${size + 4}" height="${size + 4}" fill="white"/><g fill="#0b2441">${cells.join('')}</g></svg>`;
 };
 
-const defaultMetrics = <T,>(title: string, items: T[], metrics: CorporateReportMetric[]) => {
+const defaultMetrics = <T>(title: string, items: T[], metrics: CorporateReportMetric[]) => {
   if (!title.toLowerCase().includes('proyecto')) return metrics;
   const rows = items as Array<Record<string, unknown>>;
   const budget = rows.reduce((sum, item) => sum + Number(item.budget ?? 0), 0);
-  const progress = rows.length ? rows.reduce((sum, item) => sum + Number(item.progress ?? 0), 0) / rows.length : 0;
+  const progress = rows.length
+    ? rows.reduce((sum, item) => sum + Number(item.progress ?? 0), 0) / rows.length
+    : 0;
   return [
     { label: 'Proyectos', value: rows.length, tone: 'blue' as const, icon: '📁' },
-    { label: 'Activos', value: rows.filter((x) => x.status === 'ACTIVE').length, tone: 'green' as const, icon: '▶' },
-    { label: 'Completados', value: rows.filter((x) => x.status === 'COMPLETED').length, tone: 'green' as const, icon: '✓' },
+    {
+      label: 'Activos',
+      value: rows.filter((x) => x.status === 'ACTIVE').length,
+      tone: 'green' as const,
+      icon: '▶',
+    },
+    {
+      label: 'Completados',
+      value: rows.filter((x) => x.status === 'COMPLETED').length,
+      tone: 'green' as const,
+      icon: '✓',
+    },
     { label: 'Presupuesto total', value: money.format(budget), tone: 'blue' as const, icon: 'RD$' },
-    { label: 'Avance promedio', value: `${progress.toFixed(1)}%`, tone: 'neutral' as const, icon: '%' },
+    {
+      label: 'Avance promedio',
+      value: `${progress.toFixed(1)}%`,
+      tone: 'neutral' as const,
+      icon: '%',
+    },
   ];
 };
 
@@ -122,26 +177,42 @@ export function buildCorporateReport<T>(options: CorporateReportOptions<T>): {
   const reportId = createReportId(generatedAt);
   const companyName = options.companyName ?? 'AdminGest';
   const logoUrl = new URL('/brand/logo.png', window.location.origin).href;
-  const portalUrl = (import.meta.env.VITE_PUBLIC_APP_URL as string | undefined)?.trim() || window.location.origin;
+  const portalUrl =
+    (import.meta.env.VITE_PUBLIC_APP_URL as string | undefined)?.trim() || window.location.origin;
   const metrics = defaultMetrics(options.title, options.items, options.metrics ?? []);
-  const qr = createQrSvg(`AdminGest\n${reportId}\n${options.title}\n${companyName}\n${generatedAt.toISOString()}`);
+  const qr = createQrSvg(
+    `AdminGest\n${reportId}\n${options.title}\n${companyName}\n${generatedAt.toISOString()}`,
+  );
   const firstPageSize = metrics.length ? 15 : 22;
   const pages: T[][] = [options.items.slice(0, firstPageSize)];
-  for (let index = firstPageSize; index < options.items.length; index += 24) pages.push(options.items.slice(index, index + 24));
+  for (let index = firstPageSize; index < options.items.length; index += 24)
+    pages.push(options.items.slice(index, index + 24));
   if (!pages.length) pages.push([]);
 
-  const table = (items: T[]) => items.length ? `
+  const table = (items: T[]) =>
+    items.length
+      ? `
     <table><thead><tr>${options.columns.map((c) => `<th class="${c.align ?? 'left'}">${escapeHtml(c.label)}</th>`).join('')}</tr></thead>
-    <tbody>${items.map((item) => `<tr>${options.columns.map((column) => {
-      const raw = column.value(item);
-      const format = column.format ?? inferFormat(column.label);
-      const value = formatValue(raw, format);
-      return format === 'status'
-        ? `<td class="${column.align ?? 'left'}"><b class="status status--${statusTone(raw)}">${escapeHtml(value)}</b></td>`
-        : `<td class="${column.align ?? 'left'}">${escapeHtml(value)}</td>`;
-    }).join('')}</tr>`).join('')}</tbody></table>` : '<div class="empty">No hay registros para mostrar.</div>';
+    <tbody>${items
+      .map(
+        (item) =>
+          `<tr>${options.columns
+            .map((column) => {
+              const raw = column.value(item);
+              const format = column.format ?? inferFormat(column.label);
+              const value = formatValue(raw, format);
+              return format === 'status'
+                ? `<td class="${column.align ?? 'left'}"><b class="status status--${statusTone(raw)}">${escapeHtml(value)}</b></td>`
+                : `<td class="${column.align ?? 'left'}">${escapeHtml(value)}</td>`;
+            })
+            .join('')}</tr>`,
+      )
+      .join('')}</tbody></table>`
+      : '<div class="empty">No hay registros para mostrar.</div>';
 
-  const pageHtml = pages.map((items, pageIndex) => `
+  const pageHtml = pages
+    .map(
+      (items, pageIndex) => `
     <section class="page">
       <div class="watermark">ADMINGEST</div>
       <header>
@@ -155,7 +226,9 @@ export function buildCorporateReport<T>(options: CorporateReportOptions<T>): {
         <div><strong>AdminGest</strong><br/>Documento generado electrónicamente el ${escapeHtml(longDateTime.format(generatedAt))}.<br/>No requiere firma manuscrita.<span>AdminGest v1.2.0 · ${escapeHtml(companyName)} · ${escapeHtml(portalUrl)}</span></div>
         <div class="reference">${pageIndex === 0 ? qr : ''}<p><strong>${escapeHtml(reportId)}</strong><br/>Confidencial · Uso empresarial<br/>Página ${pageIndex + 1} de ${pages.length}</p></div>
       </footer>
-    </section>`).join('');
+    </section>`,
+    )
+    .join('');
 
   const styles = `
     :root{--navy:#0b2441;--blue:#176fca;--green:#16805c;--ink:#17263a;--muted:#687b90;--line:#dce5ee}
@@ -166,6 +239,8 @@ export function buildCorporateReport<T>(options: CorporateReportOptions<T>): {
     title: `${options.title} · ${reportId}`,
     styles,
     // Every dynamic value above goes through escapeHtml; numbers are coerced.
-    body: new SafeHtml(`<button class="print" type="button" data-print>Guardar como PDF</button><main class="shell">${pageHtml}</main>`),
+    body: new SafeHtml(
+      `<button class="print" type="button" data-print>Guardar como PDF</button><main class="shell">${pageHtml}</main>`,
+    ),
   };
 }

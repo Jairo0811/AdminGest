@@ -18,7 +18,10 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
 
   afterAll(async () => harness?.close());
 
-  const useTinyPlan = async (status = 'ACTIVE', limits = { maxUsers: 2, maxCustomers: 4, maxProjects: 2 }) => {
+  const useTinyPlan = async (
+    status = 'ACTIVE',
+    limits = { maxUsers: 2, maxCustomers: 4, maxProjects: 2 },
+  ) => {
     const plan = await harness.prisma.plan.upsert({
       where: { code: `TEST-${RUN_ID}` },
       create: { code: `TEST-${RUN_ID}`, name: 'Plan de prueba', ...limits },
@@ -35,7 +38,10 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
       http()
         .post('/api/quotes')
         .set(tenant.auth)
-        .send({ customerId: data.customerId, items: [{ description: 'Servicio', quantity: 1, unitPrice: 100 }] });
+        .send({
+          customerId: data.customerId,
+          items: [{ description: 'Servicio', quantity: 1, unitPrice: 100 }],
+        });
 
     const first = await create().expect(201);
     await http().delete(`/api/quotes/${first.body.id}`).set(tenant.auth).expect(200);
@@ -49,7 +55,11 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
     // The deleted quote keeps its number: the next ones continue from 2 without reuse.
     expect(sequence).toEqual(Array.from({ length: 12 }, (_, index) => index + 2));
     const year = new Date().getFullYear();
-    expect(numbers.every((value) => new RegExp(`^COT-(${year}|${year + 1}|${year - 1})-\\d{5}$`).test(value))).toBe(true);
+    expect(
+      numbers.every((value) =>
+        new RegExp(`^COT-(${year}|${year + 1}|${year - 1})-\\d{5}$`).test(value),
+      ),
+    ).toBe(true);
   });
 
   it('persiste ITBIS por línea, líneas exentas y descuento proporcional', async () => {
@@ -61,7 +71,13 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
         opportunityId: data.opportunityId,
         discount: 25,
         items: [
-          { description: 'Gravado 18 %', quantity: 2, unitPrice: 100, taxRate: 18, catalogItemId: data.catalogItemId },
+          {
+            description: 'Gravado 18 %',
+            quantity: 2,
+            unitPrice: 100,
+            taxRate: 18,
+            catalogItemId: data.catalogItemId,
+          },
           { description: 'Exento', quantity: 1, unitPrice: 50, taxRate: 0 },
         ],
       })
@@ -71,8 +87,17 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
     expect(Number(response.body.discount)).toBe(25);
     expect(Number(response.body.tax)).toBe(32.4);
     expect(Number(response.body.total)).toBe(257.4);
-    const lines = (response.body.items as Array<Record<string, string>>).sort((x, y) => Number(y.lineTotal) - Number(x.lineTotal));
-    expect(lines.map((line) => [Number(line.lineTotal), Number(line.discountAmount), Number(line.taxAmount), Number(line.taxRate)])).toEqual([
+    const lines = (response.body.items as Array<Record<string, string>>).sort(
+      (x, y) => Number(y.lineTotal) - Number(x.lineTotal),
+    );
+    expect(
+      lines.map((line) => [
+        Number(line.lineTotal),
+        Number(line.discountAmount),
+        Number(line.taxAmount),
+        Number(line.taxRate),
+      ]),
+    ).toEqual([
       [200, 20, 32.4, 18],
       [50, 5, 0, 0],
     ]);
@@ -86,7 +111,11 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
     await http()
       .post('/api/quotes')
       .set(tenant.auth)
-      .send({ customerId: data.customerId, discount: 500, items: [{ description: 'X', quantity: 1, unitPrice: 10 }] })
+      .send({
+        customerId: data.customerId,
+        discount: 500,
+        items: [{ description: 'X', quantity: 1, unitPrice: 10 }],
+      })
       .expect(400);
   });
 
@@ -95,20 +124,30 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
     await useTinyPlan();
     const responses = await Promise.all(
       Array.from({ length: 8 }, (_, index) =>
-        http().post('/api/customers').set(tenant.auth).send({ name: `Concurrente ${index}` }),
+        http()
+          .post('/api/customers')
+          .set(tenant.auth)
+          .send({ name: `Concurrente ${index}` }),
       ),
     );
     const created = responses.filter((response) => response.status === 201).length;
     expect(created).toBe(2);
     expect(responses.filter((response) => response.status === 403)).toHaveLength(6);
-    expect(await harness.prisma.customer.count({ where: { companyId: tenant.companyId, isActive: true } })).toBe(4);
+    expect(
+      await harness.prisma.customer.count({
+        where: { companyId: tenant.companyId, isActive: true },
+      }),
+    ).toBe(4);
   });
 
   it('no supera la cuota de proyectos ni de usuarios con solicitudes simultáneas', async () => {
     await useTinyPlan('ACTIVE', { maxUsers: 3, maxCustomers: 100, maxProjects: 3 });
     const projects = await Promise.all(
       Array.from({ length: 6 }, (_, index) =>
-        http().post('/api/projects').set(tenant.auth).send({ customerId: data.customerId, name: `Proyecto concurrente ${index}` }),
+        http()
+          .post('/api/projects')
+          .set(tenant.auth)
+          .send({ customerId: data.customerId, name: `Proyecto concurrente ${index}` }),
       ),
     );
     expect(projects.filter((response) => response.status === 201)).toHaveLength(2);
@@ -119,24 +158,46 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
         http()
           .post('/api/users')
           .set(tenant.auth)
-          .send({ email: `cuota-${index}-${RUN_ID}@integracion.test`, password: 'Integracion-2026!', firstName: 'Cuota', lastName: `N${index}`, role: 'VIEWER' }),
+          .send({
+            email: `cuota-${index}-${RUN_ID}@integracion.test`,
+            password: 'Integracion-2026!',
+            firstName: 'Cuota',
+            lastName: `N${index}`,
+            role: 'VIEWER',
+          }),
       ),
     );
     expect(users.filter((response) => response.status === 201)).toHaveLength(2);
-    expect(await harness.prisma.user.count({ where: { companyId: tenant.companyId, status: 'ACTIVE' } })).toBe(3);
+    expect(
+      await harness.prisma.user.count({ where: { companyId: tenant.companyId, status: 'ACTIVE' } }),
+    ).toBe(3);
   });
 
   it('reactivar un usuario respeta la cuota y desactivarlo libera capacidad', async () => {
     const viewer = await harness.prisma.user.findFirstOrThrow({
       where: { companyId: tenant.companyId, role: 'VIEWER', status: 'ACTIVE' },
     });
-    await http().patch(`/api/users/${viewer.id}`).set(tenant.auth).send({ status: 'INACTIVE' }).expect(200);
+    await http()
+      .patch(`/api/users/${viewer.id}`)
+      .set(tenant.auth)
+      .send({ status: 'INACTIVE' })
+      .expect(200);
     await http()
       .post('/api/users')
       .set(tenant.auth)
-      .send({ email: `reemplazo-${RUN_ID}@integracion.test`, password: 'Integracion-2026!', firstName: 'Nuevo', lastName: 'Usuario', role: 'VIEWER' })
+      .send({
+        email: `reemplazo-${RUN_ID}@integracion.test`,
+        password: 'Integracion-2026!',
+        firstName: 'Nuevo',
+        lastName: 'Usuario',
+        role: 'VIEWER',
+      })
       .expect(201);
-    await http().patch(`/api/users/${viewer.id}`).set(tenant.auth).send({ status: 'ACTIVE' }).expect(403);
+    await http()
+      .patch(`/api/users/${viewer.id}`)
+      .set(tenant.auth)
+      .send({ status: 'ACTIVE' })
+      .expect(403);
   });
 
   it('bloquea nuevas altas con suscripción suspendida o prueba vencida', async () => {
@@ -147,12 +208,18 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
       where: { companyId: tenant.companyId },
       data: { status: 'TRIAL', trialEndsAt: new Date(Date.now() - 60_000) },
     });
-    await http().post('/api/projects').set(tenant.auth).send({ customerId: data.customerId, name: 'Vencida' }).expect(403);
+    await http()
+      .post('/api/projects')
+      .set(tenant.auth)
+      .send({ customerId: data.customerId, name: 'Vencida' })
+      .expect(403);
 
     const current = await http().get('/api/subscriptions/current').set(tenant.auth).expect(200);
     expect(current.body).toMatchObject({ isUsable: false, billing: { integrated: false } });
     expect(current.body.usage.customers).toBe(
-      await harness.prisma.customer.count({ where: { companyId: tenant.companyId, isActive: true } }),
+      await harness.prisma.customer.count({
+        where: { companyId: tenant.companyId, isActive: true },
+      }),
     );
   });
 
@@ -164,15 +231,22 @@ describe('Cotizaciones y cuotas SaaS (SQL Server real)', () => {
       .expect(201);
     const results = await Promise.all(
       Array.from({ length: 4 }, () =>
-        http().post(`/api/workflows/templates/${template.body.id}/apply/${data.projectId}`).set(tenant.auth),
+        http()
+          .post(`/api/workflows/templates/${template.body.id}/apply/${data.projectId}`)
+          .set(tenant.auth),
       ),
     );
     expect(results.every((response) => response.status === 201)).toBe(true);
     expect(results.reduce((sum, response) => sum + Number(response.body.created), 0)).toBe(3);
     expect(
-      await harness.prisma.projectTask.count({ where: { projectId: data.projectId, title: { in: ['Análisis', 'Diseño', 'Pruebas'] } } }),
+      await harness.prisma.projectTask.count({
+        where: { projectId: data.projectId, title: { in: ['Análisis', 'Diseño', 'Pruebas'] } },
+      }),
     ).toBe(3);
-    const project = await http().get(`/api/projects/${data.projectId}`).set(tenant.auth).expect(200);
+    const project = await http()
+      .get(`/api/projects/${data.projectId}`)
+      .set(tenant.auth)
+      .expect(200);
     expect(project.body.progress).toBe(0);
   });
 });

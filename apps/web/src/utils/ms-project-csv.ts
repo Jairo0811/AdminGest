@@ -44,17 +44,28 @@ const parseDate = (value?: string) => {
 };
 
 const parsePercent = (value?: string) => {
-  const parsed = Number(String(value ?? '0').replace('%', '').trim());
+  const parsed = Number(
+    String(value ?? '0')
+      .replace('%', '')
+      .trim(),
+  );
   return Number.isFinite(parsed) ? Math.min(100, Math.max(0, parsed)) : 0;
 };
 
 const parseDuration = (value?: string) => {
-  const parsed = Number(String(value ?? '0').replace(/[^0-9.,-]/g, '').replace(',', '.'));
+  const parsed = Number(
+    String(value ?? '0')
+      .replace(/[^0-9.,-]/g, '')
+      .replace(',', '.'),
+  );
   return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
 };
 
 export function parseMicrosoftProjectCsv(content: string): ProjectCsvRow[] {
-  const lines = content.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean);
+  const lines = content
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .filter(Boolean);
   if (lines.length < 2) throw new Error('El CSV no contiene tareas para importar.');
 
   const headers = splitCsvLine(lines[0]).map(normalizeHeader);
@@ -77,28 +88,36 @@ export function parseMicrosoftProjectCsv(content: string): ProjectCsvRow[] {
     throw new Error('El CSV debe incluir la columna Name o Nombre de tarea.');
   }
 
-  return lines.slice(1).map((line, rowIndex) => {
-    const values = splitCsvLine(line);
-    const id = indexes.id >= 0 ? Number(values[indexes.id]) : rowIndex + 1;
-    const durationDays = indexes.duration >= 0 ? parseDuration(values[indexes.duration]) : 0;
-    const milestoneValue = indexes.milestone >= 0 ? values[indexes.milestone]?.toLowerCase() : '';
-    const predecessorText = indexes.predecessors >= 0 ? values[indexes.predecessors] : '';
+  return lines
+    .slice(1)
+    .map((line, rowIndex) => {
+      const values = splitCsvLine(line);
+      const id = indexes.id >= 0 ? Number(values[indexes.id]) : rowIndex + 1;
+      const durationDays = indexes.duration >= 0 ? parseDuration(values[indexes.duration]) : 0;
+      const milestoneValue = indexes.milestone >= 0 ? values[indexes.milestone]?.toLowerCase() : '';
+      const predecessorText = indexes.predecessors >= 0 ? values[indexes.predecessors] : '';
 
-    return {
-      id: Number.isFinite(id) ? id : rowIndex + 1,
-      name: restoreFormulaText(values[indexes.name]?.trim() ?? ''),
-      start: indexes.start >= 0 ? parseDate(values[indexes.start]) : undefined,
-      finish: indexes.finish >= 0 ? parseDate(values[indexes.finish]) : undefined,
-      durationDays,
-      percentComplete: indexes.percent >= 0 ? parsePercent(values[indexes.percent]) : 0,
-      resourceNames:
-        indexes.resources >= 0 ? restoreFormulaText(values[indexes.resources]?.trim() ?? '') : undefined,
-      predecessors: predecessorText
-        ? predecessorText.split(/[;,]/).map((value) => Number(value.trim())).filter(Number.isFinite)
-        : [],
-      milestone: ['yes', 'true', 'sí', 'si', '1'].includes(milestoneValue) || durationDays === 0,
-    };
-  }).filter((row) => row.name);
+      return {
+        id: Number.isFinite(id) ? id : rowIndex + 1,
+        name: restoreFormulaText(values[indexes.name]?.trim() ?? ''),
+        start: indexes.start >= 0 ? parseDate(values[indexes.start]) : undefined,
+        finish: indexes.finish >= 0 ? parseDate(values[indexes.finish]) : undefined,
+        durationDays,
+        percentComplete: indexes.percent >= 0 ? parsePercent(values[indexes.percent]) : 0,
+        resourceNames:
+          indexes.resources >= 0
+            ? restoreFormulaText(values[indexes.resources]?.trim() ?? '')
+            : undefined,
+        predecessors: predecessorText
+          ? predecessorText
+              .split(/[;,]/)
+              .map((value) => Number(value.trim()))
+              .filter(Number.isFinite)
+          : [],
+        milestone: ['yes', 'true', 'sí', 'si', '1'].includes(milestoneValue) || durationDays === 0,
+      };
+    })
+    .filter((row) => row.name);
 }
 
 /** Characters that make spreadsheets interpret a cell as a formula (CSV injection). */
@@ -140,18 +159,32 @@ export function validateImportRows(rows: ProjectCsvRow[]): void {
 }
 
 export function buildMicrosoftProjectCsv(rows: ProjectCsvRow[]) {
-  const headers = ['ID', 'Name', 'Start', 'Finish', 'Duration', '% Complete', 'Resource Names', 'Predecessors', 'Milestone'];
-  const body = rows.map((row) => [
-    row.id,
-    neutralizeFormula(row.name),
-    row.start ? new Date(row.start).toLocaleDateString('en-US') : '',
-    row.finish ? new Date(row.finish).toLocaleDateString('en-US') : '',
-    `${row.durationDays} days`,
-    `${row.percentComplete}%`,
-    neutralizeFormula(row.resourceNames ?? ''),
-    row.predecessors?.join(',') ?? '',
-    row.milestone ? 'Yes' : 'No',
-  ].map(csvValue).join(','));
+  const headers = [
+    'ID',
+    'Name',
+    'Start',
+    'Finish',
+    'Duration',
+    '% Complete',
+    'Resource Names',
+    'Predecessors',
+    'Milestone',
+  ];
+  const body = rows.map((row) =>
+    [
+      row.id,
+      neutralizeFormula(row.name),
+      row.start ? new Date(row.start).toLocaleDateString('en-US') : '',
+      row.finish ? new Date(row.finish).toLocaleDateString('en-US') : '',
+      `${row.durationDays} days`,
+      `${row.percentComplete}%`,
+      neutralizeFormula(row.resourceNames ?? ''),
+      row.predecessors?.join(',') ?? '',
+      row.milestone ? 'Yes' : 'No',
+    ]
+      .map(csvValue)
+      .join(','),
+  );
 
   return `\uFEFF${headers.join(',')}\n${body.join('\n')}`;
 }

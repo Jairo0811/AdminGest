@@ -14,8 +14,7 @@ import { IsDominicanTaxId } from '../../../common/validation/is-dominican-tax-id
 /** Empty strings in optional fields mean "clear the value". */
 const emptyToNull = ({ value }: { value: unknown }) =>
   typeof value === 'string' && value.trim() === '' ? null : value;
-const trim = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? value.trim() : value;
+const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 
 export class UpdateCompanyDto {
   // Required columns: may be omitted, but never cleared.

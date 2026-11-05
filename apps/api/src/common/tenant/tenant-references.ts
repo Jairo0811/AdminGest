@@ -23,9 +23,7 @@ export async function assertTenantUser(
     select: { id: true },
   });
   if (!user) {
-    throw new BadRequestException(
-      `El ${label} indicado no existe o no está activo en tu empresa.`,
-    );
+    throw new BadRequestException(`El ${label} indicado no existe o no está activo en tu empresa.`);
   }
 }
 
@@ -115,11 +113,10 @@ export async function assertTaskParent(
 
   let currentId: string | null = parentId;
   for (let depth = 0; currentId && depth < 50; depth += 1) {
-    const current: { id: string; parentId: string | null } | null =
-      await db.projectTask.findFirst({
-        where: { id: currentId, projectId },
-        select: { id: true, parentId: true },
-      });
+    const current: { id: string; parentId: string | null } | null = await db.projectTask.findFirst({
+      where: { id: currentId, projectId },
+      select: { id: true, parentId: true },
+    });
     if (!current) {
       throw new BadRequestException(
         depth === 0

@@ -15,13 +15,13 @@ concurrency:
 
 env:
   NODE_ENV: test
-  SA_PASSWORD: "AdminGest_CI_2026!"
-  DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
-  JWT_SECRET: "ci-only-jwt-secret-with-at-least-32-characters"
-  JWT_EXPIRES_IN: "15m"
-  CORS_ORIGIN: "http://localhost:5173"
-  PASSWORD_RESET_URL: "http://localhost:5173/reset-password"
-  DOCUMENT_ALLOWED_HOSTS: "docs.example.com"
+  SA_PASSWORD: 'AdminGest_CI_2026!'
+  DATABASE_URL: 'sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true'
+  JWT_SECRET: 'ci-only-jwt-secret-with-at-least-32-characters'
+  JWT_EXPIRES_IN: '15m'
+  CORS_ORIGIN: 'http://localhost:5173'
+  PASSWORD_RESET_URL: 'http://localhost:5173/reset-password'
+  DOCUMENT_ALLOWED_HOSTS: 'docs.example.com'
 
 jobs:
   validate:
@@ -87,19 +87,19 @@ jobs:
       - name: Seed (first run)
         run: npm run db:seed
         env:
-          SEED_ADMIN_PASSWORD: "Seed-Primera-2026!"
+          SEED_ADMIN_PASSWORD: 'Seed-Primera-2026!'
 
       - name: Seed (second run must not modify the administrator)
         run: npm run db:seed
         env:
-          SEED_ADMIN_PASSWORD: "Seed-Segunda-2026!"
+          SEED_ADMIN_PASSWORD: 'Seed-Segunda-2026!'
 
       - name: Integration and HTTP E2E tests on SQL Server (with coverage)
         run: npm run test:integration:coverage --workspace @admingest/api
         env:
-          THROTTLE_DISABLED: "true"
-          SEED_FIRST_PASSWORD: "Seed-Primera-2026!"
-          SEED_SECOND_PASSWORD: "Seed-Segunda-2026!"
+          THROTTLE_DISABLED: 'true'
+          SEED_FIRST_PASSWORD: 'Seed-Primera-2026!'
+          SEED_SECOND_PASSWORD: 'Seed-Segunda-2026!'
 
       - name: Build
         run: npm run build
@@ -207,7 +207,7 @@ jobs:
       - name: Upgrade with legacy data
         shell: bash
         env:
-          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestUpgrade;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
+          DATABASE_URL: 'sqlserver://localhost:1433;database=AdminGestUpgrade;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true'
         run: |
           sql() { docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -C -b "$@"; }
           sql -Q "CREATE DATABASE AdminGestUpgrade"
@@ -219,14 +219,14 @@ jobs:
       - name: Verify upgraded data through the API
         run: npm run test:integration --workspace @admingest/api -- --testPathPatterns upgrade
         env:
-          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestUpgrade;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
-          UPGRADE_FIXTURE: "true"
-          THROTTLE_DISABLED: "true"
+          DATABASE_URL: 'sqlserver://localhost:1433;database=AdminGestUpgrade;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true'
+          UPGRADE_FIXTURE: 'true'
+          THROTTLE_DISABLED: 'true'
 
       - name: Cross-tenant data aborts the upgrade without partial changes
         shell: bash
         env:
-          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestViolation;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
+          DATABASE_URL: 'sqlserver://localhost:1433;database=AdminGestViolation;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true'
         run: |
           sql() { docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -C -b "$@"; }
           sql -Q "CREATE DATABASE AdminGestViolation"

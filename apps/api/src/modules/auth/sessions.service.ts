@@ -3,7 +3,10 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import {
-  REFRESH_TTL_DAYS, generateRefreshToken, hashesMatch, parseRefreshToken,
+  REFRESH_TTL_DAYS,
+  generateRefreshToken,
+  hashesMatch,
+  parseRefreshToken,
 } from './session-tokens';
 
 export interface SessionMetadata {
@@ -30,7 +33,10 @@ export class SessionsService {
     const expiresAt = new Date(Date.now() + REFRESH_TTL_DAYS * 86400_000);
     await this.prisma.authSession.create({
       data: {
-        id: refresh.id, userId: user.id, refreshTokenHash: refresh.hash, expiresAt,
+        id: refresh.id,
+        userId: user.id,
+        refreshTokenHash: refresh.hash,
+        expiresAt,
         ipAddress: metadata.ipAddress?.slice(0, 64),
         userAgent: metadata.userAgent?.slice(0, 500),
       },
@@ -48,8 +54,13 @@ export class SessionsService {
       where: { id: parsed.id },
       include: { user: { include: { company: true } } },
     });
-    if (!session || session.revokedAt || session.expiresAt <= new Date()
-      || session.user.status !== 'ACTIVE' || !session.user.company.isActive) {
+    if (
+      !session ||
+      session.revokedAt ||
+      session.expiresAt <= new Date() ||
+      session.user.status !== 'ACTIVE' ||
+      !session.user.company.isActive
+    ) {
       throw new UnauthorizedException('Sesión expirada o revocada.');
     }
     if (!hashesMatch(session.refreshTokenHash, parsed.hash)) {
@@ -85,9 +96,17 @@ export class SessionsService {
       accessToken,
       refreshToken: session.id + '.' + next.token.split('.')[1],
       user: {
-        id: user.id, companyId: user.companyId, email: user.email,
-        firstName: user.firstName, lastName: user.lastName, role: user.role,
-        company: { name: user.company.name, currency: user.company.currency, timezone: user.company.timezone },
+        id: user.id,
+        companyId: user.companyId,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        company: {
+          name: user.company.name,
+          currency: user.company.currency,
+          timezone: user.company.timezone,
+        },
       },
     };
   }
@@ -95,21 +114,30 @@ export class SessionsService {
   async list(userId: string) {
     return this.prisma.authSession.findMany({
       where: { userId, revokedAt: null, expiresAt: { gt: new Date() } },
-      select: { id: true, createdAt: true, lastUsedAt: true, expiresAt: true, ipAddress: true, userAgent: true },
+      select: {
+        id: true,
+        createdAt: true,
+        lastUsedAt: true,
+        expiresAt: true,
+        ipAddress: true,
+        userAgent: true,
+      },
       orderBy: { lastUsedAt: 'desc' },
     });
   }
 
   async revoke(userId: string, id: string) {
     await this.prisma.authSession.updateMany({
-      where: { id, userId, revokedAt: null }, data: { revokedAt: new Date() },
+      where: { id, userId, revokedAt: null },
+      data: { revokedAt: new Date() },
     });
     return { revoked: true };
   }
 
   async revokeAll(userId: string) {
     await this.prisma.authSession.updateMany({
-      where: { userId, revokedAt: null }, data: { revokedAt: new Date() },
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
     });
     return { revoked: true };
   }

@@ -1,10 +1,6 @@
 export type LimitedResource = 'users' | 'customers' | 'projects';
 
-export const LIMITED_RESOURCES: readonly LimitedResource[] = [
-  'users',
-  'customers',
-  'projects',
-];
+export const LIMITED_RESOURCES: readonly LimitedResource[] = ['users', 'customers', 'projects'];
 
 export function hasReachedLimit(limit: number, used: number): boolean {
   return used >= limit;

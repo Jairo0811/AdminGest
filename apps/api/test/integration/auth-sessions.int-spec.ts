@@ -32,8 +32,13 @@ describe('Autenticación, sesiones y permisos (SQL Server real)', () => {
     http().post('/api/auth/refresh').set('Cookie', cookie).set('Origin', origin);
 
   it('emite una cookie de refresco HttpOnly, SameSite=Strict y limitada a /api/auth', async () => {
-    const response = await http().post('/api/auth/login').send({ email: admin.email, password: PASSWORD }).expect(200);
-    const cookie = ([] as string[]).concat(response.headers['set-cookie'] ?? []).find((value) => value.startsWith('admingest_refresh='))!;
+    const response = await http()
+      .post('/api/auth/login')
+      .send({ email: admin.email, password: PASSWORD })
+      .expect(200);
+    const cookie = ([] as string[])
+      .concat(response.headers['set-cookie'] ?? [])
+      .find((value) => value.startsWith('admingest_refresh='))!;
     expect(cookie).toMatch(/HttpOnly/i);
     expect(cookie).toMatch(/SameSite=Strict/i);
     expect(cookie).toMatch(/Path=\/api\/auth/i);
@@ -42,8 +47,14 @@ describe('Autenticación, sesiones y permisos (SQL Server real)', () => {
   });
 
   it('rechaza credenciales incorrectas con el mismo mensaje exista o no la cuenta', async () => {
-    const wrong = await http().post('/api/auth/login').send({ email: admin.email, password: 'incorrecta-123' }).expect(401);
-    const unknown = await http().post('/api/auth/login').send({ email: 'nadie@integracion.test', password: 'incorrecta-123' }).expect(401);
+    const wrong = await http()
+      .post('/api/auth/login')
+      .send({ email: admin.email, password: 'incorrecta-123' })
+      .expect(401);
+    const unknown = await http()
+      .post('/api/auth/login')
+      .send({ email: 'nadie@integracion.test', password: 'incorrecta-123' })
+      .expect(401);
     expect(wrong.body.message).toBe(unknown.body.message);
   });
 
@@ -55,16 +66,24 @@ describe('Autenticación, sesiones y permisos (SQL Server real)', () => {
 
     // Within the grace window a stale token is rejected without revoking the session.
     await refresh(session.refreshCookie).expect(401);
-    await refresh(rotated).expect(200).then((response) => {
-      session.refreshCookie = refreshCookieOf(response.headers['set-cookie']);
-    });
+    await refresh(rotated)
+      .expect(200)
+      .then((response) => {
+        session.refreshCookie = refreshCookieOf(response.headers['set-cookie']);
+      });
 
     // After the grace window, reusing a stale token revokes the whole session.
     const sessionId = session.refreshCookie.split('=')[1].split('.')[0];
-    await harness.prisma.authSession.update({ where: { id: sessionId }, data: { lastUsedAt: new Date(Date.now() - 60_000) } });
+    await harness.prisma.authSession.update({
+      where: { id: sessionId },
+      data: { lastUsedAt: new Date(Date.now() - 60_000) },
+    });
     await refresh(rotated).expect(401);
     await refresh(session.refreshCookie).expect(401);
-    await http().get('/api/auth/me').set({ Authorization: `Bearer ${first.body.accessToken}` }).expect(401);
+    await http()
+      .get('/api/auth/me')
+      .set({ Authorization: `Bearer ${first.body.accessToken}` })
+      .expect(401);
   });
 
   it('rechaza el refresco desde un origen no autorizado', async () => {
@@ -85,7 +104,11 @@ describe('Autenticación, sesiones y permisos (SQL Server real)', () => {
     await refresh(phone.refreshCookie).expect(401);
     await http().get('/api/auth/me').set(laptop.auth).expect(200);
 
-    await http().post('/api/auth/logout').set('Cookie', laptop.refreshCookie).set('Origin', ORIGIN).expect(200);
+    await http()
+      .post('/api/auth/logout')
+      .set('Cookie', laptop.refreshCookie)
+      .set('Origin', ORIGIN)
+      .expect(200);
     await refresh(laptop.refreshCookie).expect(401);
 
     const one = await login(harness, admin.email, admin.companyId, admin.userId);
@@ -105,47 +128,99 @@ describe('Autenticación, sesiones y permisos (SQL Server real)', () => {
       .expect(201);
     await http().get('/api/auth/me').set(user.auth).expect(401);
     await refresh(other.refreshCookie).expect(401);
-    await http().post('/api/auth/login').send({ email: user.email, password: PASSWORD }).expect(401);
+    await http()
+      .post('/api/auth/login')
+      .send({ email: user.email, password: PASSWORD })
+      .expect(401);
     await login(harness, user.email, user.companyId, user.userId, 'Clave', 'Nueva-Clave-2026!');
   });
 
   it('un usuario desactivado pierde el acceso inmediatamente', async () => {
     const user = await addUser(harness, admin, 'SALES_REP', 'Inactivo');
-    await http().patch(`/api/users/${user.userId}`).set(admin.auth).send({ status: 'INACTIVE' }).expect(200);
+    await http()
+      .patch(`/api/users/${user.userId}`)
+      .set(admin.auth)
+      .send({ status: 'INACTIVE' })
+      .expect(200);
     await http().get('/api/auth/me').set(user.auth).expect(401);
     await refresh(user.refreshCookie).expect(401);
-    await http().post('/api/auth/login').send({ email: user.email, password: PASSWORD }).expect(401);
+    await http()
+      .post('/api/auth/login')
+      .send({ email: user.email, password: PASSWORD })
+      .expect(401);
   });
 
   it('la empresa conserva al menos un administrador activo', async () => {
-    await http().patch(`/api/users/${admin.userId}`).set(admin.auth).send({ role: 'VIEWER' }).expect(400);
-    await http().patch(`/api/users/${admin.userId}`).set(admin.auth).send({ status: 'INACTIVE' }).expect(400);
+    await http()
+      .patch(`/api/users/${admin.userId}`)
+      .set(admin.auth)
+      .send({ role: 'VIEWER' })
+      .expect(400);
+    await http()
+      .patch(`/api/users/${admin.userId}`)
+      .set(admin.auth)
+      .send({ status: 'INACTIVE' })
+      .expect(400);
   });
 
   it('aplica los permisos por rol en la API', async () => {
     const viewer = await addUser(harness, admin, 'VIEWER', 'Lector');
     // Every role manages its own profile.
     await http().get('/api/users/me').set(viewer.auth).expect(200);
-    await http().patch('/api/users/me').set(viewer.auth).send({ firstName: 'Lectora', lastName: 'Perfil', email: viewer.email }).expect(200);
+    await http()
+      .patch('/api/users/me')
+      .set(viewer.auth)
+      .send({ firstName: 'Lectora', lastName: 'Perfil', email: viewer.email })
+      .expect(200);
     await http().get('/api/customers').set(viewer.auth).expect(200);
     await http().post('/api/customers').set(viewer.auth).send({ name: 'No permitido' }).expect(403);
     await http().get('/api/users').set(viewer.auth).expect(403);
     await http().patch('/api/company').set(viewer.auth).send({ name: 'No permitido' }).expect(403);
     await http().get('/api/subscriptions/current').set(viewer.auth).expect(403);
-    await http().patch('/api/workflows/rules/PROJECT_ASSIGNED').set(viewer.auth).send({ enabled: false }).expect(403);
+    await http()
+      .patch('/api/workflows/rules/PROJECT_ASSIGNED')
+      .set(viewer.auth)
+      .send({ enabled: false })
+      .expect(403);
 
     const rep = await addUser(harness, admin, 'SALES_REP', 'Vendedor');
-    await http().post('/api/users').set(rep.auth).send({ email: 'x@integracion.test', password: PASSWORD, firstName: 'No', lastName: 'Permitido', role: 'ADMIN' }).expect(403);
-    await http().post('/api/projects').set(rep.auth).send({ name: 'No permitido', customerId: admin.companyId }).expect(403);
+    await http()
+      .post('/api/users')
+      .set(rep.auth)
+      .send({
+        email: 'x@integracion.test',
+        password: PASSWORD,
+        firstName: 'No',
+        lastName: 'Permitido',
+        role: 'ADMIN',
+      })
+      .expect(403);
+    await http()
+      .post('/api/projects')
+      .set(rep.auth)
+      .send({ name: 'No permitido', customerId: admin.companyId })
+      .expect(403);
   });
 
   it('limpia campos opcionales de la empresa y rechaza vaciar campos obligatorios', async () => {
-    await http().patch('/api/company').set(admin.auth).send({ phone: '809-555-0101', address: 'Santo Domingo' }).expect(200);
-    const cleared = await http().patch('/api/company').set(admin.auth).send({ phone: '', address: null }).expect(200);
+    await http()
+      .patch('/api/company')
+      .set(admin.auth)
+      .send({ phone: '809-555-0101', address: 'Santo Domingo' })
+      .expect(200);
+    const cleared = await http()
+      .patch('/api/company')
+      .set(admin.auth)
+      .send({ phone: '', address: null })
+      .expect(200);
     expect(cleared.body.phone).toBeNull();
     expect(cleared.body.address).toBeNull();
     await http().patch('/api/company').set(admin.auth).send({ name: '' }).expect(400);
-    await http().patch('/api/company').set(admin.auth).send({ timezone: 'Marte/Olympus' }).expect(400);
+    await http()
+      .patch('/api/company')
+      .set(admin.auth)
+      .send({ timezone: 'Marte/Olympus' })
+      .expect(400);
   });
 
   it('expone salud y disponibilidad de la base de datos', async () => {

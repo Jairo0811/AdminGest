@@ -4,7 +4,10 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 export const AUTH_CHANNEL = 'admingest-auth';
 
 export class ApiError extends Error {
-  constructor(message: string, public readonly status: number) {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
     super(message);
   }
 }
@@ -70,7 +73,9 @@ export async function restoreSession(): Promise<SessionPayload | null> {
         accessToken = null;
         return null;
       })
-      .finally(() => { refreshInFlight = null; });
+      .finally(() => {
+        refreshInFlight = null;
+      });
   }
   return refreshInFlight;
 }
@@ -98,8 +103,11 @@ async function request(path: string, options: RequestInit, token: string | null)
 
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   let response = await request(path, options, accessToken);
-  const isAuthCall = path.startsWith('/auth/login') || path.startsWith('/auth/register')
-    || path.startsWith('/auth/refresh') || path.startsWith('/auth/logout');
+  const isAuthCall =
+    path.startsWith('/auth/login') ||
+    path.startsWith('/auth/register') ||
+    path.startsWith('/auth/refresh') ||
+    path.startsWith('/auth/logout');
   if (response.status === 401 && !isAuthCall) {
     const renewed = await restoreSession();
     if (renewed) response = await request(path, options, renewed.accessToken);
@@ -111,16 +119,14 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   }
 
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as
-      | { message?: string | string[] }
-      | null;
+    const body = (await response.json().catch(() => null)) as {
+      message?: string | string[];
+    } | null;
     const message = Array.isArray(body?.message)
       ? body.message.join(', ')
-      : body?.message ?? 'No fue posible completar la operación.';
+      : (body?.message ?? 'No fue posible completar la operación.');
     throw new ApiError(message, response.status);
   }
 
-  return response.status === 204
-    ? (undefined as T)
-    : ((await response.json()) as T);
+  return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
 }

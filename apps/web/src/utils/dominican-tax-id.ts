@@ -8,14 +8,10 @@ export function formatDominicanTaxId(value: string): string {
   const digits = normalizeDominicanTaxId(value).slice(0, 11);
 
   if (digits.length <= 9) {
-    return digits
-      .replace(/^(\d{3})(\d)/, '$1-$2')
-      .replace(/^(\d{3})-(\d{5})(\d)/, '$1-$2-$3');
+    return digits.replace(/^(\d{3})(\d)/, '$1-$2').replace(/^(\d{3})-(\d{5})(\d)/, '$1-$2-$3');
   }
 
-  return digits
-    .replace(/^(\d{3})(\d)/, '$1-$2')
-    .replace(/^(\d{3})-(\d{7})(\d)/, '$1-$2-$3');
+  return digits.replace(/^(\d{3})(\d)/, '$1-$2').replace(/^(\d{3})-(\d{7})(\d)/, '$1-$2-$3');
 }
 
 export function isValidDominicanCedula(value: string): boolean {
@@ -39,10 +35,7 @@ export function isValidDominicanRnc(value: string): boolean {
   const rnc = normalizeDominicanTaxId(value);
   if (!/^\d{9}$/.test(rnc) || /^(\d)\1+$/.test(rnc)) return false;
 
-  const sum = RNC_WEIGHTS.reduce(
-    (total, weight, index) => total + Number(rnc[index]) * weight,
-    0,
-  );
+  const sum = RNC_WEIGHTS.reduce((total, weight, index) => total + Number(rnc[index]) * weight, 0);
   let expectedDigit = 11 - (sum % 11);
   if (expectedDigit === 10) expectedDigit = 1;
   if (expectedDigit === 11) expectedDigit = 2;

@@ -14,7 +14,6 @@ const EVENT_LABELS: Record<string, string> = {
 
 type Filter = 'all' | 'unread' | 'read';
 
-
 export function NotificationsPage() {
   const client = useQueryClient();
   const [filter, setFilter] = useState<Filter>('all');
@@ -29,7 +28,9 @@ export function NotificationsPage() {
       if (!items) return items;
       const ids = readIds(items);
       const now = new Date().toISOString();
-      return items.map((item) => (ids.has(item.id) && !item.readAt ? { ...item, readAt: now } : item));
+      return items.map((item) =>
+        ids.has(item.id) && !item.readAt ? { ...item, readAt: now } : item,
+      );
     });
 
   const read = useMutation({
@@ -69,7 +70,8 @@ export function NotificationsPage() {
             onClick={() => readAll.mutate()}
             type="button"
           >
-            <CheckCheck aria-hidden="true" size={17} /> {readAll.isPending ? 'Marcando…' : 'Marcar todas como leídas'}
+            <CheckCheck aria-hidden="true" size={17} />{' '}
+            {readAll.isPending ? 'Marcando…' : 'Marcar todas como leídas'}
           </button>
         </div>
       </div>
@@ -80,7 +82,11 @@ export function NotificationsPage() {
             <h2>
               <Bell aria-hidden="true" size={19} /> Bandeja
             </h2>
-            <p aria-live="polite">{unread ? `${unread} sin leer de ${items.length}` : `${items.length} notificaciones, todas leídas`}</p>
+            <p aria-live="polite">
+              {unread
+                ? `${unread} sin leer de ${items.length}`
+                : `${items.length} notificaciones, todas leídas`}
+            </p>
           </div>
           <div aria-label="Filtrar notificaciones" className="segmented" role="group">
             {(
@@ -90,7 +96,12 @@ export function NotificationsPage() {
                 ['read', 'Leídas'],
               ] as const
             ).map(([value, label]) => (
-              <button aria-pressed={filter === value} key={value} onClick={() => setFilter(value)} type="button">
+              <button
+                aria-pressed={filter === value}
+                key={value}
+                onClick={() => setFilter(value)}
+                type="button"
+              >
                 {label}
               </button>
             ))}
@@ -111,7 +122,11 @@ export function NotificationsPage() {
           <div className="empty-state empty-state--error" role="alert">
             <strong>No fue posible cargar las notificaciones</strong>
             <p>{(notifications.error as Error).message}</p>
-            <button className="secondary-button" onClick={() => void notifications.refetch()} type="button">
+            <button
+              className="secondary-button"
+              onClick={() => void notifications.refetch()}
+              type="button"
+            >
               <RefreshCw aria-hidden="true" size={16} /> Reintentar
             </button>
           </div>
@@ -148,7 +163,9 @@ export function NotificationsPage() {
                 <p>{item.message}</p>
                 <small>
                   {EVENT_LABELS[item.eventType] ?? item.eventType} ·{' '}
-                  <time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString('es-DO')}</time>
+                  <time dateTime={item.createdAt}>
+                    {new Date(item.createdAt).toLocaleString('es-DO')}
+                  </time>
                 </small>
               </div>
               <div className="item-row__actions">

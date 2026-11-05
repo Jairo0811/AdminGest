@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { TRANSACTION_OPTIONS } from '../../common/tenant/app-lock';
-import {
-  nextCompanySequence,
-  yearInTimeZone,
-} from '../../common/tenant/company-sequence';
+import { nextCompanySequence, yearInTimeZone } from '../../common/tenant/company-sequence';
 import {
   assertTenantCatalogItems,
   assertTenantCustomer,
@@ -83,12 +80,9 @@ export class QuotesService {
       throw new NotFoundException('No existe una cotización asociada a este código.');
     }
 
-    const expiredByDate =
-      quote.validUntil !== null && quote.validUntil.getTime() < Date.now();
+    const expiredByDate = quote.validUntil !== null && quote.validUntil.getTime() < Date.now();
     const effectiveStatus =
-      expiredByDate && !['ACCEPTED', 'REJECTED'].includes(quote.status)
-        ? 'EXPIRED'
-        : quote.status;
+      expiredByDate && !['ACCEPTED', 'REJECTED'].includes(quote.status) ? 'EXPIRED' : quote.status;
 
     return {
       valid: !['REJECTED'].includes(effectiveStatus),
@@ -166,12 +160,7 @@ export class QuotesService {
     return this.findOne(companyId, quote.id);
   }
 
-  async updateStatus(
-    companyId: string,
-    userId: string,
-    id: string,
-    status: string,
-  ) {
+  async updateStatus(companyId: string, userId: string, id: string, status: string) {
     const existing = await this.findOne(companyId, id);
     const quote = await this.prisma.quote.update({
       where: { id },

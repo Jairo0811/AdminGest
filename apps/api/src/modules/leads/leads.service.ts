@@ -76,7 +76,7 @@ export class LeadsService {
         ...dto,
         convertedAt:
           dto.status === 'CONVERTED'
-            ? existing.convertedAt ?? new Date()
+            ? (existing.convertedAt ?? new Date())
             : dto.status
               ? null
               : undefined,
@@ -108,4 +108,3 @@ export class LeadsService {
     return { deleted: true };
   }
 }
-

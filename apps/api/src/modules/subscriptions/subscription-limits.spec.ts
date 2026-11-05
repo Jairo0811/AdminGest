@@ -1,8 +1,4 @@
-import {
-  hasReachedLimit,
-  isSubscriptionUsable,
-  remainingCapacity,
-} from './subscription-limits';
+import { hasReachedLimit, isSubscriptionUsable, remainingCapacity } from './subscription-limits';
 
 describe('subscription limits', () => {
   const now = new Date('2026-10-27T12:00:00.000Z');

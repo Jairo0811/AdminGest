@@ -72,12 +72,7 @@ export class ActivitiesService {
     return activity;
   }
 
-  async update(
-    companyId: string,
-    userId: string,
-    id: string,
-    dto: UpdateActivityDto,
-  ) {
+  async update(companyId: string, userId: string, id: string, dto: UpdateActivityDto) {
     const existing = await this.findOne(companyId, id);
     if (dto.customerId !== undefined || dto.opportunityId !== undefined) {
       await this.validateRelations(
@@ -96,7 +91,7 @@ export class ActivitiesService {
         scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined,
         completedAt:
           dto.status === 'COMPLETED'
-            ? existing.completedAt ?? new Date()
+            ? (existing.completedAt ?? new Date())
             : dto.status
               ? null
               : undefined,
@@ -148,4 +143,3 @@ export class ActivitiesService {
     await assertTenantOpportunity(this.prisma, companyId, opportunityId, customerId);
   }
 }
-

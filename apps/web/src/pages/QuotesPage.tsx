@@ -9,10 +9,7 @@ import {
   PrintableQuote,
   QUOTE_STATUS_LABELS,
 } from '../utils/quote-print';
-import {
-  buildQuoteVerificationUrl,
-  createQuoteVerificationQr,
-} from '../utils/quote-verification';
+import { buildQuoteVerificationUrl, createQuoteVerificationQr } from '../utils/quote-verification';
 
 const money = new Intl.NumberFormat('es-DO', {
   style: 'currency',
@@ -47,7 +44,9 @@ export function QuotesPage() {
         buildQuotePrintBody({ quote, company, verificationUrl, qrDataUrl, logoUrl }),
       );
     } catch (error) {
-      setPrintError(error instanceof Error ? error.message : 'No fue posible preparar la cotización.');
+      setPrintError(
+        error instanceof Error ? error.message : 'No fue posible preparar la cotización.',
+      );
     } finally {
       setPrintingId(null);
     }
@@ -83,7 +82,13 @@ export function QuotesPage() {
       }}
       canEdit={false}
       gender="f"
-      pageAlert={printError ? <div className="alert error" role="alert">{printError}</div> : null}
+      pageAlert={
+        printError ? (
+          <div className="alert error" role="alert">
+            {printError}
+          </div>
+        ) : null
+      }
       columns={[
         {
           label: 'Cotización',
@@ -112,7 +117,11 @@ export function QuotesPage() {
           label: 'Estado',
           exportValue: (item) => String(item.status),
           exportFormat: 'status',
-          render: (item) => <span className="status-badge">{QUOTE_STATUS_LABELS[String(item.status)] ?? String(item.status)}</span>,
+          render: (item) => (
+            <span className="status-badge">
+              {QUOTE_STATUS_LABELS[String(item.status)] ?? String(item.status)}
+            </span>
+          ),
         },
         {
           label: 'Líneas',
@@ -133,10 +142,33 @@ export function QuotesPage() {
           optionLabel: (item) => String(item.name),
         },
         { name: 'validUntil', label: 'Válida hasta', type: 'date' },
-        { name: 'discountPercentage', label: 'Descuento (%)', type: 'number', defaultValue: 0, min: 0, max: 100, step: '0.01' },
+        {
+          name: 'discountPercentage',
+          label: 'Descuento (%)',
+          type: 'number',
+          defaultValue: 0,
+          min: 0,
+          max: 100,
+          step: '0.01',
+        },
         { name: 'itemDescription', label: 'Concepto', required: true, maxLength: 500 },
-        { name: 'quantity', label: 'Cantidad', type: 'number', defaultValue: 1, required: true, min: 0.01, step: '0.01' },
-        { name: 'unitPrice', label: 'Precio unitario (RD$)', type: 'number', required: true, min: 0, step: '0.01' },
+        {
+          name: 'quantity',
+          label: 'Cantidad',
+          type: 'number',
+          defaultValue: 1,
+          required: true,
+          min: 0.01,
+          step: '0.01',
+        },
+        {
+          name: 'unitPrice',
+          label: 'Precio unitario (RD$)',
+          type: 'number',
+          required: true,
+          min: 0,
+          step: '0.01',
+        },
         {
           name: 'taxRate',
           label: 'ITBIS',
@@ -159,7 +191,11 @@ export function QuotesPage() {
           title="Imprimir o guardar como PDF"
           type="button"
         >
-          {printingId === item.id ? <LoaderCircle className="spin" size={17} /> : <Printer size={17} />}
+          {printingId === item.id ? (
+            <LoaderCircle className="spin" size={17} />
+          ) : (
+            <Printer size={17} />
+          )}
         </button>
       )}
       reportMetrics={(items) => [

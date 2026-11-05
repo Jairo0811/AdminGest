@@ -1,13 +1,6 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import {
-  acquireTransactionLock,
-  TRANSACTION_OPTIONS,
-} from '../../common/tenant/app-lock';
+import { acquireTransactionLock, TRANSACTION_OPTIONS } from '../../common/tenant/app-lock';
 import { TenantDb } from '../../common/tenant/tenant-references';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import {
@@ -34,9 +27,7 @@ export class SubscriptionsService {
     });
 
     if (!subscription) {
-      throw new NotFoundException(
-        'La empresa no tiene una suscripción configurada.',
-      );
+      throw new NotFoundException('La empresa no tiene una suscripción configurada.');
     }
 
     // Sequential reads keep this usable inside an interactive transaction.

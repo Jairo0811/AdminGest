@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { TRANSACTION_OPTIONS } from '../../common/tenant/app-lock';
 import {
   assertTaskParent,
@@ -20,7 +16,11 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
-function assertDateRange(start?: string | Date | null, end?: string | Date | null, label = 'La fecha de finalización') {
+function assertDateRange(
+  start?: string | Date | null,
+  end?: string | Date | null,
+  label = 'La fecha de finalización',
+) {
   if (start && end && new Date(end).getTime() < new Date(start).getTime()) {
     throw new BadRequestException(`${label} no puede ser anterior a la fecha de inicio.`);
   }
@@ -87,20 +87,20 @@ export class ProjectsService {
       await assertTenantUser(this.prisma, companyId, managerId, 'gerente del proyecto');
     }
 
-    const project = await this.subscriptions.runWithinQuota(
-      companyId,
-      'projects',
-      (tx) =>
-        tx.project.create({
-          data: {
-            companyId,
-            ...dto,
-            managerId,
-            startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-            endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-          },
-          include: { customer: true, manager: { select: { id: true, firstName: true, lastName: true } } },
-        }),
+    const project = await this.subscriptions.runWithinQuota(companyId, 'projects', (tx) =>
+      tx.project.create({
+        data: {
+          companyId,
+          ...dto,
+          managerId,
+          startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+          endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+        },
+        include: {
+          customer: true,
+          manager: { select: { id: true, firstName: true, lastName: true } },
+        },
+      }),
     );
     await this.audit.record({
       companyId,
@@ -122,12 +122,7 @@ export class ProjectsService {
     return project;
   }
 
-  async update(
-    companyId: string,
-    userId: string,
-    id: string,
-    dto: UpdateProjectDto,
-  ) {
+  async update(companyId: string, userId: string, id: string, dto: UpdateProjectDto) {
     const existing = await this.findOne(companyId, id);
     const customerId = dto.customerId ?? existing.customerId;
     const opportunityId =
@@ -175,12 +170,7 @@ export class ProjectsService {
     return project;
   }
 
-  async addTask(
-    companyId: string,
-    userId: string,
-    projectId: string,
-    dto: CreateTaskDto,
-  ) {
+  async addTask(companyId: string, userId: string, projectId: string, dto: CreateTaskDto) {
     await this.findOne(companyId, projectId);
     assertDateRange(dto.startDate, dto.dueDate, 'La fecha de vencimiento');
     await assertTenantUser(this.prisma, companyId, dto.assigneeId, 'responsable de la tarea');
@@ -210,17 +200,16 @@ export class ProjectsService {
     return task;
   }
 
-  async updateTask(
-    companyId: string,
-    userId: string,
-    taskId: string,
-    dto: UpdateTaskDto,
-  ) {
+  async updateTask(companyId: string, userId: string, taskId: string, dto: UpdateTaskDto) {
     const existing = await this.prisma.projectTask.findFirst({
       where: { id: taskId, project: { companyId } },
     });
     if (!existing) throw new NotFoundException('Tarea no encontrada.');
-    assertDateRange(dto.startDate ?? existing.startDate, dto.dueDate ?? existing.dueDate, 'La fecha de vencimiento');
+    assertDateRange(
+      dto.startDate ?? existing.startDate,
+      dto.dueDate ?? existing.dueDate,
+      'La fecha de vencimiento',
+    );
     if (dto.assigneeId && dto.assigneeId !== existing.assigneeId) {
       await assertTenantUser(this.prisma, companyId, dto.assigneeId, 'responsable de la tarea');
     }
@@ -229,13 +218,10 @@ export class ProjectsService {
     }
 
     const progress =
-      dto.status === 'COMPLETED'
-        ? 100
-        : dto.progress === 100 && !dto.status
-          ? 100
-          : dto.progress;
+      dto.status === 'COMPLETED' ? 100 : dto.progress === 100 && !dto.status ? 100 : dto.progress;
     const status =
-      dto.status ?? (dto.progress === 100 && existing.status !== 'COMPLETED' ? 'COMPLETED' : undefined);
+      dto.status ??
+      (dto.progress === 100 && existing.status !== 'COMPLETED' ? 'COMPLETED' : undefined);
 
     const task = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.projectTask.update({

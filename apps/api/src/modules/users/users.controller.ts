@@ -45,11 +45,7 @@ export class UsersController {
 
   @Patch(':id')
   @Roles('SUPER_ADMIN', 'ADMIN')
-  update(
-    @CurrentUser() user: AuthUser,
-    @Param('id') id: string,
-    @Body() dto: UpdateUserDto,
-  ) {
+  update(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(user.companyId, user, id, dto);
   }
 

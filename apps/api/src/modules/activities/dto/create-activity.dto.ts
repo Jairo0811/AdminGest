@@ -8,20 +8,9 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export const ACTIVITY_TYPES = [
-  'CALL',
-  'EMAIL',
-  'MEETING',
-  'VISIT',
-  'TASK',
-  'FOLLOW_UP',
-] as const;
+export const ACTIVITY_TYPES = ['CALL', 'EMAIL', 'MEETING', 'VISIT', 'TASK', 'FOLLOW_UP'] as const;
 
-export const ACTIVITY_STATUSES = [
-  'PENDING',
-  'COMPLETED',
-  'CANCELLED',
-] as const;
+export const ACTIVITY_STATUSES = ['PENDING', 'COMPLETED', 'CANCELLED'] as const;
 
 export class CreateActivityDto {
   @IsIn(ACTIVITY_TYPES)

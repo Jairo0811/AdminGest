@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  buildMicrosoftProjectCsv,
-  parseMicrosoftProjectCsv,
-} from './ms-project-csv';
+import { buildMicrosoftProjectCsv, parseMicrosoftProjectCsv } from './ms-project-csv';
 
 describe('Microsoft Project CSV interoperability', () => {
   it('parses English Microsoft Project headers', () => {
@@ -11,7 +8,12 @@ describe('Microsoft Project CSV interoperability', () => {
     );
 
     expect(rows).toHaveLength(2);
-    expect(rows[0]).toMatchObject({ id: 1, name: 'Analysis', durationDays: 2, percentComplete: 50 });
+    expect(rows[0]).toMatchObject({
+      id: 1,
+      name: 'Analysis',
+      durationDays: 2,
+      percentComplete: 50,
+    });
     expect(rows[1].predecessors).toEqual([1]);
     expect(rows[1].milestone).toBe(true);
   });

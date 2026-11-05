@@ -92,7 +92,13 @@ const renderEntityPage = () => {
   return render(
     <QueryClientProvider client={client}>
       <EntityPage
-        columns={[{ label: 'Nombre', render: (item) => String(item.name), exportValue: (item) => String(item.name) }]}
+        columns={[
+          {
+            label: 'Nombre',
+            render: (item) => String(item.name),
+            exportValue: (item) => String(item.name),
+          },
+        ]}
         description="Clientes"
         endpoint="/customers"
         fields={[
@@ -146,7 +152,9 @@ describe('EntityPage', () => {
     fireEvent.submit(form);
 
     const posts = () =>
-      apiMock.mock.calls.filter(([, options]) => (options as RequestInit | undefined)?.method === 'POST');
+      apiMock.mock.calls.filter(
+        ([, options]) => (options as RequestInit | undefined)?.method === 'POST',
+      );
     await waitFor(() => expect(posts()).toHaveLength(1));
     await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
     const saves = posts();

@@ -15,21 +15,21 @@ describe('validateEnvironment', () => {
   });
 
   it('rechaza secretos JWT demasiado cortos', () => {
-    expect(() =>
-      validateEnvironment({ ...baseEnvironment, JWT_SECRET: 'corto' }),
-    ).toThrow('JWT_SECRET debe tener al menos 32 caracteres.');
+    expect(() => validateEnvironment({ ...baseEnvironment, JWT_SECRET: 'corto' })).toThrow(
+      'JWT_SECRET debe tener al menos 32 caracteres.',
+    );
   });
 
   it('exige configuración de correo y CORS en producción', () => {
-    expect(() =>
-      validateEnvironment({ ...baseEnvironment, NODE_ENV: 'production' }),
-    ).toThrow(/CORS_ORIGIN/);
+    expect(() => validateEnvironment({ ...baseEnvironment, NODE_ENV: 'production' })).toThrow(
+      /CORS_ORIGIN/,
+    );
   });
 
   it('rechaza un puerto inválido', () => {
-    expect(() =>
-      validateEnvironment({ ...baseEnvironment, PORT: '70000' }),
-    ).toThrow('PORT debe ser un número entero entre 1 y 65535.');
+    expect(() => validateEnvironment({ ...baseEnvironment, PORT: '70000' })).toThrow(
+      'PORT debe ser un número entero entre 1 y 65535.',
+    );
   });
 
   it('aplica tokens de acceso de corta duración (15m por defecto, máximo 1h)', () => {

@@ -2,9 +2,9 @@
 
 ## Versiones soportadas
 
-| Versión | Soporte |
-|---|---|
-| 1.0.x | ✅ Activo |
+| Versión              | Soporte        |
+| -------------------- | -------------- |
+| 1.0.x                | ✅ Activo      |
 | Versiones anteriores | ❌ Sin soporte |
 
 ## Reporte responsable

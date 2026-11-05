@@ -20,7 +20,10 @@ export function configureApp(app: NestExpressApplication): void {
   // X-Forwarded-For of the trusted proxy only (see docs/DEPLOYMENT.md).
   const trustProxy = config.get<string>('TRUST_PROXY', '').trim();
   if (trustProxy && trustProxy !== 'false') {
-    app.set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy === 'true' ? true : trustProxy);
+    app.set(
+      'trust proxy',
+      /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy === 'true' ? true : trustProxy,
+    );
   }
   app.use(
     helmet({
@@ -33,28 +36,44 @@ export function configureApp(app: NestExpressApplication): void {
     }),
   );
   const requestLogger = new Logger('HttpRequest');
-  app.use((request: { method: string; originalUrl: string; headers: Record<string,string | string[] | undefined>; requestId?: string }, response: {
-    setHeader: (key: string, value: string) => void;
-    on: (event: string, cb: () => void) => void;
-    statusCode: number;
-  }, next: () => void) => {
-    const supplied = request.headers['x-request-id'];
-    const requestId = typeof supplied === 'string' && /^[a-zA-Z0-9_.-]{8,96}$/.test(supplied)
-      ? supplied : randomUUID();
-    request.requestId = requestId;
-    response.setHeader('X-Request-Id', requestId);
-    const started = Date.now();
-    response.on('finish', () => {
-      requestLogger.log(JSON.stringify({
-        event: 'http_request',
-        requestId, method: request.method,
-        path: request.originalUrl?.split('?')[0],
-        status: response.statusCode,
-        durationMs: Date.now() - started,
-      }));
-    });
-    next();
-  });
+  app.use(
+    (
+      request: {
+        method: string;
+        originalUrl: string;
+        headers: Record<string, string | string[] | undefined>;
+        requestId?: string;
+      },
+      response: {
+        setHeader: (key: string, value: string) => void;
+        on: (event: string, cb: () => void) => void;
+        statusCode: number;
+      },
+      next: () => void,
+    ) => {
+      const supplied = request.headers['x-request-id'];
+      const requestId =
+        typeof supplied === 'string' && /^[a-zA-Z0-9_.-]{8,96}$/.test(supplied)
+          ? supplied
+          : randomUUID();
+      request.requestId = requestId;
+      response.setHeader('X-Request-Id', requestId);
+      const started = Date.now();
+      response.on('finish', () => {
+        requestLogger.log(
+          JSON.stringify({
+            event: 'http_request',
+            requestId,
+            method: request.method,
+            path: request.originalUrl?.split('?')[0],
+            status: response.statusCode,
+            durationMs: Date.now() - started,
+          }),
+        );
+      });
+      next();
+    },
+  );
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: config
@@ -77,5 +96,4 @@ export function configureApp(app: NestExpressApplication): void {
       stopAtFirstError: false,
     }),
   );
-
 }

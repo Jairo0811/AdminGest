@@ -22,15 +22,7 @@
   transform: translateY(0);
 }
 
-:where(
-  a,
-  button,
-  input,
-  select,
-  textarea,
-  summary,
-  [tabindex]:not([tabindex="-1"])
-):focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
   outline: 3px solid var(--a11y-focus-color);
   outline-offset: 3px;
   box-shadow: var(--a11y-focus-shadow);
@@ -52,13 +44,13 @@
   border: 0 !important;
 }
 
-[aria-disabled="true"],
+[aria-disabled='true'],
 :disabled {
   cursor: not-allowed;
 }
 
-.alert[role="alert"],
-[role="status"] {
+.alert[role='alert'],
+[role='status'] {
   scroll-margin-top: 5rem;
 }
 

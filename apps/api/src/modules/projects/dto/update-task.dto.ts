@@ -13,4 +13,3 @@ export class UpdateTaskDto extends PartialType(CreateTaskDto) {
   @Max(100)
   progress?: number;
 }
-

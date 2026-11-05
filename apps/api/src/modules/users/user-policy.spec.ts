@@ -46,9 +46,9 @@ describe('UserPolicy', () => {
     expect(removesAdministrativeAccess(admin, { status: 'BLOCKED' })).toBe(true);
     expect(removesAdministrativeAccess(admin, { role: 'ADMIN' })).toBe(false);
     expect(removesAdministrativeAccess(rep, { status: 'INACTIVE' })).toBe(false);
-    expect(
-      removesAdministrativeAccess({ ...admin, status: 'INACTIVE' }, { role: 'VIEWER' }),
-    ).toBe(false);
+    expect(removesAdministrativeAccess({ ...admin, status: 'INACTIVE' }, { role: 'VIEWER' })).toBe(
+      false,
+    );
   });
 
   it('revoca sesiones al desactivar, cambiar rol o correo', () => {

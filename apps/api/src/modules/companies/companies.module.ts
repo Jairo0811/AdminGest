@@ -7,4 +7,3 @@ import { CompaniesService } from './companies.service';
   providers: [CompaniesService],
 })
 export class CompaniesModule {}
-

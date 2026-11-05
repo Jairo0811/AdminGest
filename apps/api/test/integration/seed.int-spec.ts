@@ -17,14 +17,30 @@ describeIfSeeded('Seed repetible (SQL Server real)', () => {
 
   it('conserva la contraseña, el rol y los datos del administrador existente', async () => {
     const email = 'admin@admingest.com.do';
-    await harness.http().post('/api/auth/login').send({ email, password: firstPassword }).expect(200);
-    await harness.http().post('/api/auth/login').send({ email, password: secondPassword }).expect(401);
+    await harness
+      .http()
+      .post('/api/auth/login')
+      .send({ email, password: firstPassword })
+      .expect(200);
+    await harness
+      .http()
+      .post('/api/auth/login')
+      .send({ email, password: secondPassword })
+      .expect(401);
 
     const admin = await harness.prisma.user.findUniqueOrThrow({ where: { email } });
     expect(admin.role).toBe('ADMIN');
     expect(await harness.prisma.company.count({ where: { name: 'Empresa Demo SRL' } })).toBe(1);
-    expect(await harness.prisma.customer.count({ where: { companyId: admin.companyId, name: 'Cliente de Demostración' } })).toBe(1);
-    expect(await harness.prisma.subscription.count({ where: { companyId: admin.companyId } })).toBe(1);
-    expect(await harness.prisma.plan.count({ where: { code: { in: ['STARTER', 'PRO', 'BUSINESS'] } } })).toBe(3);
+    expect(
+      await harness.prisma.customer.count({
+        where: { companyId: admin.companyId, name: 'Cliente de Demostración' },
+      }),
+    ).toBe(1);
+    expect(await harness.prisma.subscription.count({ where: { companyId: admin.companyId } })).toBe(
+      1,
+    );
+    expect(
+      await harness.prisma.plan.count({ where: { code: { in: ['STARTER', 'PRO', 'BUSINESS'] } } }),
+    ).toBe(3);
   });
 });

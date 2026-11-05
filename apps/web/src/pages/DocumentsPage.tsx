@@ -104,7 +104,9 @@ export function DocumentsPage() {
         <div>
           <p className="eyebrow">Gestión documental</p>
           <h1>Documentos</h1>
-          <p>Referencias a archivos alojados en el repositorio documental autorizado de tu empresa.</p>
+          <p>
+            Referencias a archivos alojados en el repositorio documental autorizado de tu empresa.
+          </p>
         </div>
       </div>
 
@@ -134,7 +136,11 @@ export function DocumentsPage() {
             <div className="empty-state empty-state--error" role="alert">
               <strong>No fue posible cargar los documentos</strong>
               <p>{(records.error as Error).message}</p>
-              <button className="secondary-button" onClick={() => void records.refetch()} type="button">
+              <button
+                className="secondary-button"
+                onClick={() => void records.refetch()}
+                type="button"
+              >
                 <RefreshCw aria-hidden="true" size={16} /> Reintentar
               </button>
             </div>
@@ -142,7 +148,11 @@ export function DocumentsPage() {
           {records.data?.length === 0 && (
             <div className="empty-state">
               <strong>No hay documentos registrados</strong>
-              <p>{canWrite ? 'Registra el enlace de un contrato, propuesta o entregable.' : 'Tu rol puede consultar documentos registrados por el equipo.'}</p>
+              <p>
+                {canWrite
+                  ? 'Registra el enlace de un contrato, propuesta o entregable.'
+                  : 'Tu rol puede consultar documentos registrados por el equipo.'}
+              </p>
             </div>
           )}
 
@@ -166,11 +176,16 @@ export function DocumentsPage() {
                       <strong>{item.title}</strong>
                     )}
                     <small>
-                      {CATEGORY_LABELS[item.category] ?? item.category} · {url?.hostname ?? 'Enlace no válido'} ·{' '}
+                      {CATEGORY_LABELS[item.category] ?? item.category} ·{' '}
+                      {url?.hostname ?? 'Enlace no válido'} ·{' '}
                       {new Date(item.createdAt).toLocaleDateString('es-DO')}
                     </small>
                     {(project || customer) && (
-                      <small>{[project && `Proyecto: ${project}`, customer && `Cliente: ${customer}`].filter(Boolean).join(' · ')}</small>
+                      <small>
+                        {[project && `Proyecto: ${project}`, customer && `Cliente: ${customer}`]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </small>
                     )}
                   </div>
                   {canWrite && (
@@ -207,7 +222,11 @@ export function DocumentsPage() {
             <div className="form-grid">
               <label className="form-field full">
                 <span>
-                  Título<span aria-hidden="true" className="required-mark"> *</span>
+                  Título
+                  <span aria-hidden="true" className="required-mark">
+                    {' '}
+                    *
+                  </span>
                 </span>
                 <input maxLength={150} name="title" required />
               </label>
@@ -223,7 +242,11 @@ export function DocumentsPage() {
               </label>
               <label className="form-field full">
                 <span>
-                  URL HTTPS<span aria-hidden="true" className="required-mark"> *</span>
+                  URL HTTPS
+                  <span aria-hidden="true" className="required-mark">
+                    {' '}
+                    *
+                  </span>
                 </span>
                 <input
                   aria-describedby="document-url-help"
@@ -267,8 +290,8 @@ export function DocumentsPage() {
               </div>
             )}
             <p className="field-hint">
-              <Info aria-hidden="true" size={14} /> El módulo registra referencias externas; todavía no administra
-              almacenamiento privado ni permisos sobre el archivo.
+              <Info aria-hidden="true" size={14} /> El módulo registra referencias externas; todavía
+              no administra almacenamiento privado ni permisos sobre el archivo.
             </p>
             <div className="form-actions">
               <button className="primary-button" disabled={create.isPending} type="submit">
@@ -283,7 +306,8 @@ export function DocumentsPage() {
         <Modal onClose={() => setPendingDelete(null)} title="Eliminar referencia">
           <div className="confirm-dialog">
             <p>
-              Se eliminará la referencia «{pendingDelete.title}». El archivo en el proveedor externo no se modifica.
+              Se eliminará la referencia «{pendingDelete.title}». El archivo en el proveedor externo
+              no se modifica.
             </p>
             {remove.isError && (
               <div className="alert error" role="alert">
@@ -291,7 +315,11 @@ export function DocumentsPage() {
               </div>
             )}
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => setPendingDelete(null)} type="button">
+              <button
+                className="secondary-button"
+                onClick={() => setPendingDelete(null)}
+                type="button"
+              >
                 Cancelar
               </button>
               <button

@@ -7,4 +7,3 @@ import { CustomersService } from './customers.service';
   providers: [CustomersService],
 })
 export class CustomersModule {}
-

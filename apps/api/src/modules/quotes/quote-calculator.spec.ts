@@ -104,8 +104,8 @@ describe('calculateQuote', () => {
     expect(() => calculateQuote([{ quantity: 1, unitPrice: 1, taxRate: 150 }])).toThrow(
       BadRequestException,
     );
-    expect(() =>
-      calculateQuote([{ quantity: 1_000_000, unitPrice: 1_000_000_000_000 }]),
-    ).toThrow(BadRequestException);
+    expect(() => calculateQuote([{ quantity: 1_000_000, unitPrice: 1_000_000_000_000 }])).toThrow(
+      BadRequestException,
+    );
   });
 });

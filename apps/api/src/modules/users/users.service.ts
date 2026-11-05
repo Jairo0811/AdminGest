@@ -233,10 +233,12 @@ export class UsersService {
     assertCanManageUser(actor, target);
     await this.prisma.$transaction(async (transaction) => {
       await transaction.user.update({
-        where: { id }, data: { passwordHash: await hash(dto.password, 12) },
+        where: { id },
+        data: { passwordHash: await hash(dto.password, 12) },
       });
       await transaction.authSession.updateMany({
-        where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() },
+        where: { userId: id, revokedAt: null },
+        data: { revokedAt: new Date() },
       });
     });
     await this.audit.record({

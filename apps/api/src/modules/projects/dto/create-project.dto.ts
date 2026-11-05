@@ -13,13 +13,7 @@ import {
   Min,
 } from 'class-validator';
 
-export const PROJECT_STATUSES = [
-  'PLANNED',
-  'ACTIVE',
-  'ON_HOLD',
-  'COMPLETED',
-  'CANCELLED',
-] as const;
+export const PROJECT_STATUSES = ['PLANNED', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED'] as const;
 
 export class CreateProjectDto {
   @IsUUID()

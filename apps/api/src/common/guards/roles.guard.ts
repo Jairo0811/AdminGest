@@ -37,10 +37,6 @@ export class RolesGuard implements CanActivate {
     const resource = resolveResource(request.originalUrl ?? request.url ?? '');
     if (!resource) return true;
 
-    return roleHasPermission(
-      request.user.role,
-      resource,
-      resolveAction(request.method),
-    );
+    return roleHasPermission(request.user.role, resource, resolveAction(request.method));
   }
 }

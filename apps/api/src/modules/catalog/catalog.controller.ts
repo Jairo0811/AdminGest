@@ -31,4 +31,3 @@ export class CatalogController {
     return this.service.update(user.companyId, id, dto);
   }
 }
-

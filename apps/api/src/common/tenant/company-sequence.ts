@@ -40,7 +40,9 @@ export async function nextCompanySequence(
 export function yearInTimeZone(date: Date, timeZone?: string | null): number {
   try {
     return Number(
-      new Intl.DateTimeFormat('en-US', { timeZone: timeZone || 'UTC', year: 'numeric' }).format(date),
+      new Intl.DateTimeFormat('en-US', { timeZone: timeZone || 'UTC', year: 'numeric' }).format(
+        date,
+      ),
     );
   } catch {
     return date.getUTCFullYear();

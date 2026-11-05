@@ -7,7 +7,9 @@ const prismaError = (code: string, message = 'db error') =>
 
 describe('mapPrismaError', () => {
   it('convierte violaciones de unicidad en 409 sin exponer nombres internos', () => {
-    const mapped = mapPrismaError(prismaError('P2002', 'Unique constraint Customer_companyId_taxId_key'));
+    const mapped = mapPrismaError(
+      prismaError('P2002', 'Unique constraint Customer_companyId_taxId_key'),
+    );
     expect(mapped?.statusCode).toBe(HttpStatus.CONFLICT);
     expect(String(mapped?.message)).not.toContain('Customer_');
   });

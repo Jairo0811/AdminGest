@@ -1,9 +1,5 @@
 import { PartialType } from '@nestjs/swagger';
-import {
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 import { CreateOpportunityDto } from './create-opportunity.dto';
 
 export class UpdateOpportunityDto extends PartialType(CreateOpportunityDto) {

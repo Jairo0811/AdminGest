@@ -6,11 +6,11 @@ Esta fase convierte la arquitectura multiempresa existente en una base SaaS come
 
 ## Planes iniciales
 
-| Plan | Usuarios activos | Clientes activos | Proyectos | Almacenamiento | Reportes avanzados | API |
-|---|---:|---:|---:|---:|---|---|
-| Starter | 3 | 100 | 10 | 1 GB | No | No |
-| Pro | 10 | 1,000 | 100 | 10 GB | Sí | No |
-| Business | 50 | 10,000 | 1,000 | 50 GB | Sí | Sí |
+| Plan     | Usuarios activos | Clientes activos | Proyectos | Almacenamiento | Reportes avanzados | API |
+| -------- | ---------------: | ---------------: | --------: | -------------: | ------------------ | --- |
+| Starter  |                3 |              100 |        10 |           1 GB | No                 | No  |
+| Pro      |               10 |            1,000 |       100 |          10 GB | Sí                 | No  |
+| Business |               50 |           10,000 |     1,000 |          50 GB | Sí                 | Sí  |
 
 Los precios permanecen en 0 de forma intencional hasta integrar billing y definir la estrategia comercial definitiva.
 

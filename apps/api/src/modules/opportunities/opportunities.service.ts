@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   assertTenantCustomer,
   assertTenantPipelineStage,
@@ -62,9 +58,7 @@ export class OpportunitiesService {
       data: {
         companyId,
         ...dto,
-        expectedCloseDate: dto.expectedCloseDate
-          ? new Date(dto.expectedCloseDate)
-          : undefined,
+        expectedCloseDate: dto.expectedCloseDate ? new Date(dto.expectedCloseDate) : undefined,
       },
       include: { customer: true, pipelineStage: true },
     });
@@ -79,12 +73,7 @@ export class OpportunitiesService {
     return opportunity;
   }
 
-  async update(
-    companyId: string,
-    userId: string,
-    id: string,
-    dto: UpdateOpportunityDto,
-  ) {
+  async update(companyId: string, userId: string, id: string, dto: UpdateOpportunityDto) {
     const existing = await this.findOne(companyId, id);
     if (dto.customerId && dto.customerId !== existing.customerId) {
       await assertTenantCustomer(this.prisma, companyId, dto.customerId);
@@ -110,9 +99,7 @@ export class OpportunitiesService {
       where: { id },
       data: {
         ...dto,
-        expectedCloseDate: dto.expectedCloseDate
-          ? new Date(dto.expectedCloseDate)
-          : undefined,
+        expectedCloseDate: dto.expectedCloseDate ? new Date(dto.expectedCloseDate) : undefined,
       },
       include: { customer: true, pipelineStage: true },
     });
@@ -137,10 +124,7 @@ export class OpportunitiesService {
         project: { select: { id: true } },
       },
     });
-    if (
-      linked &&
-      (linked._count.quotes > 0 || linked._count.activities > 0 || linked.project)
-    ) {
+    if (linked && (linked._count.quotes > 0 || linked._count.activities > 0 || linked.project)) {
       throw new ConflictException(
         'La oportunidad tiene actividades, cotizaciones o un proyecto asociados. Márcala como perdida en lugar de eliminarla.',
       );

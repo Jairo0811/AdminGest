@@ -65,11 +65,19 @@ export function SubscriptionPanel() {
         </div>
       </div>
 
-      {query.isLoading && <p className="muted-state" role="status">Cargando suscripción…</p>}
+      {query.isLoading && (
+        <p className="muted-state" role="status">
+          Cargando suscripción…
+        </p>
+      )}
       {query.isError && (
         <div className="alert error" role="alert">
-          {query.error instanceof Error ? query.error.message : 'No fue posible consultar la suscripción.'}{' '}
-          <button className="text-button" onClick={() => void query.refetch()} type="button">Reintentar</button>
+          {query.error instanceof Error
+            ? query.error.message
+            : 'No fue posible consultar la suscripción.'}{' '}
+          <button className="text-button" onClick={() => void query.refetch()} type="button">
+            Reintentar
+          </button>
         </div>
       )}
 
@@ -138,9 +146,10 @@ export function SubscriptionPanel() {
           </ul>
 
           <p className="field-hint">
-            <Info aria-hidden="true" size={14} /> Almacenamiento ({subscription.plan.storageMb} MB), reportes
-            avanzados y acceso API son atributos informativos del plan y todavía no se aplican técnicamente.
-            AdminGest no integra pagos: el plan lo asigna un operador y no hay renovación automática.
+            <Info aria-hidden="true" size={14} /> Almacenamiento ({subscription.plan.storageMb} MB),
+            reportes avanzados y acceso API son atributos informativos del plan y todavía no se
+            aplican técnicamente. AdminGest no integra pagos: el plan lo asigna un operador y no hay
+            renovación automática.
           </p>
         </>
       )}

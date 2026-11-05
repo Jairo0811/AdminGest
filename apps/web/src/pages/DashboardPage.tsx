@@ -126,14 +126,9 @@ const roleProfiles: Record<
   },
   SALES_MANAGER: {
     eyebrow: 'Dirección comercial',
-    description: 'Supervisa el pipeline, las oportunidades, cotizaciones y prioridades del equipo comercial.',
-    metricKeys: [
-      'newLeads',
-      'customers',
-      'openOpportunities',
-      'pipelineValue',
-      'pendingQuotes',
-    ],
+    description:
+      'Supervisa el pipeline, las oportunidades, cotizaciones y prioridades del equipo comercial.',
+    metricKeys: ['newLeads', 'customers', 'openOpportunities', 'pipelineValue', 'pendingQuotes'],
     commercial: true,
     opportunities: true,
     activities: true,
@@ -141,20 +136,15 @@ const roleProfiles: Record<
   SALES_REP: {
     eyebrow: 'Operación comercial',
     description: 'Consulta tus prioridades de ventas, seguimiento y oportunidades activas.',
-    metricKeys: [
-      'newLeads',
-      'customers',
-      'openOpportunities',
-      'pipelineValue',
-      'pendingQuotes',
-    ],
+    metricKeys: ['newLeads', 'customers', 'openOpportunities', 'pipelineValue', 'pendingQuotes'],
     commercial: true,
     opportunities: true,
     activities: true,
   },
   PROJECT_MANAGER: {
     eyebrow: 'Dirección de proyectos',
-    description: 'Mantén el foco en proyectos activos, clientes relacionados y próximos compromisos.',
+    description:
+      'Mantén el foco en proyectos activos, clientes relacionados y próximos compromisos.',
     metricKeys: ['customers', 'pendingQuotes', 'activeProjects'],
     commercial: false,
     opportunities: false,
@@ -244,7 +234,13 @@ function SalesChart({ data }: { data: Dashboard['salesEvolution'] }) {
           const y = padding.top + chartHeight - ratio * chartHeight;
           return (
             <g key={ratio}>
-              <line className="chart-grid-line" x1={padding.left} x2={padding.left + chartWidth} y1={y} y2={y} />
+              <line
+                className="chart-grid-line"
+                x1={padding.left}
+                x2={padding.left + chartWidth}
+                y1={y}
+                y2={y}
+              />
               <text className="chart-axis-label" x={padding.left - 10} y={y + 4} textAnchor="end">
                 {compactNumber.format(max * ratio)}
               </text>
@@ -256,7 +252,12 @@ function SalesChart({ data }: { data: Dashboard['salesEvolution'] }) {
         {points.map((point) => (
           <g key={point.key}>
             <circle className="chart-point" cx={point.x} cy={point.y} r="5" />
-            <text className="chart-axis-label month" x={point.x} y={height - 14} textAnchor="middle">
+            <text
+              className="chart-axis-label month"
+              x={point.x}
+              y={height - 14}
+              textAnchor="middle"
+            >
               {point.month}
             </text>
             <title>{`${point.month}: ${currency.format(point.value)} · ${point.count} oportunidades`}</title>
@@ -275,9 +276,15 @@ function PipelineFunnel({ stages }: { stages: Dashboard['opportunitiesByStage'] 
         const width = 44 + (stage.count / maxCount) * 56;
         return (
           <div className="funnel-stage" key={stage.id}>
-            <div className="funnel-stage-meta"><span>{stage.name}</span><strong>{stage.count}</strong></div>
+            <div className="funnel-stage-meta">
+              <span>{stage.name}</span>
+              <strong>{stage.count}</strong>
+            </div>
             <div className="funnel-track">
-              <div className="funnel-fill" style={{ width: `${width}%`, opacity: 1 - index * 0.08 }}>
+              <div
+                className="funnel-fill"
+                style={{ width: `${width}%`, opacity: 1 - index * 0.08 }}
+              >
                 <span>{currency.format(stage.value)}</span>
               </div>
             </div>
@@ -327,7 +334,9 @@ export function DashboardPage() {
           <div className="metrics">
             {metrics.map(({ key, label, metric, icon: Icon, currency: isCurrency }) => (
               <article className="metric-card metric-card-premium" key={key}>
-                <div className="metric-icon"><Icon size={21} /></div>
+                <div className="metric-icon">
+                  <Icon size={21} />
+                </div>
                 <div className="metric-content">
                   <p>{label}</p>
                   <strong>{isCurrency ? currency.format(metric.value) : metric.value}</strong>
@@ -341,35 +350,67 @@ export function DashboardPage() {
             <div className="dashboard-premium-grid">
               <article className="panel chart-panel">
                 <div className="panel-header">
-                  <div><p className="eyebrow">Últimos 6 meses</p><h2>Evolución comercial</h2></div>
+                  <div>
+                    <p className="eyebrow">Últimos 6 meses</p>
+                    <h2>Evolución comercial</h2>
+                  </div>
                   <span className="panel-caption">Valor de oportunidades creadas</span>
                 </div>
-                {data.salesEvolution.some((item) => item.value > 0)
-                  ? <SalesChart data={data.salesEvolution} />
-                  : <div className="empty-state chart-empty">Aún no hay datos suficientes para mostrar la evolución comercial.</div>}
+                {data.salesEvolution.some((item) => item.value > 0) ? (
+                  <SalesChart data={data.salesEvolution} />
+                ) : (
+                  <div className="empty-state chart-empty">
+                    Aún no hay datos suficientes para mostrar la evolución comercial.
+                  </div>
+                )}
               </article>
 
               <article className="panel funnel-panel">
-                <div className="panel-header"><div><p className="eyebrow">Embudo comercial</p><h2>Oportunidades por etapa</h2></div></div>
-                {data.opportunitiesByStage.length
-                  ? <PipelineFunnel stages={data.opportunitiesByStage} />
-                  : <div className="empty-state compact">No hay etapas configuradas.</div>}
+                <div className="panel-header">
+                  <div>
+                    <p className="eyebrow">Embudo comercial</p>
+                    <h2>Oportunidades por etapa</h2>
+                  </div>
+                </div>
+                {data.opportunitiesByStage.length ? (
+                  <PipelineFunnel stages={data.opportunitiesByStage} />
+                ) : (
+                  <div className="empty-state compact">No hay etapas configuradas.</div>
+                )}
               </article>
             </div>
           )}
 
-          <div className={profile.opportunities && profile.activities ? "dashboard-grid dashboard-detail-grid" : "dashboard-grid"}>
+          <div
+            className={
+              profile.opportunities && profile.activities
+                ? 'dashboard-grid dashboard-detail-grid'
+                : 'dashboard-grid'
+            }
+          >
             {profile.opportunities && (
               <article className="panel">
-                <div className="panel-header"><div><p className="eyebrow">Pipeline comercial</p><h2>Oportunidades recientes</h2></div></div>
+                <div className="panel-header">
+                  <div>
+                    <p className="eyebrow">Pipeline comercial</p>
+                    <h2>Oportunidades recientes</h2>
+                  </div>
+                </div>
                 <div className="opportunity-list">
-                  {data.recentOpportunities.length ? data.recentOpportunities.map((item) => (
-                    <div className="opportunity-row" key={item.id}>
-                      <div className="opportunity-main"><strong>{item.name}</strong><span>{item.customer.name}</span></div>
-                      <span className="status-badge blue">{item.pipelineStage.name}</span>
-                      <strong>{currency.format(Number(item.estimatedValue))}</strong>
-                    </div>
-                  )) : <div className="empty-state compact">No hay oportunidades abiertas.</div>}
+                  {data.recentOpportunities.length ? (
+                    data.recentOpportunities.map((item) => (
+                      <div className="opportunity-row" key={item.id}>
+                        <div className="opportunity-main">
+                          <strong>{item.name}</strong>
+                          <span>{item.customer.name}</span>
+                        </div>
+                        <span className="status-badge blue">{item.pipelineStage.name}</span>
+                        <strong>{currency.format(Number(item.estimatedValue))}</strong>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="empty-state compact">No hay oportunidades abiertas.</div>
+                  )}
                 </div>
               </article>
             )}
@@ -379,23 +420,36 @@ export function DashboardPage() {
                 <div className="panel-header">
                   <div>
                     <p className="eyebrow">Próximos 7 días</p>
-                    <h2>{user?.role === 'PROJECT_MANAGER' ? 'Compromisos próximos' : 'Actividades próximas'}</h2>
+                    <h2>
+                      {user?.role === 'PROJECT_MANAGER'
+                        ? 'Compromisos próximos'
+                        : 'Actividades próximas'}
+                    </h2>
                   </div>
                 </div>
                 <div className="activity-list">
-                  {data.upcomingActivities.length ? data.upcomingActivities.map((item) => (
-                    <div className="activity-item" key={item.id}>
-                      <CalendarDays size={18} />
-                      <div>
-                        <strong>{item.subject}</strong>
-                        <span>
-                          {new Intl.DateTimeFormat('es-DO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.scheduledAt))}
-                          {item.customer ? ` · ${item.customer.name}` : ''}
-                          {!item.customer && item.opportunity ? ` · ${item.opportunity.name}` : ''}
-                        </span>
+                  {data.upcomingActivities.length ? (
+                    data.upcomingActivities.map((item) => (
+                      <div className="activity-item" key={item.id}>
+                        <CalendarDays size={18} />
+                        <div>
+                          <strong>{item.subject}</strong>
+                          <span>
+                            {new Intl.DateTimeFormat('es-DO', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            }).format(new Date(item.scheduledAt))}
+                            {item.customer ? ` · ${item.customer.name}` : ''}
+                            {!item.customer && item.opportunity
+                              ? ` · ${item.opportunity.name}`
+                              : ''}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )) : <div className="empty-state compact">Tu agenda está despejada.</div>}
+                    ))
+                  ) : (
+                    <div className="empty-state compact">Tu agenda está despejada.</div>
+                  )}
                 </div>
               </article>
             )}

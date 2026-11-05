@@ -10,9 +10,7 @@ const REQUIRED_IN_PRODUCTION = [
 /** Access tokens are short lived; long sessions rely on the rotating refresh token. */
 export const MAX_ACCESS_TOKEN_SECONDS = 3600;
 
-export function validateEnvironment(
-  environment: Record<string, unknown>,
-): Record<string, unknown> {
+export function validateEnvironment(environment: Record<string, unknown>): Record<string, unknown> {
   const nodeEnv = String(environment.NODE_ENV ?? 'development');
   const required = [
     ...REQUIRED_ALWAYS,
@@ -25,9 +23,7 @@ export function validateEnvironment(
   });
 
   if (missing.length > 0) {
-    throw new Error(
-      `Faltan variables de entorno obligatorias: ${missing.join(', ')}`,
-    );
+    throw new Error(`Faltan variables de entorno obligatorias: ${missing.join(', ')}`);
   }
 
   const jwtSecret = String(environment.JWT_SECRET);

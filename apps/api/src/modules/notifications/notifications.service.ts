@@ -9,7 +9,10 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
 export const EVENT_TYPES = [
-  'ACTIVITY_ASSIGNED', 'PROJECT_ASSIGNED', 'ACTIVITY_DUE', 'QUOTE_EXPIRING',
+  'ACTIVITY_ASSIGNED',
+  'PROJECT_ASSIGNED',
+  'ACTIVITY_DUE',
+  'QUOTE_EXPIRING',
 ] as const;
 export type BusinessEvent = (typeof EVENT_TYPES)[number];
 
@@ -39,9 +42,10 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
     // The persistent unique key makes this safe even if several API replicas run.
     // This in-process timer is best effort: reminders are not generated while the API
     // is down (see docs/BUSINESS-AUTOMATION.md).
-    const run = () => void this.scanReminders().catch(
-      (error: unknown) => this.logger.error('No fue posible generar recordatorios.', error),
-    );
+    const run = () =>
+      void this.scanReminders().catch((error: unknown) =>
+        this.logger.error('No fue posible generar recordatorios.', error),
+      );
     this.startup = setTimeout(run, 30_000);
     this.startup.unref();
     this.timer = setInterval(run, REMINDER_INTERVAL_MS);
@@ -56,7 +60,15 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
   list(companyId: string, userId: string) {
     return this.prisma.notification.findMany({
       where: { companyId, userId },
-      select: { id: true, title: true, message: true, path: true, eventType: true, readAt: true, createdAt: true },
+      select: {
+        id: true,
+        title: true,
+        message: true,
+        path: true,
+        eventType: true,
+        readAt: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
@@ -93,7 +105,9 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
           select: { id: true },
         }),
         this.prisma.workflowRule.findUnique({
-          where: { companyId_eventType: { companyId: input.companyId, eventType: input.eventType } },
+          where: {
+            companyId_eventType: { companyId: input.companyId, eventType: input.eventType },
+          },
         }),
       ]);
       if (!recipient || rule?.enabled === false) return;
@@ -127,22 +141,34 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
     for (const activity of activities) {
       if (!activity.ownerId) continue;
       await this.emit({
-        companyId: activity.companyId, userId: activity.ownerId,
-        eventType: 'ACTIVITY_DUE', title: 'Actividad próxima',
-        message: activity.subject, path: '/activities',
+        companyId: activity.companyId,
+        userId: activity.ownerId,
+        eventType: 'ACTIVITY_DUE',
+        title: 'Actividad próxima',
+        message: activity.subject,
+        path: '/activities',
         dedupeKey: 'activity-due:' + activity.id + ':' + activity.scheduledAt.toISOString(),
       });
     }
     for (const quote of quotes) {
       const admins = await this.prisma.user.findMany({
-        where: { companyId: quote.companyId, role: { in: ['ADMIN', 'SUPER_ADMIN'] }, status: 'ACTIVE' },
-        select: { id: true }, orderBy: { createdAt: 'asc' }, take: 5,
+        where: {
+          companyId: quote.companyId,
+          role: { in: ['ADMIN', 'SUPER_ADMIN'] },
+          status: 'ACTIVE',
+        },
+        select: { id: true },
+        orderBy: { createdAt: 'asc' },
+        take: 5,
       });
       for (const admin of admins) {
         await this.emit({
-          companyId: quote.companyId, userId: admin.id,
-          eventType: 'QUOTE_EXPIRING', title: 'Cotización próxima a vencer',
-          message: quote.number, path: '/quotes',
+          companyId: quote.companyId,
+          userId: admin.id,
+          eventType: 'QUOTE_EXPIRING',
+          title: 'Cotización próxima a vencer',
+          message: quote.number,
+          path: '/quotes',
           dedupeKey: 'quote-expiring:' + quote.id + ':' + quote.validUntil?.toISOString(),
         });
       }

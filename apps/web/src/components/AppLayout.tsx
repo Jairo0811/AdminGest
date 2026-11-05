@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart3,
   Bell,
@@ -25,15 +25,15 @@ import {
   UserCog,
   UsersRound,
   X,
-} from "lucide-react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { api } from "../api/client";
-import { internalPath, NotificationItem, NOTIFICATIONS_KEY } from "../api/notifications";
-import { useAuth } from "../auth/AuthContext";
-import { AppResource, hasPermission } from "../auth/permissions";
-import { useTheme } from "../theme/useTheme";
-import { AppFooter } from "./AppFooter";
-import { BrandLogo } from "./BrandLogo";
+} from 'lucide-react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { api } from '../api/client';
+import { internalPath, NotificationItem, NOTIFICATIONS_KEY } from '../api/notifications';
+import { useAuth } from '../auth/AuthContext';
+import { AppResource, hasPermission } from '../auth/permissions';
+import { useTheme } from '../theme/useTheme';
+import { AppFooter } from './AppFooter';
+import { BrandLogo } from './BrandLogo';
 
 const navigation: Array<{
   icon: typeof LayoutDashboard;
@@ -41,18 +41,18 @@ const navigation: Array<{
   to: string;
   resource: AppResource;
 }> = [
-  { icon: LayoutDashboard, label: "Dashboard", to: "/", resource: "dashboard" },
-  { icon: ContactRound, label: "Prospectos", to: "/leads", resource: "leads" },
-  { icon: UsersRound, label: "Clientes", to: "/customers", resource: "customers" },
-  { icon: Target, label: "Oportunidades", to: "/opportunities", resource: "opportunities" },
-  { icon: CalendarDays, label: "Actividades", to: "/activities", resource: "activities" },
-  { icon: Boxes, label: "Catálogo", to: "/catalog", resource: "catalog" },
-  { icon: FileText, label: "Cotizaciones", to: "/quotes", resource: "quotes" },
-  { icon: FolderKanban, label: "Proyectos", to: "/projects", resource: "projects" },
-  { icon: BarChart3, label: "Reportes", to: "/reports", resource: "reports" },
-  { icon: Bell, label: "Notificaciones", to: "/notifications", resource: "notifications" },
-  { icon: Files, label: "Documentos", to: "/documents", resource: "documents" },
-  { icon: Workflow, label: "Flujos y plantillas", to: "/workflows", resource: "workflows" },
+  { icon: LayoutDashboard, label: 'Dashboard', to: '/', resource: 'dashboard' },
+  { icon: ContactRound, label: 'Prospectos', to: '/leads', resource: 'leads' },
+  { icon: UsersRound, label: 'Clientes', to: '/customers', resource: 'customers' },
+  { icon: Target, label: 'Oportunidades', to: '/opportunities', resource: 'opportunities' },
+  { icon: CalendarDays, label: 'Actividades', to: '/activities', resource: 'activities' },
+  { icon: Boxes, label: 'Catálogo', to: '/catalog', resource: 'catalog' },
+  { icon: FileText, label: 'Cotizaciones', to: '/quotes', resource: 'quotes' },
+  { icon: FolderKanban, label: 'Proyectos', to: '/projects', resource: 'projects' },
+  { icon: BarChart3, label: 'Reportes', to: '/reports', resource: 'reports' },
+  { icon: Bell, label: 'Notificaciones', to: '/notifications', resource: 'notifications' },
+  { icon: Files, label: 'Documentos', to: '/documents', resource: 'documents' },
+  { icon: Workflow, label: 'Flujos y plantillas', to: '/workflows', resource: 'workflows' },
 ];
 
 type SearchResult = {
@@ -63,16 +63,15 @@ type SearchResult = {
   path: string;
 };
 
-
-const SIDEBAR_KEY = "admingest-sidebar-collapsed";
+const SIDEBAR_KEY = 'admingest-sidebar-collapsed';
 
 const roleLabels: Record<string, string> = {
-  SUPER_ADMIN: "Superadministrador",
-  ADMIN: "Administrador",
-  SALES_MANAGER: "Gerente comercial",
-  SALES_REP: "Representante de ventas",
-  PROJECT_MANAGER: "Gerente de proyectos",
-  VIEWER: "Solo lectura",
+  SUPER_ADMIN: 'Superadministrador',
+  ADMIN: 'Administrador',
+  SALES_MANAGER: 'Gerente comercial',
+  SALES_REP: 'Representante de ventas',
+  PROJECT_MANAGER: 'Gerente de proyectos',
+  VIEWER: 'Solo lectura',
 };
 
 export function AppLayout() {
@@ -86,23 +85,18 @@ export function AppLayout() {
     () => navigation.filter((item) => hasPermission(user?.role, item.resource)),
     [user?.role],
   );
-  const canManageUsers = hasPermission(user?.role, "users");
-  const canManageSettings = hasPermission(user?.role, "settings");
+  const canManageUsers = hasPermission(user?.role, 'users');
+  const canManageSettings = hasPermission(user?.role, 'settings');
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(
-    () => localStorage.getItem(SIDEBAR_KEY) === "true",
-  );
-  const [search, setSearch] = useState("");
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(SIDEBAR_KEY) === 'true');
+  const [search, setSearch] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
   const searchQuery = useQuery({
-    queryKey: ["navigation-search", search],
-    queryFn: () =>
-      api<SearchResult[]>(
-        `/navigation/search?q=${encodeURIComponent(search.trim())}`,
-      ),
+    queryKey: ['navigation-search', search],
+    queryFn: () => api<SearchResult[]>(`/navigation/search?q=${encodeURIComponent(search.trim())}`),
     enabled: search.trim().length >= 2,
     staleTime: 15_000,
   });
@@ -110,26 +104,24 @@ export function AppLayout() {
   const queryClient = useQueryClient();
   const notificationsQuery = useQuery({
     queryKey: NOTIFICATIONS_KEY,
-    queryFn: () => api<NotificationItem[]>("/notifications"),
+    queryFn: () => api<NotificationItem[]>('/notifications'),
     refetchInterval: 60_000,
   });
   const unreadCount = notificationsQuery.data?.filter((item) => !item.readAt).length ?? 0;
   const markNotificationRead = useMutation({
-    mutationFn: (id: string) => api(`/notifications/${id}/read`, { method: "PATCH" }),
+    mutationFn: (id: string) => api(`/notifications/${id}/read`, { method: 'PATCH' }),
     onSettled: () => void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY }),
   });
 
   const currentLabel = useMemo(() => {
-    if (location.pathname.startsWith("/users")) return "Usuarios y roles";
-    if (location.pathname.startsWith("/profile")) return "Mi perfil";
-    if (location.pathname.startsWith("/settings")) return "Configuración";
+    if (location.pathname.startsWith('/users')) return 'Usuarios y roles';
+    if (location.pathname.startsWith('/profile')) return 'Mi perfil';
+    if (location.pathname.startsWith('/settings')) return 'Configuración';
 
     return (
       visibleNavigation.find((item) =>
-        item.to === "/"
-          ? location.pathname === "/"
-          : location.pathname.startsWith(item.to),
-      )?.label ?? "AdminGest"
+        item.to === '/' ? location.pathname === '/' : location.pathname.startsWith(item.to),
+      )?.label ?? 'AdminGest'
     );
   }, [location.pathname, visibleNavigation]);
 
@@ -140,15 +132,15 @@ export function AppLayout() {
 
   useEffect(() => {
     const closeTransientUi = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
+      if (event.key !== 'Escape') return;
       setMenuOpen(false);
       setNotificationsOpen(false);
       setProfileOpen(false);
-      setSearch("");
+      setSearch('');
     };
 
-    document.addEventListener("keydown", closeTransientUi);
-    return () => document.removeEventListener("keydown", closeTransientUi);
+    document.addEventListener('keydown', closeTransientUi);
+    return () => document.removeEventListener('keydown', closeTransientUi);
   }, []);
 
   const toggleSidebar = () => {
@@ -161,32 +153,35 @@ export function AppLayout() {
 
   const goTo = (path: string) => {
     navigate(path);
-    setSearch("");
+    setSearch('');
     setNotificationsOpen(false);
     setProfileOpen(false);
     setMenuOpen(false);
   };
 
   return (
-    <div className={collapsed ? "app-shell app-shell--collapsed" : "app-shell"}>
-      <a className="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <div className={collapsed ? 'app-shell app-shell--collapsed' : 'app-shell'}>
+      <a className="skip-link" href="#main-content">
+        Saltar al contenido principal
+      </a>
 
       <aside
         aria-label="Menú principal"
-        className={[
-          "sidebar",
-          menuOpen ? "open" : "",
-          collapsed ? "sidebar--collapsed" : "",
-        ]
+        className={['sidebar', menuOpen ? 'open' : '', collapsed ? 'sidebar--collapsed' : '']
           .filter(Boolean)
-          .join(" ")}
+          .join(' ')}
         id="primary-sidebar"
       >
         <div className="brand-row">
           <div className="brand">
             <BrandLogo compact={collapsed} variant="sidebar" />
           </div>
-          <button aria-label="Cerrar menú" className="mobile-close" onClick={() => setMenuOpen(false)} type="button">
+          <button
+            aria-label="Cerrar menú"
+            className="mobile-close"
+            onClick={() => setMenuOpen(false)}
+            type="button"
+          >
             <X aria-hidden="true" size={20} />
           </button>
         </div>
@@ -200,8 +195,8 @@ export function AppLayout() {
           {visibleNavigation.map(({ icon: Icon, label, to }) => (
             <NavLink
               aria-label={label}
-              className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
-              end={to === "/"}
+              className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+              end={to === '/'}
               key={to}
               onClick={() => setMenuOpen(false)}
               title={collapsed ? label : undefined}
@@ -213,7 +208,11 @@ export function AppLayout() {
           ))}
 
           {canManageUsers && (
-            <NavLink className={({ isActive }) => isActive ? "nav-item active" : "nav-item"} onClick={() => setMenuOpen(false)} to="/users">
+            <NavLink
+              className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+              onClick={() => setMenuOpen(false)}
+              to="/users"
+            >
               <UserCog aria-hidden="true" size={19} />
               <span>Usuarios</span>
             </NavLink>
@@ -233,76 +232,252 @@ export function AppLayout() {
         </button>
       </aside>
 
-      {menuOpen && <button aria-label="Cerrar menú" className="sidebar-scrim" onClick={() => setMenuOpen(false)} type="button" />}
+      {menuOpen && (
+        <button
+          aria-label="Cerrar menú"
+          className="sidebar-scrim"
+          onClick={() => setMenuOpen(false)}
+          type="button"
+        />
+      )}
 
       <div className="workspace-shell">
         <header className="topbar">
-          <button aria-controls="primary-sidebar" aria-expanded={menuOpen} aria-label="Abrir menú" className="menu-button" onClick={() => setMenuOpen(true)} type="button"><Menu aria-hidden="true" size={21} /></button>
-          <button aria-label={collapsed ? "Expandir barra lateral" : "Colapsar barra lateral"} className="sidebar-toggle" onClick={toggleSidebar} type="button">
-            {collapsed ? <PanelLeftOpen aria-hidden="true" size={19} /> : <PanelLeftClose aria-hidden="true" size={19} />}
+          <button
+            aria-controls="primary-sidebar"
+            aria-expanded={menuOpen}
+            aria-label="Abrir menú"
+            className="menu-button"
+            onClick={() => setMenuOpen(true)}
+            type="button"
+          >
+            <Menu aria-hidden="true" size={21} />
+          </button>
+          <button
+            aria-label={collapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
+            className="sidebar-toggle"
+            onClick={toggleSidebar}
+            type="button"
+          >
+            {collapsed ? (
+              <PanelLeftOpen aria-hidden="true" size={19} />
+            ) : (
+              <PanelLeftClose aria-hidden="true" size={19} />
+            )}
           </button>
 
-          <nav aria-label="Ruta de navegación" className="breadcrumbs"><span>AdminGest</span><b aria-hidden="true">/</b><strong aria-current="page">{currentLabel}</strong></nav>
+          <nav aria-label="Ruta de navegación" className="breadcrumbs">
+            <span>AdminGest</span>
+            <b aria-hidden="true">/</b>
+            <strong aria-current="page">{currentLabel}</strong>
+          </nav>
 
           <div className="global-search" role="search">
             <Search aria-hidden="true" size={18} />
-            <input aria-controls="global-search-results" aria-expanded={search.trim().length >= 2} aria-label="Buscar en AdminGest" onChange={(event) => setSearch(event.target.value)} placeholder="Buscar clientes, proyectos..." value={search} />
+            <input
+              aria-controls="global-search-results"
+              aria-expanded={search.trim().length >= 2}
+              aria-label="Buscar en AdminGest"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar clientes, proyectos..."
+              value={search}
+            />
             {search.trim().length >= 2 && (
-              <div aria-live="polite" className="search-results" id="global-search-results" role="region">
-                {searchQuery.isLoading ? <div className="popover-state" role="status">Buscando…</div> : searchQuery.data?.length ? searchQuery.data.map((item) => (
-                  <button key={`${item.type}-${item.id}`} onClick={() => goTo(item.path)} type="button">
-                    <span className="search-result-type">{item.type}</span>
-                    <span><strong>{item.title}</strong><small>{item.subtitle}</small></span>
-                  </button>
-                )) : <div className="popover-state" role="status">No encontramos coincidencias.</div>}
+              <div
+                aria-live="polite"
+                className="search-results"
+                id="global-search-results"
+                role="region"
+              >
+                {searchQuery.isLoading ? (
+                  <div className="popover-state" role="status">
+                    Buscando…
+                  </div>
+                ) : searchQuery.data?.length ? (
+                  searchQuery.data.map((item) => (
+                    <button
+                      key={`${item.type}-${item.id}`}
+                      onClick={() => goTo(item.path)}
+                      type="button"
+                    >
+                      <span className="search-result-type">{item.type}</span>
+                      <span>
+                        <strong>{item.title}</strong>
+                        <small>{item.subtitle}</small>
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="popover-state" role="status">
+                    No encontramos coincidencias.
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           <div className="topbar-spacer" />
-          <button aria-label={theme === "dark" ? "Activar tema claro" : "Activar tema oscuro"} className="icon-button" onClick={toggleTheme} type="button">
-            {theme === "dark" ? <Sun aria-hidden="true" size={20} /> : <Moon aria-hidden="true" size={20} />}
+          <button
+            aria-label={theme === 'dark' ? 'Activar tema claro' : 'Activar tema oscuro'}
+            className="icon-button"
+            onClick={toggleTheme}
+            type="button"
+          >
+            {theme === 'dark' ? (
+              <Sun aria-hidden="true" size={20} />
+            ) : (
+              <Moon aria-hidden="true" size={20} />
+            )}
           </button>
 
           <div className="topbar-popover-anchor">
-            <button aria-controls="notifications-popover" aria-expanded={notificationsOpen} aria-label={unreadCount ? `Notificaciones: ${unreadCount} sin leer` : "Notificaciones"} className="icon-button" onClick={() => { setNotificationsOpen((value) => !value); setProfileOpen(false); }} type="button">
+            <button
+              aria-controls="notifications-popover"
+              aria-expanded={notificationsOpen}
+              aria-label={
+                unreadCount ? `Notificaciones: ${unreadCount} sin leer` : 'Notificaciones'
+              }
+              className="icon-button"
+              onClick={() => {
+                setNotificationsOpen((value) => !value);
+                setProfileOpen(false);
+              }}
+              type="button"
+            >
               <Bell aria-hidden="true" size={20} />
-              {unreadCount > 0 && <span aria-hidden="true" className="notification-count">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+              {unreadCount > 0 && (
+                <span aria-hidden="true" className="notification-count">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
             {notificationsOpen && (
-              <div aria-label="Notificaciones" className="topbar-popover notifications-popover" id="notifications-popover" role="region">
-                <div className="popover-header"><strong>Notificaciones</strong><span>{unreadCount} sin leer</span></div>
-                {notificationsQuery.isLoading ? <div className="popover-state" role="status">Cargando…</div>
-                  : notificationsQuery.isError ? <div className="popover-state" role="alert">No fue posible cargar las notificaciones.</div>
-                  : notificationsQuery.data?.length ? notificationsQuery.data.slice(0, 6).map((item) => (
-                  <button key={item.id} onClick={() => { if (!item.readAt) markNotificationRead.mutate(item.id); goTo(internalPath(item.path)); }} type="button">
-                    <span><strong>{item.title}{!item.readAt && <><span aria-hidden="true" className="unread-dot" /><span className="sr-only"> (sin leer)</span></>}</strong><small>{item.message}</small><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString("es-DO")}</time></span>
+              <div
+                aria-label="Notificaciones"
+                className="topbar-popover notifications-popover"
+                id="notifications-popover"
+                role="region"
+              >
+                <div className="popover-header">
+                  <strong>Notificaciones</strong>
+                  <span>{unreadCount} sin leer</span>
+                </div>
+                {notificationsQuery.isLoading ? (
+                  <div className="popover-state" role="status">
+                    Cargando…
+                  </div>
+                ) : notificationsQuery.isError ? (
+                  <div className="popover-state" role="alert">
+                    No fue posible cargar las notificaciones.
+                  </div>
+                ) : notificationsQuery.data?.length ? (
+                  notificationsQuery.data.slice(0, 6).map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        if (!item.readAt) markNotificationRead.mutate(item.id);
+                        goTo(internalPath(item.path));
+                      }}
+                      type="button"
+                    >
+                      <span>
+                        <strong>
+                          {item.title}
+                          {!item.readAt && (
+                            <>
+                              <span aria-hidden="true" className="unread-dot" />
+                              <span className="sr-only"> (sin leer)</span>
+                            </>
+                          )}
+                        </strong>
+                        <small>{item.message}</small>
+                        <time dateTime={item.createdAt}>
+                          {new Date(item.createdAt).toLocaleString('es-DO')}
+                        </time>
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="popover-state" role="status">
+                    No tienes notificaciones.
+                  </div>
+                )}
+                <div className="popover-footer">
+                  <button
+                    className="text-button"
+                    onClick={() => goTo('/notifications')}
+                    type="button"
+                  >
+                    Ver todas
                   </button>
-                )) : <div className="popover-state" role="status">No tienes notificaciones.</div>}
-                <div className="popover-footer"><button className="text-button" onClick={() => goTo("/notifications")} type="button">Ver todas</button></div>
+                </div>
               </div>
             )}
           </div>
 
           <div className="topbar-popover-anchor">
-            <button aria-controls="profile-popover" aria-expanded={profileOpen} aria-haspopup="menu" aria-label="Abrir menú de usuario" className="user-summary user-summary--button" onClick={() => { setProfileOpen((value) => !value); setNotificationsOpen(false); }} type="button">
-              <div aria-hidden="true" className="avatar">{user?.firstName[0]}{user?.lastName[0]}</div>
-              <div className="user-summary-copy"><strong>{user?.firstName} {user?.lastName}</strong><small>{user ? (roleLabels[user.role] ?? user.role) : ""}</small></div>
+            <button
+              aria-controls="profile-popover"
+              aria-expanded={profileOpen}
+              aria-haspopup="menu"
+              aria-label="Abrir menú de usuario"
+              className="user-summary user-summary--button"
+              onClick={() => {
+                setProfileOpen((value) => !value);
+                setNotificationsOpen(false);
+              }}
+              type="button"
+            >
+              <div aria-hidden="true" className="avatar">
+                {user?.firstName[0]}
+                {user?.lastName[0]}
+              </div>
+              <div className="user-summary-copy">
+                <strong>
+                  {user?.firstName} {user?.lastName}
+                </strong>
+                <small>{user ? (roleLabels[user.role] ?? user.role) : ''}</small>
+              </div>
               <ChevronDown aria-hidden="true" size={16} />
             </button>
 
             {profileOpen && (
-              <div aria-label="Menú de usuario" className="topbar-popover profile-popover" id="profile-popover" role="menu">
-                <button onClick={() => goTo("/profile")} role="menuitem" type="button"><UserCircle aria-hidden="true" size={18} />Mi perfil</button>
-                {canManageUsers && <button onClick={() => goTo("/users")} role="menuitem" type="button"><UserCog aria-hidden="true" size={18} />Usuarios y roles</button>}
-                <button onClick={toggleTheme} role="menuitem" type="button">{theme === "dark" ? <Sun aria-hidden="true" size={18} /> : <Moon aria-hidden="true" size={18} />}Cambiar tema</button>
-                <button className="danger" onClick={logout} role="menuitem" type="button"><LogOut aria-hidden="true" size={18} />Cerrar sesión</button>
+              <div
+                aria-label="Menú de usuario"
+                className="topbar-popover profile-popover"
+                id="profile-popover"
+                role="menu"
+              >
+                <button onClick={() => goTo('/profile')} role="menuitem" type="button">
+                  <UserCircle aria-hidden="true" size={18} />
+                  Mi perfil
+                </button>
+                {canManageUsers && (
+                  <button onClick={() => goTo('/users')} role="menuitem" type="button">
+                    <UserCog aria-hidden="true" size={18} />
+                    Usuarios y roles
+                  </button>
+                )}
+                <button onClick={toggleTheme} role="menuitem" type="button">
+                  {theme === 'dark' ? (
+                    <Sun aria-hidden="true" size={18} />
+                  ) : (
+                    <Moon aria-hidden="true" size={18} />
+                  )}
+                  Cambiar tema
+                </button>
+                <button className="danger" onClick={logout} role="menuitem" type="button">
+                  <LogOut aria-hidden="true" size={18} />
+                  Cerrar sesión
+                </button>
               </div>
             )}
           </div>
         </header>
 
-        <main className="workspace" id="main-content" ref={workspaceRef} tabIndex={-1}><Outlet /></main>
+        <main className="workspace" id="main-content" ref={workspaceRef} tabIndex={-1}>
+          <Outlet />
+        </main>
         <AppFooter />
       </div>
     </div>

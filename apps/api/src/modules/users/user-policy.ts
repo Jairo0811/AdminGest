@@ -8,8 +8,7 @@ export interface PolicySubject {
   status?: string;
 }
 
-export const isAdministrator = (role: string) =>
-  (ADMIN_ROLES as readonly string[]).includes(role);
+export const isAdministrator = (role: string) => (ADMIN_ROLES as readonly string[]).includes(role);
 
 export function assertCanChangeUserStatus(
   actorId: string,

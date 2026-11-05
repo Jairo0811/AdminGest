@@ -15,7 +15,9 @@ describeIfUpgrade('Actualización desde el esquema v1.1.0 (SQL Server real)', ()
   afterAll(async () => harness?.close());
 
   it('conserva los datos y limpia solo referencias documentales huérfanas', async () => {
-    expect(await harness.prisma.company.count({ where: { name: { startsWith: 'Legado' } } })).toBe(2);
+    expect(await harness.prisma.company.count({ where: { name: { startsWith: 'Legado' } } })).toBe(
+      2,
+    );
     expect(await harness.prisma.quote.count({ where: { companyId: LEGACY_COMPANY } })).toBe(2);
     const orphan = await harness.prisma.documentRecord.findUniqueOrThrow({
       where: { id: '10000000-0000-4000-8000-000000000061' },
@@ -56,9 +58,24 @@ describeIfUpgrade('Actualización desde el esquema v1.1.0 (SQL Server real)', ()
     const second = await registerTenant(harness, 'SinRncDos');
     expect(first.companyId).not.toBe(second.companyId);
     for (const tenant of [first, second]) {
-      const customer = await harness.http().post('/api/customers').set(tenant.auth).send({ name: 'Sin RNC' }).expect(201);
-      await harness.http().post('/api/customers').set(tenant.auth).send({ name: 'Sin RNC 2' }).expect(201);
-      await harness.http().post('/api/projects').set(tenant.auth).send({ customerId: customer.body.id, name: 'Sin oportunidad' }).expect(201);
+      const customer = await harness
+        .http()
+        .post('/api/customers')
+        .set(tenant.auth)
+        .send({ name: 'Sin RNC' })
+        .expect(201);
+      await harness
+        .http()
+        .post('/api/customers')
+        .set(tenant.auth)
+        .send({ name: 'Sin RNC 2' })
+        .expect(201);
+      await harness
+        .http()
+        .post('/api/projects')
+        .set(tenant.auth)
+        .send({ customerId: customer.body.id, name: 'Sin oportunidad' })
+        .expect(201);
     }
   });
 });

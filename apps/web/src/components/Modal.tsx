@@ -108,7 +108,12 @@ export function Modal({ title, children, onClose, description }: ModalProps) {
       >
         <header className="modal-header">
           <h2 id={titleId}>{title}</h2>
-          <button aria-label="Cerrar" className="icon-button modal-close" onClick={onClose} type="button">
+          <button
+            aria-label="Cerrar"
+            className="icon-button modal-close"
+            onClick={onClose}
+            type="button"
+          >
             <X aria-hidden="true" size={19} />
           </button>
         </header>
