@@ -189,6 +189,7 @@ export function LoginPage() {
                   <span>Cédula o RNC</span>
                   <input
                     aria-describedby="tax-id-help"
+                    aria-label="Cédula o RNC"
                     inputMode="numeric"
                     maxLength={13}
                     name="taxId"
@@ -231,6 +232,8 @@ export function LoginPage() {
               <span>Contraseña</span>
               <input
                 aria-describedby={mode === 'register' ? 'password-help' : undefined}
+                // Explicit name: the hint inside the label is the description, not the name.
+                aria-label="Contraseña"
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 minLength={mode === 'login' ? 8 : 10}
                 name="password"
