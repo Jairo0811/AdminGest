@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { normalizeDominicanTaxId } from '../../common/validation/dominican-tax-id';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -28,6 +28,9 @@ export class CompaniesService {
 
   update(companyId: string, dto: UpdateCompanyDto) {
     const taxId = dto.taxId ? normalizeDominicanTaxId(dto.taxId) : dto.taxId;
+    if (dto.timezone !== undefined && !isValidTimeZone(dto.timezone)) {
+      throw new BadRequestException('La zona horaria no es válida (formato IANA, por ejemplo America/Santo_Domingo).');
+    }
 
     return this.prisma.company.update({
       where: { id: companyId },
@@ -44,5 +47,14 @@ export class CompaniesService {
         timezone: true,
       },
     });
+  }
+}
+
+export function isValidTimeZone(value: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value });
+    return value.length > 0;
+  } catch {
+    return false;
   }
 }

@@ -4,6 +4,8 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Length,
+  MaxLength,
 } from 'class-validator';
 
 export const ACTIVITY_TYPES = [
@@ -26,10 +28,12 @@ export class CreateActivityDto {
   type!: (typeof ACTIVITY_TYPES)[number];
 
   @IsString()
+  @Length(2, 150)
   subject!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   description?: string;
 
   @IsDateString()

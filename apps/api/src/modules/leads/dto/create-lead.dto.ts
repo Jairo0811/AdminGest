@@ -8,6 +8,7 @@ import {
   IsUUID,
   Length,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -31,23 +32,27 @@ export class CreateLeadDto {
 
   @IsOptional()
   @IsString()
-  @Length(2, 120)
+  @Length(2, 150)
   companyName?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   jobTitle?: string;
 
   @IsOptional()
   @IsEmail()
+  @MaxLength(254)
   email?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(30)
   phone?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(80)
   source?: string;
 
   @IsOptional()
@@ -67,5 +72,6 @@ export class CreateLeadDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   notes?: string;
 }

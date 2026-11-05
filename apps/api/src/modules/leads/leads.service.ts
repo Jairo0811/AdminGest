@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { assertTenantUser } from '../../common/tenant/tenant-references';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
@@ -49,6 +50,7 @@ export class LeadsService {
   }
 
   async create(companyId: string, userId: string, dto: CreateLeadDto) {
+    await assertTenantUser(this.prisma, companyId, dto.ownerId, 'responsable');
     const lead = await this.prisma.lead.create({
       data: { companyId, ...dto },
     });
@@ -65,6 +67,9 @@ export class LeadsService {
 
   async update(companyId: string, userId: string, id: string, dto: UpdateLeadDto) {
     const existing = await this.findOne(companyId, id);
+    if (dto.ownerId && dto.ownerId !== existing.ownerId) {
+      await assertTenantUser(this.prisma, companyId, dto.ownerId, 'responsable');
+    }
     const lead = await this.prisma.lead.update({
       where: { id },
       data: {

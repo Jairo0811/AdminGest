@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
@@ -6,6 +12,10 @@ export const EVENT_TYPES = [
   'ACTIVITY_ASSIGNED', 'PROJECT_ASSIGNED', 'ACTIVITY_DUE', 'QUOTE_EXPIRING',
 ] as const;
 export type BusinessEvent = (typeof EVENT_TYPES)[number];
+
+const REMINDER_INTERVAL_MS = 15 * 60_000;
+const SCAN_PAGE_SIZE = 200;
+const SCAN_MAX_ROWS = 10_000;
 
 interface EmitInput {
   companyId: string;
@@ -21,18 +31,26 @@ interface EmitInput {
 export class NotificationsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(NotificationsService.name);
   private timer?: ReturnType<typeof setInterval>;
+  private startup?: ReturnType<typeof setTimeout>;
   constructor(private readonly prisma: PrismaService) {}
 
   onModuleInit() {
+    if (process.env.NODE_ENV === 'test' || process.env.REMINDERS_DISABLED === 'true') return;
     // The persistent unique key makes this safe even if several API replicas run.
-    this.timer = setInterval(() => void this.scanReminders().catch(
+    // This in-process timer is best effort: reminders are not generated while the API
+    // is down (see docs/BUSINESS-AUTOMATION.md).
+    const run = () => void this.scanReminders().catch(
       (error: unknown) => this.logger.error('No fue posible generar recordatorios.', error),
-    ), 15 * 60_000);
+    );
+    this.startup = setTimeout(run, 30_000);
+    this.startup.unref();
+    this.timer = setInterval(run, REMINDER_INTERVAL_MS);
     this.timer.unref();
   }
 
   onModuleDestroy() {
     if (this.timer) clearInterval(this.timer);
+    if (this.startup) clearTimeout(this.startup);
   }
 
   list(companyId: string, userId: string) {
@@ -45,11 +63,26 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async markRead(companyId: string, userId: string, id: string) {
-    const result = await this.prisma.notification.updateMany({
+    const notification = await this.prisma.notification.findFirst({
       where: { id, companyId, userId },
+      select: { id: true, readAt: true },
+    });
+    if (!notification) throw new NotFoundException('Notificación no encontrada.');
+    if (notification.readAt) return { updated: false };
+    // Keeps the first read time when the request is repeated.
+    const result = await this.prisma.notification.updateMany({
+      where: { id, companyId, userId, readAt: null },
       data: { readAt: new Date() },
     });
     return { updated: result.count === 1 };
+  }
+
+  async markAllRead(companyId: string, userId: string) {
+    const result = await this.prisma.notification.updateMany({
+      where: { companyId, userId, readAt: null },
+      data: { readAt: new Date() },
+    });
+    return { updated: result.count };
   }
 
   async emit(input: EmitInput) {
@@ -73,18 +106,24 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
 
   async scanReminders(now = new Date()) {
     const soon = new Date(now.getTime() + 24 * 3600_000);
-    const [activities, quotes] = await Promise.all([
+    const activities = await this.collect((skip) =>
       this.prisma.activity.findMany({
         where: { status: 'PENDING', ownerId: { not: null }, scheduledAt: { gte: now, lte: soon } },
         select: { id: true, companyId: true, ownerId: true, subject: true, scheduledAt: true },
-        take: 100,
+        orderBy: { id: 'asc' },
+        skip,
+        take: SCAN_PAGE_SIZE,
       }),
+    );
+    const quotes = await this.collect((skip) =>
       this.prisma.quote.findMany({
         where: { status: { in: ['DRAFT', 'SENT'] }, validUntil: { gte: now, lte: soon } },
         select: { id: true, companyId: true, number: true, validUntil: true },
-        take: 50,
+        orderBy: { id: 'asc' },
+        skip,
+        take: SCAN_PAGE_SIZE,
       }),
-    ]);
+    );
     for (const activity of activities) {
       if (!activity.ownerId) continue;
       await this.emit({
@@ -96,8 +135,8 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
     }
     for (const quote of quotes) {
       const admins = await this.prisma.user.findMany({
-        where: { companyId: quote.companyId, role: 'ADMIN', status: 'ACTIVE' },
-        select: { id: true }, take: 5,
+        where: { companyId: quote.companyId, role: { in: ['ADMIN', 'SUPER_ADMIN'] }, status: 'ACTIVE' },
+        select: { id: true }, orderBy: { createdAt: 'asc' }, take: 5,
       });
       for (const admin of admins) {
         await this.emit({
@@ -109,5 +148,16 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
       }
     }
     return { activities: activities.length, quotes: quotes.length };
+  }
+
+  /** Reads every page (bounded) so large tenants do not lose reminders. */
+  private async collect<T>(page: (skip: number) => Promise<T[]>): Promise<T[]> {
+    const rows: T[] = [];
+    for (let skip = 0; skip < SCAN_MAX_ROWS; skip += SCAN_PAGE_SIZE) {
+      const batch = await page(skip);
+      rows.push(...batch);
+      if (batch.length < SCAN_PAGE_SIZE) break;
+    }
+    return rows;
   }
 }
