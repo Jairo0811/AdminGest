@@ -61,9 +61,9 @@ h3,
 p {
   margin-top: 0;
 }
-h1,
-h2,
-h3,
+/* v1.2.0: this rule used to include h1, h2 and h3, which turned every heading of the
+   application into a centered flex box (titles appeared indented next to their eyebrow
+   and panel titles were centered). It now applies only to the sidebar brand. */
 .brand {
   width: 100%;
   display: flex;

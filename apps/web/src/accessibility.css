@@ -120,3 +120,6 @@
 :root[data-theme='dark'] .table-action:hover {
   color: #9cc4ee;
 }
+:root:not([data-theme='dark']) .table-header {
+  color: #52657a;
+}

@@ -424,3 +424,10 @@
     max-height: calc(100dvh - 1rem);
   }
 }
+
+/* Table cells may hold long e-mails or names: wrap inside the column instead of
+   overlapping the next one. */
+.data-table > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
