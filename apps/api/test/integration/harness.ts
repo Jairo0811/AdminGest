@@ -61,7 +61,7 @@ export async function registerTenant(harness: Harness, label: string): Promise<T
     .send({
       companyName: `Empresa ${label} ${RUN_ID}`,
       firstName: 'Admin',
-      lastName: label,
+      lastName: `Empresa ${label}`,
       email,
       password: PASSWORD,
     })
@@ -90,7 +90,7 @@ export async function addUser(
     .http()
     .post('/api/users')
     .set(admin.auth)
-    .send({ email, password: PASSWORD, firstName: 'Usuario', lastName: label, role })
+    .send({ email, password: PASSWORD, firstName: 'Usuario', lastName: `Prueba ${label}`, role })
     .expect(201);
   return login(harness, email, created.body.companyId as string, created.body.id as string, label);
 }

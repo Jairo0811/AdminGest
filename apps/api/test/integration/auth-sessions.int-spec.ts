@@ -93,8 +93,10 @@ describe('Autenticación, sesiones y permisos (SQL Server real)', () => {
   });
 
   it('revoca por dispositivo, cierra sesión y cierra todas las sesiones', async () => {
-    const laptop = await login(harness, admin.email, admin.companyId, admin.userId);
-    const phone = await login(harness, admin.email, admin.companyId, admin.userId);
+    // A dedicated user: logout-all must not revoke the admin session used by other tests.
+    const owner = await addUser(harness, admin, 'SALES_REP', 'Dispositivos');
+    const laptop = await login(harness, owner.email, owner.companyId, owner.userId);
+    const phone = await login(harness, owner.email, owner.companyId, owner.userId);
     const sessions = await http().get('/api/auth/sessions').set(laptop.auth).expect(200);
     const phoneSessionId = phone.refreshCookie.split('=')[1].split('.')[0];
     expect(sessions.body.map((item: { id: string }) => item.id)).toContain(phoneSessionId);
@@ -111,8 +113,8 @@ describe('Autenticación, sesiones y permisos (SQL Server real)', () => {
       .expect(200);
     await refresh(laptop.refreshCookie).expect(401);
 
-    const one = await login(harness, admin.email, admin.companyId, admin.userId);
-    const two = await login(harness, admin.email, admin.companyId, admin.userId);
+    const one = await login(harness, owner.email, owner.companyId, owner.userId);
+    const two = await login(harness, owner.email, owner.companyId, owner.userId);
     await http().post('/api/auth/logout-all').set(one.auth).expect(200);
     await http().get('/api/auth/me').set(two.auth).expect(401);
     await refresh(two.refreshCookie).expect(401);
