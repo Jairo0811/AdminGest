@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   useMutation,
   useQueries,
@@ -13,6 +13,7 @@ import {
   FileSpreadsheet,
   Filter,
   Plus,
+  RefreshCw,
   Search,
   Trash2,
 } from "lucide-react";
@@ -23,11 +24,17 @@ import {
   resourceFromEndpoint,
 } from "../auth/permissions";
 import {
-  buildCorporateReportHtml,
+  buildCorporateReport,
   CorporateReportColumn,
   CorporateReportMetric,
 } from "../utils/corporate-report";
-import { ExportColumn, exportToExcel } from "../utils/export";
+import {
+  buildPrintableDocument,
+  ExportColumn,
+  exportToExcel,
+  openPrintWindow,
+} from "../utils/export";
+import { normalizeValue, toInputValue } from "../utils/form-values";
 import { Modal } from "./Modal";
 
 export interface Entity extends Record<string, unknown> {
@@ -64,6 +71,11 @@ interface Field {
   optionLabel?: (item: Entity) => string;
   placeholder?: string;
   defaultValue?: string | number;
+  min?: number;
+  max?: number;
+  /** Defaults to "any" for numbers so decimals such as 1250.50 are accepted. */
+  step?: string;
+  maxLength?: number;
 }
 
 interface EntityPageProps {
@@ -79,27 +91,14 @@ interface EntityPageProps {
   buildPayload?(values: Record<string, string | number>): unknown;
   itemActions?: (item: Entity) => ReactNode;
   reportMetrics?: (items: Entity[]) => CorporateReportMetric[];
+  /** Grammatical gender of `singular`, for messages ("Nueva cotización guardada"). */
+  gender?: "m" | "f";
+  /** Message shown under the heading (for example, a print error of the page). */
+  pageAlert?: ReactNode;
 }
-
-const normalizeValue = (field: Field, value: string) =>
-  field.type === "number" ? Number(value) : value || undefined;
 
 const humanize = (value: string) =>
   value.replace(/([a-z])([A-Z])/g, "$1 $2").replaceAll("_", " ");
-
-const openPrintWindow = (html: string) => {
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    throw new Error(
-      "El navegador bloqueó la ventana de impresión. Habilita las ventanas emergentes para AdminGest e inténtalo nuevamente.",
-    );
-  }
-
-  printWindow.opener = null;
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-};
 
 export function EntityPage({
   title,
@@ -114,7 +113,11 @@ export function EntityPage({
   buildPayload,
   itemActions,
   reportMetrics,
+  gender = "m",
+  pageAlert,
 }: EntityPageProps) {
+  const label = `${singular[0].toUpperCase()}${singular.slice(1)}`;
+  const suffix = gender === "f" ? "a" : "o";
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const resource = resourceFromEndpoint(endpoint);
@@ -136,10 +139,13 @@ export function EntityPage({
   const [notice, setNotice] = useState("");
   const queryKey = [endpoint];
 
-  const { data = [], isLoading } = useQuery({
+  const submitting = useRef(false);
+  const list = useQuery({
     queryKey,
     queryFn: () => api<Entity[]>(endpoint),
   });
+  const { isLoading, isError, refetch, isFetching } = list;
+  const data = useMemo(() => list.data ?? [], [list.data]);
 
   const lookupEndpoints = useMemo(
     () => [
@@ -174,11 +180,12 @@ export function EntityPage({
       void queryClient.invalidateQueries({ queryKey });
       setEditing(undefined);
       setError("");
-      setNotice(
-        `${singular[0].toUpperCase()}${singular.slice(1)} guardado correctamente.`,
-      );
+      setNotice(`${label} guardad${suffix} correctamente.`);
     },
     onError: (mutationError: Error) => setError(mutationError.message),
+    onSettled: () => {
+      submitting.current = false;
+    },
   });
 
   const remove = useMutation({
@@ -189,9 +196,8 @@ export function EntityPage({
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
       setPendingDelete(null);
-      setNotice(`${singular[0].toUpperCase()}${singular.slice(1)} eliminado.`);
+      setNotice(`${label} eliminad${suffix}.`);
     },
-    onError: (mutationError: Error) => setError(mutationError.message),
   });
 
   useEffect(() => setPage(1), [search, status, pageSize]);
@@ -259,7 +265,9 @@ export function EntityPage({
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!canWrite) return;
+    // A ref (not state) blocks a second submit fired before React re-renders.
+    if (!canWrite || submitting.current) return;
+    submitting.current = true;
     const formData = new FormData(event.currentTarget);
     const values = Object.fromEntries(
       fields.map((field) => [
@@ -271,7 +279,7 @@ export function EntityPage({
   };
 
   const printCorporateReport = () => {
-    const html = buildCorporateReportHtml({
+    const report = buildCorporateReport({
       title,
       subtitle: description,
       companyName: user?.company.name ?? "AdminGest",
@@ -284,7 +292,11 @@ export function EntityPage({
         { label: "Registros", value: filtered.length, tone: "blue" },
       ],
     });
-    openPrintWindow(html);
+    try {
+      openPrintWindow(buildPrintableDocument({ ...report, autoPrintDelayMs: 450 }));
+    } catch (printError) {
+      setError(printError instanceof Error ? printError.message : "No fue posible abrir el reporte.");
+    }
   };
 
   return (
@@ -300,8 +312,8 @@ export function EntityPage({
         <div className="page-heading-actions">
           {headerActions}
           {canWrite && (
-            <button className="primary-button" onClick={() => setEditing(null)} type="button">
-              <Plus size={18} /> Nuevo {singular}
+            <button className="primary-button" onClick={() => { save.reset(); setError(""); setEditing(null); }} type="button">
+              <Plus aria-hidden="true" size={18} /> Nuev{suffix} {singular}
             </button>
           )}
         </div>
@@ -341,9 +353,10 @@ export function EntityPage({
         <span className="record-count">{filtered.length} registros</span>
       </div>
 
-      {error && <div className="alert error">{error}</div>}
+      {pageAlert}
+      {error && editing === undefined && <div className="alert error" role="alert">{error}</div>}
 
-      <div className="table-card">
+      <div className="table-card" aria-busy={isLoading || isFetching}>
         <div className="data-table table-header">
           {columns.map((column) => <strong key={column.label}>{column.label}</strong>)}
           {showActionsColumn && <strong>Acciones</strong>}
@@ -352,10 +365,24 @@ export function EntityPage({
           <div className="table-skeleton" aria-label="Cargando información">
             {Array.from({ length: 5 }, (_, index) => <span key={index} />)}
           </div>
+        ) : isError ? (
+          <div className="empty-state empty-state--error" role="alert">
+            <strong>No fue posible cargar {title.toLowerCase()}</strong>
+            <p>{list.error instanceof Error ? list.error.message : "Verifica tu conexión e inténtalo nuevamente."}</p>
+            <button className="secondary-button" disabled={isFetching} onClick={() => void refetch()} type="button">
+              <RefreshCw aria-hidden="true" size={16} /> {isFetching ? "Reintentando…" : "Reintentar"}
+            </button>
+          </div>
         ) : visibleItems.length === 0 ? (
           <div className="empty-state">
-            <strong>No hay resultados</strong>
-            <p>{canWrite ? `Ajusta los filtros o crea tu primer ${singular}.` : "Ajusta los filtros para consultar la información disponible."}</p>
+            <strong>{data.length === 0 ? `Todavía no hay registros de ${title.toLowerCase()}` : "No hay resultados"}</strong>
+            <p>
+              {data.length === 0
+                ? canWrite
+                  ? `Crea ${gender === "f" ? "la primera" : "el primer"} ${singular} con el botón «Nuev${suffix} ${singular}».`
+                  : "No hay información disponible para tu rol."
+                : "Ningún registro coincide con la búsqueda o el filtro seleccionados."}
+            </p>
           </div>
         ) : (
           visibleItems.map((item) => (
@@ -367,13 +394,13 @@ export function EntityPage({
                 <div className="row-actions" data-label="Acciones">
                   {allowItemActions && itemActions?.(item)}
                   {allowEdit && (
-                    <button aria-label={`Editar ${singular}`} className="table-action" onClick={() => setEditing(item)} type="button">
-                      <Edit3 size={17} />
+                    <button aria-label={`Editar ${singular}`} className="table-action" onClick={() => { save.reset(); setError(""); setEditing(item); }} title={`Editar ${singular}`} type="button">
+                      <Edit3 aria-hidden="true" size={17} />
                     </button>
                   )}
                   {allowDelete && (
-                    <button aria-label={`Eliminar ${singular}`} className="table-action danger" onClick={() => setPendingDelete(item)} type="button">
-                      <Trash2 size={17} />
+                    <button aria-label={`Eliminar ${singular}`} className="table-action danger" onClick={() => { remove.reset(); setPendingDelete(item); }} title={`Eliminar ${singular}`} type="button">
+                      <Trash2 aria-hidden="true" size={17} />
                     </button>
                   )}
                 </div>
@@ -387,11 +414,11 @@ export function EntityPage({
         <div className="pagination">
           <label>
             Mostrar
-            <select onChange={(event) => setPageSize(Number(event.target.value))} value={pageSize}>
+            <select aria-label="Registros por página" onChange={(event) => setPageSize(Number(event.target.value))} value={pageSize}>
               {[10, 25, 50].map((size) => <option key={size} value={size}>{size}</option>)}
             </select>
           </label>
-          <span>Página {page} de {totalPages}</span>
+          <span aria-live="polite">Página {page} de {totalPages}</span>
           <div>
             <button aria-label="Página anterior" disabled={page === 1} onClick={() => setPage((value) => value - 1)} type="button"><ChevronLeft size={18} /></button>
             <button aria-label="Página siguiente" disabled={page === totalPages} onClick={() => setPage((value) => value + 1)} type="button"><ChevronRight size={18} /></button>
@@ -400,7 +427,7 @@ export function EntityPage({
       )}
 
       {canWrite && editing !== undefined && (
-        <Modal onClose={() => { setEditing(undefined); setError(""); }} title={editing ? `Editar ${singular}` : `Nuevo ${singular}`}>
+        <Modal onClose={() => { setEditing(undefined); setError(""); }} title={editing ? `Editar ${singular}` : `Nuev${suffix} ${singular}`}>
           <form className="entity-form" onSubmit={submit}>
             {fields.map((field) => {
               const lookup = lookups.find(([key]) => key === field.optionsEndpoint)?.[1] ?? [];
@@ -408,27 +435,42 @@ export function EntityPage({
                 value: item.id,
                 label: field.optionLabel?.(item) ?? String(item.name ?? item.id),
               }));
-              const defaultValue = String(editing?.[field.name] ?? field.defaultValue ?? "");
+              const lookupFailed = Boolean(field.optionsEndpoint) &&
+                lookupQueries[lookupEndpoints.indexOf(field.optionsEndpoint!)]?.isError;
+              const defaultValue = editing
+                ? toInputValue(field, editing[field.name] ?? field.defaultValue)
+                : String(field.defaultValue ?? "");
 
               return (
                 <label className={field.type === "textarea" ? "form-field full" : "form-field"} key={field.name}>
-                  <span>{field.label}</span>
+                  <span>{field.label}{field.required && <span aria-hidden="true" className="required-mark"> *</span>}</span>
                   {field.type === "textarea" ? (
-                    <textarea defaultValue={defaultValue} name={field.name} placeholder={field.placeholder} required={field.required} />
+                    <textarea defaultValue={defaultValue} maxLength={field.maxLength ?? 2000} name={field.name} placeholder={field.placeholder} required={field.required} />
                   ) : field.type === "select" ? (
                     <select defaultValue={defaultValue} name={field.name} required={field.required}>
-                      <option value="">Selecciona una opción</option>
+                      <option value="">{lookupFailed ? "No fue posible cargar las opciones" : "Selecciona una opción"}</option>
                       {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                     </select>
                   ) : (
-                    <input defaultValue={defaultValue} name={field.name} placeholder={field.placeholder} required={field.required} type={field.type ?? "text"} />
+                    <input
+                      defaultValue={defaultValue}
+                      inputMode={field.type === "number" ? "decimal" : undefined}
+                      max={field.max}
+                      maxLength={field.maxLength}
+                      min={field.min}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                      step={field.type === "number" ? field.step ?? "any" : undefined}
+                      type={field.type ?? "text"}
+                    />
                   )}
                 </label>
               );
             })}
-            {error && <div className="alert error form-alert">{error}</div>}
+            {error && <div className="alert error form-alert" role="alert">{error}</div>}
             <footer className="form-actions">
-              <button className="secondary-button" onClick={() => setEditing(undefined)} type="button">Cancelar</button>
+              <button className="secondary-button" onClick={() => { setEditing(undefined); setError(""); }} type="button">Cancelar</button>
               <button className="primary-button" disabled={save.isPending} type="submit">{save.isPending ? "Guardando…" : "Guardar"}</button>
             </footer>
           </form>
@@ -439,9 +481,10 @@ export function EntityPage({
         <Modal onClose={() => setPendingDelete(null)} title={`Eliminar ${singular}`}>
           <div className="confirm-dialog">
             <p>Esta acción no se puede deshacer. ¿Deseas eliminar el registro seleccionado?</p>
+            {remove.error && <div className="alert error" role="alert">{remove.error.message}</div>}
             <footer className="form-actions">
               <button className="secondary-button" onClick={() => setPendingDelete(null)} type="button">Cancelar</button>
-              <button className="danger-button" disabled={remove.isPending} onClick={() => remove.mutate(pendingDelete.id)} type="button">{remove.isPending ? "Eliminando…" : "Eliminar"}</button>
+              <button className="danger-button" disabled={remove.isPending} onClick={() => { if (!remove.isPending) remove.mutate(pendingDelete.id); }} type="button">{remove.isPending ? "Eliminando…" : "Eliminar"}</button>
             </footer>
           </div>
         </Modal>
