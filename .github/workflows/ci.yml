@@ -15,15 +15,19 @@ concurrency:
 
 env:
   NODE_ENV: test
+  SA_PASSWORD: "AdminGest_CI_2026!"
   DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
   JWT_SECRET: "ci-only-jwt-secret-with-at-least-32-characters"
+  JWT_EXPIRES_IN: "15m"
   CORS_ORIGIN: "http://localhost:5173"
   PASSWORD_RESET_URL: "http://localhost:5173/reset-password"
+  DOCUMENT_ALLOWED_HOSTS: "docs.example.com"
 
 jobs:
   validate:
+    name: Validación, pruebas e integración SQL Server
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     services:
       sqlserver:
@@ -60,28 +64,74 @@ jobs:
       - name: Validate Prisma schema
         run: npm run db:validate
 
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests with coverage
+        run: npm run test:coverage
+
       - name: Create CI database
         shell: bash
         run: |
           CONTAINER_ID=$(docker ps --filter ancestor=mcr.microsoft.com/mssql/server:2022-latest --format '{{.ID}}' | head -n 1)
           docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd \
-            -S localhost -U sa -P 'AdminGest_CI_2026!' -C \
+            -S localhost -U sa -P "$SA_PASSWORD" -C \
             -Q "IF DB_ID('AdminGestDb') IS NULL CREATE DATABASE AdminGestDb"
 
-      - name: Deploy Prisma migrations
+      - name: Deploy Prisma migrations (clean database)
         run: npm run db:deploy
 
-      - name: Lint
-        run: npm run lint
+      - name: Seed (first run)
+        run: npm run db:seed
+        env:
+          SEED_ADMIN_PASSWORD: "Seed-Primera-2026!"
 
-      - name: Test
-        run: npm run test
+      - name: Seed (second run must not modify the administrator)
+        run: npm run db:seed
+        env:
+          SEED_ADMIN_PASSWORD: "Seed-Segunda-2026!"
+
+      - name: Integration and HTTP E2E tests on SQL Server (with coverage)
+        run: npm run test:integration:coverage --workspace @admingest/api
+        env:
+          THROTTLE_DISABLED: "true"
+          SEED_FIRST_PASSWORD: "Seed-Primera-2026!"
+          SEED_SECOND_PASSWORD: "Seed-Segunda-2026!"
 
       - name: Build
         run: npm run build
 
+      - name: API starts from the production build
+        shell: bash
+        run: |
+          node apps/api/dist/main.js > api.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/api/health/ready > /dev/null; then
+              curl -fsS http://127.0.0.1:3000/api/health
+              exit 0
+            fi
+            sleep 1
+          done
+          cat api.log
+          exit 1
+
       - name: Dependency audit
         run: npm audit --audit-level=critical
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            apps/api/coverage
+            apps/api/coverage-integration
+            apps/web/coverage
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload web build
         uses: actions/upload-artifact@v4
@@ -98,3 +148,96 @@ jobs:
           path: apps/api/dist
           if-no-files-found: error
           retention-days: 7
+
+  migration-upgrade:
+    name: Actualización de esquema v1.1.0 → v1.2.0
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: AdminGest_CI_2026!
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'AdminGest_CI_2026!' -C -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+          --health-start-period 30s
+
+    env:
+      NEW_MIGRATION: 20261103120000_tenant_integrity_hardening
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: Prepare SQL helpers and the v1.1.0 migration set
+        shell: bash
+        run: |
+          CONTAINER_ID=$(docker ps --filter ancestor=mcr.microsoft.com/mssql/server:2022-latest --format '{{.ID}}' | head -n 1)
+          echo "CONTAINER_ID=$CONTAINER_ID" >> "$GITHUB_ENV"
+          docker cp apps/api/test/migrations/. "$CONTAINER_ID":/tmp/fixtures/
+          mkdir -p /tmp/v110/migrations
+          cp apps/api/prisma/schema.prisma /tmp/v110/schema.prisma
+          cp apps/api/prisma/migrations/migration_lock.toml /tmp/v110/migrations/
+          for dir in apps/api/prisma/migrations/*/; do
+            name=$(basename "$dir")
+            [ "$name" = "$NEW_MIGRATION" ] || cp -r "$dir" /tmp/v110/migrations/
+          done
+          ls /tmp/v110/migrations
+
+      - name: Upgrade with legacy data
+        shell: bash
+        env:
+          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestUpgrade;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
+        run: |
+          sql() { docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -C -b "$@"; }
+          sql -Q "CREATE DATABASE AdminGestUpgrade"
+          (cd apps/api && npx prisma migrate deploy --schema /tmp/v110/schema.prisma)
+          sql -d AdminGestUpgrade -i /tmp/fixtures/legacy-v1.1-fixture.sql
+          npm run db:deploy
+          sql -d AdminGestUpgrade -Q "SET NOCOUNT ON; SELECT name FROM sys.foreign_keys WHERE name LIKE '%companyId_%_fkey' ORDER BY name; SELECT COUNT(*) AS sequences_table FROM sys.tables WHERE name = 'CompanySequence';"
+
+      - name: Verify upgraded data through the API
+        run: npm run test:integration --workspace @admingest/api -- --testPathPatterns upgrade
+        env:
+          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestUpgrade;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
+          UPGRADE_FIXTURE: "true"
+          THROTTLE_DISABLED: "true"
+
+      - name: Cross-tenant data aborts the upgrade without partial changes
+        shell: bash
+        env:
+          DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestViolation;user=sa;password=AdminGest_CI_2026!;encrypt=true;trustServerCertificate=true"
+        run: |
+          sql() { docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -C -b "$@"; }
+          sql -Q "CREATE DATABASE AdminGestViolation"
+          (cd apps/api && npx prisma migrate deploy --schema /tmp/v110/schema.prisma)
+          sql -d AdminGestViolation -i /tmp/fixtures/cross-tenant-violation.sql
+          if npm run db:deploy > deploy.log 2>&1; then
+            cat deploy.log
+            echo "La migración debía abortar ante referencias entre empresas." >&2
+            exit 1
+          fi
+          grep -q "referencias entre empresas distintas" deploy.log || { cat deploy.log; exit 1; }
+          RESULT=$(sql -d AdminGestViolation -h -1 -W -Q "SET NOCOUNT ON; SELECT CONCAT((SELECT COUNT(*) FROM sys.tables WHERE name = 'CompanySequence'), ':', (SELECT COUNT(*) FROM sys.foreign_keys WHERE name = 'Project_managerId_fkey'), ':', (SELECT COUNT(*) FROM [dbo].[Project]))")
+          echo "Estado tras el rechazo (tabla nueva:FK anterior:proyectos) = $RESULT"
+          [ "$(echo "$RESULT" | tr -d '[:space:]')" = "0:1:1" ]
