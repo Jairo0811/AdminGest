@@ -7,8 +7,8 @@
  * Configure API_ORIGIN in Pages > Settings > Variables and Secrets.
  */
 const JSON_HEADERS = {
-  "content-type": "application/json; charset=utf-8",
-  "cache-control": "private, no-store, max-age=0",
+  'content-type': 'application/json; charset=utf-8',
+  'cache-control': 'private, no-store, max-age=0',
 };
 
 function errorResponse(status, message) {
@@ -21,31 +21,31 @@ function errorResponse(status, message) {
 export async function onRequest(context) {
   const incoming = new URL(context.request.url);
 
-  if (incoming.pathname !== "/api" && !incoming.pathname.startsWith("/api/")) {
-    return errorResponse(404, "Ruta no encontrada.");
+  if (incoming.pathname !== '/api' && !incoming.pathname.startsWith('/api/')) {
+    return errorResponse(404, 'Ruta no encontrada.');
   }
 
   const configuredOrigin = context.env.API_ORIGIN;
-  if (typeof configuredOrigin !== "string" || !configuredOrigin.trim()) {
-    return errorResponse(503, "La API de AdminGest todavía no está configurada.");
+  if (typeof configuredOrigin !== 'string' || !configuredOrigin.trim()) {
+    return errorResponse(503, 'La API de AdminGest todavía no está configurada.');
   }
 
   let upstream;
   try {
     upstream = new URL(configuredOrigin.trim());
     if (
-      upstream.protocol !== "https:" ||
+      upstream.protocol !== 'https:' ||
       upstream.username ||
       upstream.password ||
       upstream.search ||
       upstream.hash ||
-      (upstream.pathname !== "/" && upstream.pathname !== "") ||
+      (upstream.pathname !== '/' && upstream.pathname !== '') ||
       upstream.origin === incoming.origin
     ) {
-      throw new Error("Invalid upstream origin");
+      throw new Error('Invalid upstream origin');
     }
   } catch {
-    return errorResponse(503, "La dirección de la API no es válida.");
+    return errorResponse(503, 'La dirección de la API no es válida.');
   }
 
   // The destination is fixed by the server-side API_ORIGIN binding.
@@ -55,22 +55,22 @@ export async function onRequest(context) {
 
   // Do not trust user-controlled forwarding headers sent by browsers.
   for (const name of [
-    "host",
-    "connection",
-    "forwarded",
-    "x-forwarded-for",
-    "x-forwarded-host",
-    "x-forwarded-proto",
-    "x-real-ip",
+    'host',
+    'connection',
+    'forwarded',
+    'x-forwarded-for',
+    'x-forwarded-host',
+    'x-forwarded-proto',
+    'x-real-ip',
   ]) {
     headers.delete(name);
   }
 
-  headers.set("x-forwarded-host", incoming.host);
-  headers.set("x-forwarded-proto", "https");
+  headers.set('x-forwarded-host', incoming.host);
+  headers.set('x-forwarded-proto', 'https');
 
-  const clientIp = context.request.headers.get("cf-connecting-ip");
-  if (clientIp) headers.set("x-forwarded-for", clientIp);
+  const clientIp = context.request.headers.get('cf-connecting-ip');
+  if (clientIp) headers.set('x-forwarded-for', clientIp);
 
   try {
     // Forward incoming cookies (including refresh) and preserve upstream
@@ -83,9 +83,9 @@ export async function onRequest(context) {
       upstreamRequest.headers.set(key, value);
     }
 
-    const response = await fetch(upstreamRequest, { redirect: "manual" });
+    const response = await fetch(upstreamRequest, { redirect: 'manual' });
     const responseHeaders = new Headers(response.headers);
-    responseHeaders.set("cache-control", "private, no-store, max-age=0");
+    responseHeaders.set('cache-control', 'private, no-store, max-age=0');
 
     return new Response(response.body, {
       status: response.status,
@@ -94,6 +94,6 @@ export async function onRequest(context) {
     });
   } catch {
     // Avoid leaking backend hostnames, credentials, or exception messages.
-    return errorResponse(502, "La API de AdminGest no está disponible.");
+    return errorResponse(502, 'La API de AdminGest no está disponible.');
   }
 }

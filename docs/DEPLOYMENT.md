@@ -107,7 +107,6 @@ docker compose up -d
 - Las migraciones aparecen aplicadas en `_prisma_migrations`.
 - No se muestran trazas internas en respuestas HTTP.
 
-
 ## Cloudflare Pages
 
 La opción de hospedaje del frontend en Cloudflare Pages y la función proxy same-origin

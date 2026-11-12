@@ -18,16 +18,16 @@ sin backend.
 3. Autoriza GitHub y selecciona `Jairo0811/AdminGest`.
 4. Configura:
 
-| Campo Cloudflare | Valor |
-| --- | --- |
-| Nombre de proyecto | `admingest` (si está disponible) |
-| Rama de producción | `main` (después de fusionar PR #33 y el PR Cloudflare) |
-| Framework preset | None (configuración manual) |
-| Root directory | Raíz del repositorio, `/` (no `apps/web`) |
-| Build command | `npm run build --workspace @admingest/web` |
-| Build output directory | `apps/web/dist` |
-| Variable de build | `NODE_VERSION=24` |
-| Variable de build | `VITE_API_URL=/api` |
+| Campo Cloudflare       | Valor                                                  |
+| ---------------------- | ------------------------------------------------------ |
+| Nombre de proyecto     | `admingest` (si está disponible)                       |
+| Rama de producción     | `main` (después de fusionar PR #33 y el PR Cloudflare) |
+| Framework preset       | None (configuración manual)                            |
+| Root directory         | Raíz del repositorio, `/` (no `apps/web`)              |
+| Build command          | `npm run build --workspace @admingest/web`             |
+| Build output directory | `apps/web/dist`                                        |
+| Variable de build      | `NODE_VERSION=24`                                      |
+| Variable de build      | `VITE_API_URL=/api`                                    |
 
 **Importante:** mantener la raíz del repositorio para instalar dependencias de los
 `npm workspaces` y detectar `functions/api/[[path]].js`.

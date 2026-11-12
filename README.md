@@ -306,7 +306,6 @@ alineadas con el código. **No está listo para comercialización**: no integra 
 automática, MFA, almacenamiento privado de archivos, facturación electrónica (e-CF) ni operación
 productiva con respaldos y monitoreo. Las cotizaciones no son comprobantes fiscales.
 
-
 ## Despliegue opcional en Cloudflare Pages
 
 El frontend React puede desplegarse en Cloudflare Pages desde este monorepo.
