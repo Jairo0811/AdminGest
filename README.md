@@ -305,3 +305,14 @@ AdminGest v1.2.0 está **congelado técnicamente**: funcionalidades definidas, p
 alineadas con el código. **No está listo para comercialización**: no integra cobros ni renovación
 automática, MFA, almacenamiento privado de archivos, facturación electrónica (e-CF) ni operación
 productiva con respaldos y monitoreo. Las cotizaciones no son comprobantes fiscales.
+
+
+## Despliegue opcional en Cloudflare Pages
+
+El frontend React puede desplegarse en Cloudflare Pages desde este monorepo.
+El backend NestJS y SQL Server permanecen en infraestructura externa: Pages
+incluye una función proxy `/api/*` para conservar las cookies HttpOnly y
+SameSite=Strict en el mismo origen. Sin `API_ORIGIN` (servidor backend), las
+peticiones API responden 503; no existe una demo desconectada.
+
+Configuración, variables de entorno y checklist: [Cloudflare Pages](docs/CLOUDFLARE.md).
