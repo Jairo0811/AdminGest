@@ -1,0 +1,36 @@
+name: Cloudflare Prettier One-Time Fix
+
+on:
+  push:
+    branches:
+      - feat/cloudflare-pages-deployment
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: ${{ !contains(github.event.head_commit.message, '[format]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format Cloudflare-specific changes
+        run: |
+          npx prettier --write docs/CLOUDFLARE.md docs/DEPLOYMENT.md README.md 'functions/api/[[path]].js' tests/cloudflare-pages-proxy.test.mjs
+      - name: Commit formatted changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/CLOUDFLARE.md docs/DEPLOYMENT.md README.md 'functions/api/[[path]].js' tests/cloudflare-pages-proxy.test.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m 'style(cloudflare): apply Prettier [format]'
+            git push origin HEAD:feat/cloudflare-pages-deployment
+          fi
