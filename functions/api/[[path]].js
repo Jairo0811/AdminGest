@@ -76,10 +76,12 @@ export async function onRequest(context) {
     // Forward incoming cookies (including refresh) and preserve upstream
     // Set-Cookie headers on the response. Never use follow redirects here.
     const upstreamRequest = new Request(destination, context.request);
-    for (const [key] of upstreamRequest.headers) {
-      if (!headers.has(key)) upstreamRequest.headers.delete(key);
+    for (const key of [...upstreamRequest.headers.keys()]) {
+      upstreamRequest.headers.delete(key);
     }
-    for (const [key, value] of headers) upstreamRequest.headers.set(key, value);
+    for (const [key, value] of headers) {
+      upstreamRequest.headers.set(key, value);
+    }
 
     const response = await fetch(upstreamRequest, { redirect: "manual" });
     const responseHeaders = new Headers(response.headers);
