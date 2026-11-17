@@ -57,7 +57,13 @@ No publiques vulnerabilidades como issues públicos. Reporta el hallazgo al resp
 - almacenar secretos en el gestor de secretos de la plataforma;
 - ejecutar `npm audit`, pruebas y migraciones antes de desplegar;
 - mantener copias de seguridad verificadas de SQL Server;
-- rotar credenciales ante cualquier sospecha de exposición.
+- rotar credenciales ante cualquier sospecha de exposición;
+- detrás de Cloudflare Pages, definir `API_PROXY_SECRET` (mismo valor en la Function y en la API) para
+  bloquear el acceso directo a la API y aplicar el rate limiting por visitante;
+- mantener `PUBLIC_REGISTRATION=false` salvo decisión explícita de abrir el alta de empresas;
+- usar Azure SQL (u otro SQL Server) con `encrypt=true` y `trustServerCertificate=false`, firewall
+  restringido y un usuario sin permisos DDL para la aplicación ([AZURE-SQL.md](docs/AZURE-SQL.md));
+- no definir secretos en variables `VITE_*` ([ENVIRONMENT.md](docs/ENVIRONMENT.md)).
 
 ## Dependencias
 

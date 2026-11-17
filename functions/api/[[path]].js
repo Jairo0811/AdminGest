@@ -4,15 +4,26 @@
  * Keep the browser on the Pages origin so that HttpOnly + SameSite=Strict
  * refresh cookies work without exposing the database or JWT secrets.
  *
- * Configure API_ORIGIN in Pages > Settings > Variables and Secrets.
+ * Configure in Pages > Settings > Variables and Secrets:
+ *   API_ORIGIN        (required) HTTPS origin of the NestJS API, without path.
+ *   API_PROXY_SECRET  (recommended, secret) same value as API_PROXY_SECRET in the API.
+ *                     The API then rejects direct calls and trusts the visitor address
+ *                     sent in x-admingest-client-ip (rate limits, sessions, audit).
  */
+const PROXY_SECRET_HEADER = 'x-admingest-proxy-secret';
+const CLIENT_IP_HEADER = 'x-admingest-client-ip';
+
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
   'cache-control': 'private, no-store, max-age=0',
 };
 
-function errorResponse(status, message) {
-  return new Response(JSON.stringify({ message }), {
+/**
+ * Error codes understood by the web client (apps/web/src/api/errors.ts) so that the UI can
+ * tell "API not configured" from "API unreachable" without exposing internal details.
+ */
+function errorResponse(status, message, code) {
+  return new Response(JSON.stringify({ statusCode: status, message, code }), {
     status,
     headers: JSON_HEADERS,
   });
@@ -22,12 +33,16 @@ export async function onRequest(context) {
   const incoming = new URL(context.request.url);
 
   if (incoming.pathname !== '/api' && !incoming.pathname.startsWith('/api/')) {
-    return errorResponse(404, 'Ruta no encontrada.');
+    return errorResponse(404, 'Ruta no encontrada.', 'NOT_FOUND');
   }
 
   const configuredOrigin = context.env.API_ORIGIN;
   if (typeof configuredOrigin !== 'string' || !configuredOrigin.trim()) {
-    return errorResponse(503, 'La API de AdminGest todavía no está configurada.');
+    return errorResponse(
+      503,
+      'La API de AdminGest todavía no está configurada.',
+      'API_NOT_CONFIGURED',
+    );
   }
 
   let upstream;
@@ -45,7 +60,7 @@ export async function onRequest(context) {
       throw new Error('Invalid upstream origin');
     }
   } catch {
-    return errorResponse(503, 'La dirección de la API no es válida.');
+    return errorResponse(503, 'La dirección de la API no es válida.', 'API_NOT_CONFIGURED');
   }
 
   // The destination is fixed by the server-side API_ORIGIN binding.
@@ -62,6 +77,8 @@ export async function onRequest(context) {
     'x-forwarded-host',
     'x-forwarded-proto',
     'x-real-ip',
+    PROXY_SECRET_HEADER,
+    CLIENT_IP_HEADER,
   ]) {
     headers.delete(name);
   }
@@ -71,6 +88,13 @@ export async function onRequest(context) {
 
   const clientIp = context.request.headers.get('cf-connecting-ip');
   if (clientIp) headers.set('x-forwarded-for', clientIp);
+
+  const proxySecret =
+    typeof context.env.API_PROXY_SECRET === 'string' ? context.env.API_PROXY_SECRET.trim() : '';
+  if (proxySecret) {
+    headers.set(PROXY_SECRET_HEADER, proxySecret);
+    if (clientIp) headers.set(CLIENT_IP_HEADER, clientIp);
+  }
 
   try {
     // Forward incoming cookies (including refresh) and preserve upstream
@@ -94,6 +118,6 @@ export async function onRequest(context) {
     });
   } catch {
     // Avoid leaking backend hostnames, credentials, or exception messages.
-    return errorResponse(502, 'La API de AdminGest no está disponible.');
+    return errorResponse(502, 'La API de AdminGest no está disponible.', 'API_UNREACHABLE');
   }
 }

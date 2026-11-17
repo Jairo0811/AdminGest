@@ -98,8 +98,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // The server already rejected the session: clear local state without calling
     // /auth/logout, which could revoke a session another tab has just renewed.
-    window.addEventListener('admingest:unauthorized', forgetSession);
-    return () => window.removeEventListener('admingest:unauthorized', forgetSession);
+    const onUnauthorized = () => {
+      setNotice('Tu sesión expiró o fue cerrada desde otro dispositivo. Inicia sesión nuevamente.');
+      forgetSession();
+    };
+    window.addEventListener('admingest:unauthorized', onUnauthorized);
+    return () => window.removeEventListener('admingest:unauthorized', onUnauthorized);
   }, [forgetSession]);
 
   useEffect(() => {

@@ -13,7 +13,19 @@ interface ErrorResponse {
   statusCode: number;
   message: string | string[];
   error?: string;
+  /** Stable machine-readable code for the web client (for example DATABASE_UNAVAILABLE). */
+  code?: string;
 }
+
+/** Prisma error codes that mean "the database cannot be reached right now". */
+const DATABASE_UNAVAILABLE_CODES = new Set(['P1001', 'P1002', 'P1008', 'P1017', 'P2024']);
+
+export const DATABASE_UNAVAILABLE: ErrorResponse = {
+  statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+  message: 'La base de datos no está disponible en este momento. Inténtalo en unos minutos.',
+  error: 'Service Unavailable',
+  code: 'DATABASE_UNAVAILABLE',
+};
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -35,7 +47,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (mapped) {
       this.logger.warn(
-        `${request.method} ${request.originalUrl?.split('?')[0]} -> ${mapped.statusCode} (${(exception as { code?: string }).code ?? 'prisma'})`,
+        `${request.method} ${request.originalUrl?.split('?')[0]} -> ${mapped.statusCode} (${(exception as { code?: string }).code ?? exception?.constructor?.name ?? 'prisma'})`,
       );
     }
 
@@ -50,7 +62,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       requestId: (request as Request & { requestId?: string }).requestId,
       ...payload,
       timestamp: new Date().toISOString(),
-      path: request.originalUrl,
+      // Without the query string: it never needs to be echoed back to the client.
+      path: request.originalUrl?.split('?')[0],
     });
   }
 
@@ -73,6 +86,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       statusCode: status,
       message: objectResponse.message ?? exception.message,
       error: objectResponse.error,
+      ...(objectResponse.code ? { code: objectResponse.code } : {}),
     };
   }
 }
@@ -82,7 +96,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
  * not surface as 500 errors nor leak table or constraint names to the client.
  */
 export function mapPrismaError(exception: unknown): ErrorResponse | null {
+  // Connection failures (server down, paused Azure SQL database, firewall, pool timeout)
+  // are reported as 503 so that the client does not show them as an internal error.
+  if (
+    exception instanceof Prisma.PrismaClientInitializationError ||
+    exception instanceof Prisma.PrismaClientRustPanicError
+  ) {
+    return DATABASE_UNAVAILABLE;
+  }
   if (!(exception instanceof Prisma.PrismaClientKnownRequestError)) return null;
+  if (DATABASE_UNAVAILABLE_CODES.has(exception.code)) return DATABASE_UNAVAILABLE;
   switch (exception.code) {
     case 'P2002':
       return {

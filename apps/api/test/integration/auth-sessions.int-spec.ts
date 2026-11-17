@@ -226,6 +226,8 @@ describe('Autenticación, sesiones y permisos (SQL Server real)', () => {
   });
 
   it('expone salud y disponibilidad de la base de datos', async () => {
+    // NODE_ENV=test without PUBLIC_REGISTRATION: self-service registration stays open.
+    await http().get('/api/auth/registration').expect(200, { enabled: true });
     const health = await http().get('/api/health').expect(200);
     expect(health.body).toMatchObject({ status: 'ok', version: '1.2.0' });
     await http().get('/api/health/ready').expect(200);

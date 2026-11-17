@@ -9,6 +9,7 @@
 | Integración y E2E HTTP      | Jest + supertest + AppModule real | `apps/api/test/integration/*.int-spec.ts`       | **SQL Server real**         | `npm run test:integration --workspace @admingest/api` |
 | E2E en navegador            | Playwright (Chromium)             | `apps/web/e2e/*.spec.ts`                        | **SQL Server real** vía API | `npm run test:e2e --workspace @admingest/web`         |
 | Actualización de esquema    | GitHub Actions + sqlcmd           | `apps/api/test/migrations/*.sql`                | SQL Server real             | job `migration-upgrade`                               |
+| Proxy de Cloudflare Pages   | `node:test` (sin dependencias)    | `tests/cloudflare-pages-proxy.test.mjs`         | No (backend simulado)       | `node --test tests/cloudflare-pages-proxy.test.mjs`   |
 
 Las pruebas de aislamiento multiempresa **no usan mocks**: arrancan el `AppModule` completo (guards,
 validación, filtros y Prisma) contra SQL Server 2022.
@@ -29,6 +30,12 @@ validación, filtros y Prisma) contra SQL Server 2022.
   incorrectas, rotación, reutilización de tokens, origen no autorizado, revocación por dispositivo, logout,
   logout-all, cambio de contraseña, usuario desactivado, último administrador, permisos por rol, limpieza de
   campos de empresa y salud.
+- **Proxy de Cloudflare** (`proxy-access`): con `API_PROXY_SECRET`, las llamadas directas reciben 403
+  `DIRECT_ACCESS_FORBIDDEN` (salvo `/api/health` y `/api/health/ready`), la sesión registra la IP del
+  visitante enviada por la Function y el límite de 10 inicios de sesión por minuto se aplica por visitante,
+  no a todos los usuarios que llegan desde la misma IP de Cloudflare.
+- **Registro** (`auth-sessions`): `GET /api/auth/registration` informa la política; las pruebas unitarias
+  verifican que con `PUBLIC_REGISTRATION=false` el alta se rechaza antes de tocar la base.
 - **Seed** (`seed`): ejecutado dos veces con contraseñas distintas; conserva la primera, el rol y los datos.
 - **Actualización** (`upgrade`): datos con el esquema v1.1.0 conservados, referencias huérfanas limpiadas,
   numeración continuada sin repetir y nuevas empresas sin RNC admitidas.
@@ -58,6 +65,23 @@ El job `e2e` despliega migraciones, ejecuta el seed, inicia la API desde `dist/m
 clientes con doble clic, cotización exenta, aislamiento A/B, importación CSV con nombres hostiles y Gantt
 imprimible sin ejecución de scripts, plantilla, notificaciones, revocación de sesión, cambio de contraseña
 y usuario de solo lectura (escritorio y móvil).
+
+## Proxy de Cloudflare y estados de servicio
+
+- `tests/cloudflare-pages-proxy.test.mjs` (CI, job `validate`): 503 `API_NOT_CONFIGURED` sin backend,
+  rechazo de orígenes inseguros, todos los métodos con cuerpo JSON, query y `Authorization`, respuestas 204,
+  varias `Set-Cookie`, redirecciones sin seguir, `no-store`, ausencia de proxy abierto y envío del secreto e
+  IP del visitante solo cuando `API_PROXY_SECRET` está configurado.
+- Vitest (`apps/web/src/api/errors.spec.ts`, `LoginPage.spec.tsx`): clasificación de errores (API no
+  configurada, servidor no disponible, base de datos, red, sesión expirada, permisos, validación, límite de
+  solicitudes), política de reintentos y mensajes de la pantalla de inicio de sesión sin «credenciales
+  incorrectas» cuando el problema es el servicio.
+
+## Verificación en producción
+
+Las pruebas anteriores usan SQL Server en contenedor o servicios simulados: **no** son una verificación del
+despliegue real. La verificación en Cloudflare + Render + Azure SQL se registra con
+[PRODUCTION-CHECKLIST.md](PRODUCTION-CHECKLIST.md) y está **pendiente** hasta que exista esa infraestructura.
 
 ## Cobertura
 

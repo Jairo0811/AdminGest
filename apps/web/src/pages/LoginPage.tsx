@@ -13,7 +13,10 @@ import {
   UsersRound,
 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import { ServiceStatus } from '../components/ServiceStatus';
 import { AppFooter } from '../components/AppFooter';
 import { BrandLogo } from '../components/BrandLogo';
 import {
@@ -56,6 +59,14 @@ export function LoginPage() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // The API decides whether self-service registration is open (PUBLIC_REGISTRATION).
+  const registration = useQuery({
+    queryKey: ['/auth/registration'],
+    queryFn: () => api<{ enabled: boolean }>('/auth/registration'),
+    retry: false,
+    staleTime: 5 * 60_000,
+  });
+  const registrationEnabled = registration.data?.enabled === true;
 
   if (user) {
     return <Navigate replace to="/" />;
@@ -251,6 +262,7 @@ export function LoginPage() {
               </Link>
             )}
 
+            <ServiceStatus />
             {notice && !error && (
               <div className="alert success" role="status">
                 {notice}
@@ -273,18 +285,26 @@ export function LoginPage() {
               {!submitting && <ArrowRight aria-hidden="true" size={18} />}
             </button>
 
-            <button
-              className="text-button"
-              onClick={() => {
-                setMode(mode === 'login' ? 'register' : 'login');
-                setError('');
-              }}
-              type="button"
-            >
-              {mode === 'login'
-                ? '¿Primera vez? Crea una cuenta'
-                : '¿Ya tienes cuenta? Inicia sesión'}
-            </button>
+            {(registrationEnabled || mode === 'register') && (
+              <button
+                className="text-button"
+                onClick={() => {
+                  setMode(mode === 'login' ? 'register' : 'login');
+                  setError('');
+                }}
+                type="button"
+              >
+                {mode === 'login'
+                  ? '¿Primera vez? Crea una cuenta'
+                  : '¿Ya tienes cuenta? Inicia sesión'}
+              </button>
+            )}
+            {registration.data?.enabled === false && (
+              <p className="field-hint auth-registration-closed">
+                El registro de nuevas empresas está cerrado en este entorno. Solicita una cuenta al
+                administrador.
+              </p>
+            )}
 
             <div className="auth-form-assurance">
               <BriefcaseBusiness aria-hidden="true" size={16} />

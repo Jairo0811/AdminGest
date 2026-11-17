@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   UnauthorizedException,
@@ -14,6 +15,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { isPublicRegistrationEnabled, REGISTRATION_DISABLED } from './registration-policy';
 import { PasswordResetMailService } from './password-reset-mail.service';
 import { SessionsService, SessionMetadata } from './sessions.service';
 
@@ -63,7 +65,17 @@ export class AuthService {
     private readonly sessions: SessionsService,
   ) {}
 
+  isRegistrationEnabled(): boolean {
+    return isPublicRegistrationEnabled({
+      NODE_ENV: this.config.get<string>('NODE_ENV'),
+      PUBLIC_REGISTRATION: this.config.get<string>('PUBLIC_REGISTRATION'),
+    });
+  }
+
   async register(dto: RegisterDto, metadata: SessionMetadata = {}) {
+    if (!this.isRegistrationEnabled()) {
+      throw new ForbiddenException(REGISTRATION_DISABLED);
+    }
     const email = dto.email.trim().toLowerCase();
     const exists = await this.prisma.user.findUnique({ where: { email } });
 
