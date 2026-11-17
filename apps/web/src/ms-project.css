@@ -67,11 +67,11 @@
   padding: 0.22rem 0;
 }
 
-[data-theme="dark"] .task-gantt .task-late {
+[data-theme='dark'] .task-gantt .task-late {
   background: rgba(255, 105, 130, 0.08);
 }
 
-[data-theme="dark"] .task-gantt .task-late .timeline-project small {
+[data-theme='dark'] .task-gantt .task-late .timeline-project small {
   color: #ff8ea2;
 }
 

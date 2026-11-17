@@ -7,4 +7,3 @@ import { LeadsService } from './leads.service';
   providers: [LeadsService],
 })
 export class LeadsModule {}
-

@@ -41,8 +41,11 @@
   min-width: 0;
   min-height: 78px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  /* Icon above the text: the five columns are too narrow for icon + title side by
+     side, which split words such as «Administración» in the middle. */
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  align-items: start;
   gap: 0.55rem;
   padding: 0.65rem;
   border: 1px solid rgba(159, 188, 210, 0.16);
@@ -82,7 +85,8 @@
   font-size: 0.75rem;
   line-height: 1.18;
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  hyphens: auto;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }

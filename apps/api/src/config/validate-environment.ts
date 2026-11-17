@@ -7,9 +7,10 @@ const REQUIRED_IN_PRODUCTION = [
   'MAIL_FROM',
 ] as const;
 
-export function validateEnvironment(
-  environment: Record<string, unknown>,
-): Record<string, unknown> {
+/** Access tokens are short lived; long sessions rely on the rotating refresh token. */
+export const MAX_ACCESS_TOKEN_SECONDS = 3600;
+
+export function validateEnvironment(environment: Record<string, unknown>): Record<string, unknown> {
   const nodeEnv = String(environment.NODE_ENV ?? 'development');
   const required = [
     ...REQUIRED_ALWAYS,
@@ -22,9 +23,7 @@ export function validateEnvironment(
   });
 
   if (missing.length > 0) {
-    throw new Error(
-      `Faltan variables de entorno obligatorias: ${missing.join(', ')}`,
-    );
+    throw new Error(`Faltan variables de entorno obligatorias: ${missing.join(', ')}`);
   }
 
   const jwtSecret = String(environment.JWT_SECRET);
@@ -37,8 +36,26 @@ export function validateEnvironment(
     throw new Error('PORT debe ser un número entero entre 1 y 65535.');
   }
 
+  const jwtExpiresIn = String(environment.JWT_EXPIRES_IN ?? '15m').trim();
+  const expiresMatch = /^(\d+)([smh])$/.exec(jwtExpiresIn);
+  const expiresSeconds = expiresMatch
+    ? Number(expiresMatch[1]) * { s: 1, m: 60, h: 3600 }[expiresMatch[2] as 's' | 'm' | 'h']
+    : NaN;
+  if (!(expiresSeconds >= 60 && expiresSeconds <= MAX_ACCESS_TOKEN_SECONDS)) {
+    throw new Error(
+      'JWT_EXPIRES_IN debe expresarse como 15m, 900s o 1h y estar entre 1 minuto y 1 hora. ' +
+        'La sesión se mantiene con el refresh token rotativo de 7 días.',
+    );
+  }
+
+  const trustProxy = String(environment.TRUST_PROXY ?? '').trim();
+  if (trustProxy && !/^(false|true|loopback|\d{1,2})$/.test(trustProxy)) {
+    throw new Error('TRUST_PROXY admite false, true, loopback o el número de proxies (0-99).');
+  }
+
   return {
     ...environment,
+    JWT_EXPIRES_IN: jwtExpiresIn,
     NODE_ENV: nodeEnv,
     PORT: port,
   };

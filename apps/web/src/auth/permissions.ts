@@ -1,10 +1,5 @@
 export type AppRole =
-  | 'SUPER_ADMIN'
-  | 'ADMIN'
-  | 'SALES_MANAGER'
-  | 'SALES_REP'
-  | 'PROJECT_MANAGER'
-  | 'VIEWER';
+  'SUPER_ADMIN' | 'ADMIN' | 'SALES_MANAGER' | 'SALES_REP' | 'PROJECT_MANAGER' | 'VIEWER';
 
 export type AppResource =
   | 'dashboard'
@@ -91,9 +86,7 @@ export function hasPermission(
   if (!role) return false;
   if (role === 'SUPER_ADMIN' || role === 'ADMIN') return true;
 
-  return (
-    ROLE_PERMISSIONS[role as AppRole]?.[resource]?.includes(action) ?? false
-  );
+  return ROLE_PERMISSIONS[role as AppRole]?.[resource]?.includes(action) ?? false;
 }
 
 export function resourceFromEndpoint(endpoint: string): AppResource | null {
@@ -114,7 +107,5 @@ export function resourceFromEndpoint(endpoint: string): AppResource | null {
     'workflows',
   ];
 
-  return resources.includes(segment as AppResource)
-    ? (segment as AppResource)
-    : null;
+  return resources.includes(segment as AppResource) ? (segment as AppResource) : null;
 }

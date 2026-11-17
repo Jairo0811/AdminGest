@@ -7,4 +7,3 @@ import { QuotesService } from './quotes.service';
   providers: [QuotesService],
 })
 export class QuotesModule {}
-

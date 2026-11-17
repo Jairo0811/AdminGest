@@ -7,17 +7,13 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Length,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 
-export const PROJECT_STATUSES = [
-  'PLANNED',
-  'ACTIVE',
-  'ON_HOLD',
-  'COMPLETED',
-  'CANCELLED',
-] as const;
+export const PROJECT_STATUSES = ['PLANNED', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED'] as const;
 
 export class CreateProjectDto {
   @IsUUID()
@@ -32,10 +28,12 @@ export class CreateProjectDto {
   managerId?: string;
 
   @IsString()
+  @Length(2, 150)
   name!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   description?: string;
 
   @IsOptional()
@@ -50,6 +48,7 @@ export class CreateProjectDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
+  @Max(9_999_999_999_999)
   budget?: number;
 
   @IsOptional()

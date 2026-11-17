@@ -17,4 +17,3 @@ export class AuditController {
     return this.auditService.findAll(user.companyId, take ? Number(take) : 50);
   }
 }
-

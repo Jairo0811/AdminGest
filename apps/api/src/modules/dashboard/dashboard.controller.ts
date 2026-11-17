@@ -15,4 +15,3 @@ export class DashboardController {
     return this.service.summary(user.companyId);
   }
 }
-

@@ -26,4 +26,3 @@ export class CatalogService {
     return this.prisma.catalogItem.update({ where: { id }, data: dto });
   }
 }
-

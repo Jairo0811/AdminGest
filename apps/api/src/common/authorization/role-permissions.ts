@@ -1,10 +1,5 @@
 export type AppRole =
-  | 'SUPER_ADMIN'
-  | 'ADMIN'
-  | 'SALES_MANAGER'
-  | 'SALES_REP'
-  | 'PROJECT_MANAGER'
-  | 'VIEWER';
+  'SUPER_ADMIN' | 'ADMIN' | 'SALES_MANAGER' | 'SALES_REP' | 'PROJECT_MANAGER' | 'VIEWER';
 
 export type PermissionAction = 'read' | 'write';
 
@@ -114,10 +109,16 @@ const RESOURCE_ALIASES: Record<string, PermissionResource> = {
 };
 
 export function resolveResource(url: string): PermissionResource | null {
-  const cleanPath = url.split('?')[0].replace(/^\/api\/?/, '').replace(/^\//, '');
+  const cleanPath = url
+    .split('?')[0]
+    .replace(/^\/api\/?/, '')
+    .replace(/^\//, '');
   const firstSegment = cleanPath.split('/')[0];
 
   if (firstSegment === 'auth') return 'profile';
+  // The own profile (GET/PATCH /users/me, POST /users/me/change-password) belongs to
+  // every authenticated user, not to user administration.
+  if (/^users\/me(\/|$)/.test(cleanPath)) return 'profile';
   return RESOURCE_ALIASES[firstSegment] ?? null;
 }
 

@@ -27,18 +27,14 @@ export function CustomersPage() {
           render: (item) => (
             <span className="primary-cell">
               <strong>{value(item, 'name')}</strong>
-              <small>
-                {item.taxId ? formatDominicanTaxId(String(item.taxId)) : '—'}
-              </small>
+              <small>{item.taxId ? formatDominicanTaxId(String(item.taxId)) : '—'}</small>
             </span>
           ),
         },
         {
           label: 'RNC/Cédula',
-          exportValue: (item) =>
-            item.taxId ? formatDominicanTaxId(String(item.taxId)) : '—',
-          render: (item) =>
-            item.taxId ? formatDominicanTaxId(String(item.taxId)) : '—',
+          exportValue: (item) => (item.taxId ? formatDominicanTaxId(String(item.taxId)) : '—'),
+          render: (item) => (item.taxId ? formatDominicanTaxId(String(item.taxId)) : '—'),
         },
         {
           label: 'Correo',

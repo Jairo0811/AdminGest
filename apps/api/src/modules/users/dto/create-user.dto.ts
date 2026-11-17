@@ -27,4 +27,3 @@ export class CreateUserDto {
   @IsIn(USER_ROLES)
   role!: (typeof USER_ROLES)[number];
 }
-

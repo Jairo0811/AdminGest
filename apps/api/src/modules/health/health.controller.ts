@@ -2,6 +2,7 @@ import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
+import { API_VERSION } from '../../version';
 
 @ApiTags('Health')
 @Controller('health')
@@ -14,7 +15,7 @@ export class HealthController {
     return {
       status: 'ok',
       service: 'AdminGest API',
-      version: '1.1.0',
+      version: API_VERSION,
       timestamp: new Date().toISOString(),
     };
   }
@@ -30,4 +31,3 @@ export class HealthController {
     }
   }
 }
-

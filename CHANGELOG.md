@@ -2,9 +2,52 @@
 
 Todos los cambios relevantes de AdminGest se documentan en este archivo.
 
-## [1.2.0] - En desarrollo
+## [1.2.0] - Pendiente de publicación
 
-### Añadido
+Versión de congelamiento técnico. Consolida las fases SaaS Foundation, Production Security y Business
+Automation (1.1.0 y 1.2.0 no se publicaron por separado) junto con el hardening final. Detalle, evidencia
+y riesgos en [docs/RELEASE-1.2.0.md](docs/RELEASE-1.2.0.md).
+
+### Seguridad
+
+- Corregido XSS almacenado en el Gantt imprimible; toda impresión usa escape obligatorio (`SafeHtml`) y una
+  CSP sin acceso a red con script por nonce.
+- Validación por empresa de responsables, gerentes, tareas padre, etapas, catálogo, clientes y
+  oportunidades en creación y actualización, y claves foráneas compuestas `(companyId, id)` en SQL Server.
+- Tokens de acceso de 15 minutos (máximo 1 hora, validado al iniciar); refresh coordinado entre pestañas;
+  caché limpiada al cambiar de sesión; cierre de sesión propagado a otras pestañas.
+- Política de administración: solo SUPER_ADMIN gestiona SUPER_ADMIN, la empresa conserva un administrador
+  activo, cambios de rol/estado/correo revocan sesiones.
+- `/api/users/me` accesible para todos los roles (antes 403 para roles no administrativos).
+- `TRUST_PROXY` para proxies HTTPS, login de tiempo constante, neutralización de fórmulas en CSV.
+- `react-router-dom` 7.18.5.
+
+### Integridad de datos
+
+- Numeración de cotizaciones por empresa y año con secuencia transaccional.
+- Cuotas de usuarios, clientes y proyectos verificadas y aplicadas de forma atómica.
+- Importes de descuento e ITBIS persistidos por línea; impresión basada solo en valores del servidor;
+  descuento mayor que el subtotal rechazado.
+- Índices únicos filtrados: varias empresas sin RNC y varios proyectos sin oportunidad.
+- Seed idempotente que no modifica credenciales, roles, planes ni datos existentes.
+- Migración `20261103120000_tenant_integrity_hardening` con comprobación previa y aborto atómico.
+
+### Interfaz y accesibilidad
+
+- `EntityPage` distingue error y lista vacía, evita envíos duplicados y carga fechas al editar.
+- Modal accesible (foco, Escape, contención y restauración).
+- Panel de suscripción en Configuración y campos opcionales limpiables.
+- Notificaciones, Documentos y Flujos unificados con el diseño corporativo, con confirmaciones.
+- Contraste AA, títulos alineados, tablas sin superposición y sin desbordamiento en 320-1440 px.
+
+### Calidad
+
+- Pruebas de integración y E2E HTTP sobre SQL Server real, prueba de actualización de esquema y E2E en
+  navegador con Playwright en CI.
+- Prettier aplicado y verificado en CI; umbrales de cobertura para módulos críticos.
+- La API vuelve a iniciar desde `dist/main.js` (`tsconfig.build.json`).
+
+### Añadido en la fase Business Automation
 
 - Bandeja persistente de notificaciones por empresa y usuario.
 - Avisos de actividades y proyectos asignados, más recordatorios periódicos.
@@ -12,9 +55,14 @@ Todos los cambios relevantes de AdminGest se documentan en este archivo.
 - Plantillas reutilizables de tareas para proyectos.
 - Registro de referencias documentales HTTPS con filtros por tenant.
 - Vistas de Notificaciones, Documentos y Flujos.
-- Documentación de Business Automation.
 
-## [1.1.0] - En desarrollo
+### Cambios que requieren acción
+
+- `JWT_EXPIRES_IN` mayor de `1h` impide iniciar la API: usar `15m`.
+- Ejecutar `npm run db:deploy` con respaldo previo; la migración aborta si encuentra referencias entre
+  empresas.
+
+## [1.1.0] - No publicada por separado (incluida en 1.2.0)
 
 ### Añadido
 

@@ -39,7 +39,11 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Crea una empresa y su usuario administrador' })
-  async register(@Body() dto: RegisterDto, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
+  async register(
+    @Body() dto: RegisterDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const session = await this.authService.register(dto, this.getRequestMetadata(request));
     this.setRefreshCookie(response, session.refreshToken);
     return { accessToken: session.accessToken, user: session.user };
@@ -50,7 +54,11 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Inicia una sesión' })
-  async login(@Body() dto: LoginDto, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const session = await this.authService.login(dto, this.getRequestMetadata(request));
     this.setRefreshCookie(response, session.refreshToken);
     return { accessToken: session.accessToken, user: session.user };
@@ -63,7 +71,8 @@ export class AuthController {
   async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
     this.assertTrustedOrigin(request);
     const session = await this.sessions.rotate(
-      refreshCookieValue(request.headers.cookie), this.getRequestMetadata(request),
+      refreshCookieValue(request.headers.cookie),
+      this.getRequestMetadata(request),
     );
     this.setRefreshCookie(response, session.refreshToken);
     return { accessToken: session.accessToken, user: session.user };
@@ -143,8 +152,10 @@ export class AuthController {
   private assertTrustedOrigin(request: Request) {
     const origin = request.headers.origin;
     if (!origin) return;
-    const allowed = this.config.get<string>('CORS_ORIGIN', 'http://localhost:5173')
-      .split(',').map((value) => value.trim());
+    const allowed = this.config
+      .get<string>('CORS_ORIGIN', 'http://localhost:5173')
+      .split(',')
+      .map((value) => value.trim());
     if (!allowed.includes(origin)) throw new ForbiddenException('Origen no autorizado.');
   }
 

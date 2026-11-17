@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 permissions:
   contents: write
@@ -15,10 +15,10 @@ jobs:
 
     env:
       NODE_ENV: test
-      DATABASE_URL: "sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=ReleaseOnly_2026!;encrypt=true;trustServerCertificate=true"
-      JWT_SECRET: "release-only-jwt-secret-with-at-least-32-characters"
-      CORS_ORIGIN: "http://localhost:5173"
-      PASSWORD_RESET_URL: "http://localhost:5173/reset-password"
+      DATABASE_URL: 'sqlserver://localhost:1433;database=AdminGestDb;user=sa;password=ReleaseOnly_2026!;encrypt=true;trustServerCertificate=true'
+      JWT_SECRET: 'release-only-jwt-secret-with-at-least-32-characters'
+      CORS_ORIGIN: 'http://localhost:5173'
+      PASSWORD_RESET_URL: 'http://localhost:5173/reset-password'
 
     steps:
       - name: Checkout

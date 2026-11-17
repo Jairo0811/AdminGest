@@ -8,18 +8,18 @@ datasource db {
 }
 
 model Company {
-  id             String          @id @default(uuid()) @db.NVarChar(36)
-  name           String          @db.NVarChar(150)
-  taxId          String?         @unique @db.NVarChar(30)
-  email          String?         @db.NVarChar(254)
-  phone          String?         @db.NVarChar(30)
-  address        String?         @db.NVarChar(500)
-  logoUrl        String?         @db.NVarChar(500)
-  currency       String          @default("DOP") @db.NVarChar(3)
-  timezone       String          @default("America/Santo_Domingo") @db.NVarChar(64)
-  isActive       Boolean         @default(true)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id             String            @id @default(uuid()) @db.NVarChar(36)
+  name           String            @db.NVarChar(150)
+  taxId          String?           @unique @db.NVarChar(30)
+  email          String?           @db.NVarChar(254)
+  phone          String?           @db.NVarChar(30)
+  address        String?           @db.NVarChar(500)
+  logoUrl        String?           @db.NVarChar(500)
+  currency       String            @default("DOP") @db.NVarChar(3)
+  timezone       String            @default("America/Santo_Domingo") @db.NVarChar(64)
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
   users          User[]
   leads          Lead[]
   customers      Customer[]
@@ -35,6 +35,17 @@ model Company {
   workflowRules  WorkflowRule[]
   templates      ProjectTemplate[]
   documents      DocumentRecord[]
+  sequences      CompanySequence[]
+}
+
+model CompanySequence {
+  companyId String   @db.NVarChar(36)
+  scope     String   @db.NVarChar(40)
+  value     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([companyId, scope])
 }
 
 model Plan {
@@ -57,19 +68,19 @@ model Plan {
 }
 
 model Subscription {
-  id                  String    @id @default(uuid()) @db.NVarChar(36)
-  companyId           String    @unique @db.NVarChar(36)
-  planId              String    @db.NVarChar(36)
-  status              String    @default("TRIAL") @db.NVarChar(20)
-  trialEndsAt         DateTime?
-  currentPeriodStart  DateTime  @default(now())
-  currentPeriodEnd    DateTime?
-  cancelAtPeriodEnd   Boolean   @default(false)
-  canceledAt          DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  company             Company   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  plan                Plan      @relation(fields: [planId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                 String    @id @default(uuid()) @db.NVarChar(36)
+  companyId          String    @unique @db.NVarChar(36)
+  planId             String    @db.NVarChar(36)
+  status             String    @default("TRIAL") @db.NVarChar(20)
+  trialEndsAt        DateTime?
+  currentPeriodStart DateTime  @default(now())
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  canceledAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  company            Company   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plan               Plan      @relation(fields: [planId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([planId, status])
 }
@@ -81,22 +92,24 @@ model User {
   passwordHash          String               @db.NVarChar(100)
   firstName             String               @db.NVarChar(60)
   lastName              String               @db.NVarChar(60)
-  role                   String               @default("SALES_REP") @db.NVarChar(32)
-  status                 String               @default("ACTIVE") @db.NVarChar(20)
-  lastLoginAt            DateTime?
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt
-  company                Company              @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  assignedLeads          Lead[]               @relation("LeadOwner")
+  role                  String               @default("SALES_REP") @db.NVarChar(32)
+  status                String               @default("ACTIVE") @db.NVarChar(20)
+  lastLoginAt           DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  company               Company              @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignedLeads         Lead[]               @relation("LeadOwner")
   assignedOpportunities Opportunity[]        @relation("OpportunityOwner")
   assignedActivities    Activity[]           @relation("ActivityOwner")
   managedProjects       Project[]            @relation("ProjectManager")
   assignedTasks         ProjectTask[]        @relation("TaskAssignee")
-  auditLogs              AuditLog[]
+  auditLogs             AuditLog[]
   passwordResetTokens   PasswordResetToken[]
   sessions              AuthSession[]
   notifications         Notification[]
+  documents             DocumentRecord[]
 
+  @@unique([companyId, id])
   @@index([companyId, status])
   @@index([companyId, role])
 }
@@ -132,50 +145,52 @@ model PasswordResetToken {
 }
 
 model Lead {
-  id          String   @id @default(uuid()) @db.NVarChar(36)
-  companyId   String   @db.NVarChar(36)
-  ownerId     String?  @db.NVarChar(36)
-  firstName   String   @db.NVarChar(60)
-  lastName    String?  @db.NVarChar(60)
-  companyName String?  @db.NVarChar(150)
-  jobTitle    String?  @db.NVarChar(100)
-  email       String?  @db.NVarChar(254)
-  phone       String?  @db.NVarChar(30)
-  source      String?  @db.NVarChar(80)
-  status      String   @default("NEW") @db.NVarChar(24)
-  priority    Int      @default(2)
-  notes       String?  @db.NVarChar(2000)
+  id          String    @id @default(uuid()) @db.NVarChar(36)
+  companyId   String    @db.NVarChar(36)
+  ownerId     String?   @db.NVarChar(36)
+  firstName   String    @db.NVarChar(60)
+  lastName    String?   @db.NVarChar(60)
+  companyName String?   @db.NVarChar(150)
+  jobTitle    String?   @db.NVarChar(100)
+  email       String?   @db.NVarChar(254)
+  phone       String?   @db.NVarChar(30)
+  source      String?   @db.NVarChar(80)
+  status      String    @default("NEW") @db.NVarChar(24)
+  priority    Int       @default(2)
+  notes       String?   @db.NVarChar(2000)
   convertedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  company     Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  owner       User?    @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  owner       User?     @relation("LeadOwner", fields: [companyId, ownerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([companyId, status])
   @@index([ownerId])
 }
 
 model Customer {
-  id            String        @id @default(uuid()) @db.NVarChar(36)
-  companyId     String        @db.NVarChar(36)
-  name          String        @db.NVarChar(150)
-  taxId         String?       @db.NVarChar(30)
-  email         String?       @db.NVarChar(254)
-  phone         String?       @db.NVarChar(30)
-  address       String?       @db.NVarChar(500)
-  website       String?       @db.NVarChar(500)
-  isActive      Boolean       @default(true)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  company       Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id            String           @id @default(uuid()) @db.NVarChar(36)
+  companyId     String           @db.NVarChar(36)
+  name          String           @db.NVarChar(150)
+  taxId         String?          @db.NVarChar(30)
+  email         String?          @db.NVarChar(254)
+  phone         String?          @db.NVarChar(30)
+  address       String?          @db.NVarChar(500)
+  website       String?          @db.NVarChar(500)
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  company       Company          @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   contacts      Contact[]
   opportunities Opportunity[]
   activities    Activity[]
   quotes        Quote[]
   projects      Project[]
+  documents     DocumentRecord[]
 
-  @@index([companyId, name])
+  @@unique([companyId, id])
   @@unique([companyId, taxId])
+  @@index([companyId, name])
 }
 
 model Contact {
@@ -207,6 +222,7 @@ model PipelineStage {
   company       Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   opportunities Opportunity[]
 
+  @@unique([companyId, id])
   @@unique([companyId, position])
   @@index([companyId])
 }
@@ -227,13 +243,14 @@ model Opportunity {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   company           Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer          Customer      @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  owner             User?         @relation("OpportunityOwner", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  pipelineStage     PipelineStage @relation(fields: [pipelineStageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer          Customer      @relation(fields: [companyId, customerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
+  owner             User?         @relation("OpportunityOwner", fields: [companyId, ownerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
+  pipelineStage     PipelineStage @relation(fields: [companyId, pipelineStageId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
   activities        Activity[]
   quotes            Quote[]
   project           Project?
 
+  @@unique([companyId, id])
   @@index([companyId, status])
   @@index([customerId])
   @@index([ownerId])
@@ -255,9 +272,9 @@ model Activity {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   company       Company      @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer      Customer?    @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  owner         User?        @relation("ActivityOwner", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer      Customer?    @relation(fields: [companyId, customerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
+  opportunity   Opportunity? @relation(fields: [companyId, opportunityId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
+  owner         User?        @relation("ActivityOwner", fields: [companyId, ownerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([companyId, scheduledAt])
   @@index([ownerId, status])
@@ -298,8 +315,8 @@ model Quote {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   company       Company      @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer      Customer     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer      Customer     @relation(fields: [companyId, customerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
+  opportunity   Opportunity? @relation(fields: [companyId, opportunityId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
   items         QuoteItem[]
 
   @@unique([companyId, number])
@@ -307,41 +324,47 @@ model Quote {
 }
 
 model QuoteItem {
-  id            String       @id @default(uuid()) @db.NVarChar(36)
-  quoteId       String       @db.NVarChar(36)
-  catalogItemId String?      @db.NVarChar(36)
-  description   String       @db.NVarChar(500)
-  quantity      Decimal      @default(1) @db.Decimal(18, 2)
-  unitPrice     Decimal      @db.Decimal(18, 2)
-  taxRate       Decimal      @default(18) @db.Decimal(5, 2)
-  lineTotal     Decimal      @db.Decimal(18, 2)
-  quote         Quote        @relation(fields: [quoteId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  catalogItem   CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             String       @id @default(uuid()) @db.NVarChar(36)
+  quoteId        String       @db.NVarChar(36)
+  catalogItemId  String?      @db.NVarChar(36)
+  description    String       @db.NVarChar(500)
+  quantity       Decimal      @default(1) @db.Decimal(18, 2)
+  unitPrice      Decimal      @db.Decimal(18, 2)
+  taxRate        Decimal      @default(18) @db.Decimal(5, 2)
+  lineTotal      Decimal      @db.Decimal(18, 2)
+  /// Descuento global asignado proporcionalmente a la línea (nulo en cotizaciones anteriores a v1.2.0).
+  discountAmount Decimal?     @db.Decimal(18, 2)
+  /// ITBIS calculado y persistido por el servidor para la línea (nulo en cotizaciones anteriores a v1.2.0).
+  taxAmount      Decimal?     @db.Decimal(18, 2)
+  quote          Quote        @relation(fields: [quoteId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  catalogItem    CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([quoteId])
 }
 
 model Project {
-  id            String        @id @default(uuid()) @db.NVarChar(36)
-  companyId     String        @db.NVarChar(36)
-  customerId    String        @db.NVarChar(36)
-  opportunityId String?       @unique @db.NVarChar(36)
-  managerId     String?       @db.NVarChar(36)
-  name          String        @db.NVarChar(150)
-  description   String?       @db.NVarChar(2000)
-  status        String        @default("PLANNED") @db.NVarChar(20)
+  id            String           @id @default(uuid()) @db.NVarChar(36)
+  companyId     String           @db.NVarChar(36)
+  customerId    String           @db.NVarChar(36)
+  opportunityId String?          @unique @db.NVarChar(36)
+  managerId     String?          @db.NVarChar(36)
+  name          String           @db.NVarChar(150)
+  description   String?          @db.NVarChar(2000)
+  status        String           @default("PLANNED") @db.NVarChar(20)
   startDate     DateTime?
   endDate       DateTime?
-  budget        Decimal?      @db.Decimal(18, 2)
-  progress      Int           @default(0)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  company       Company       @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer      Customer      @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  opportunity   Opportunity?  @relation(fields: [opportunityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  manager       User?         @relation("ProjectManager", fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  budget        Decimal?         @db.Decimal(18, 2)
+  progress      Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  company       Company          @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer      Customer         @relation(fields: [companyId, customerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
+  opportunity   Opportunity?     @relation(fields: [opportunityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  manager       User?            @relation("ProjectManager", fields: [companyId, managerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
   tasks         ProjectTask[]
+  documents     DocumentRecord[]
 
+  @@unique([companyId, id])
   @@index([companyId, status])
   @@index([customerId])
 }
@@ -371,23 +394,22 @@ model ProjectTask {
 }
 
 model AuditLog {
-  id         String   @id @default(uuid()) @db.NVarChar(36)
-  companyId  String   @db.NVarChar(36)
-  userId     String?  @db.NVarChar(36)
-  action     String   @db.NVarChar(40)
-  entity     String   @db.NVarChar(80)
-  entityId   String?  @db.NVarChar(36)
-  oldValues  String?  @db.NVarChar(4000)
-  newValues  String?  @db.NVarChar(4000)
-  ipAddress  String?  @db.NVarChar(64)
-  createdAt  DateTime @default(now())
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user       User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id        String   @id @default(uuid()) @db.NVarChar(36)
+  companyId String   @db.NVarChar(36)
+  userId    String?  @db.NVarChar(36)
+  action    String   @db.NVarChar(40)
+  entity    String   @db.NVarChar(80)
+  entityId  String?  @db.NVarChar(36)
+  oldValues String?  @db.NVarChar(4000)
+  newValues String?  @db.NVarChar(4000)
+  ipAddress String?  @db.NVarChar(64)
+  createdAt DateTime @default(now())
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([companyId, createdAt])
   @@index([userId])
 }
-
 
 model Notification {
   id        String    @id @default(uuid()) @db.NVarChar(36)
@@ -401,7 +423,7 @@ model Notification {
   readAt    DateTime?
   createdAt DateTime  @default(now())
   company   Company   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User      @relation(fields: [companyId, userId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([companyId, userId, dedupeKey])
   @@index([companyId, userId, readAt, createdAt])
@@ -433,17 +455,20 @@ model ProjectTemplate {
 }
 
 model DocumentRecord {
-  id          String   @id @default(uuid()) @db.NVarChar(36)
-  companyId   String   @db.NVarChar(36)
-  creatorId   String   @db.NVarChar(36)
-  projectId   String?  @db.NVarChar(36)
-  customerId  String?  @db.NVarChar(36)
-  title       String   @db.NVarChar(150)
-  category    String   @default("OTHER") @db.NVarChar(32)
-  url         String   @db.NVarChar(1500)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  company     Company  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id         String    @id @default(uuid()) @db.NVarChar(36)
+  companyId  String    @db.NVarChar(36)
+  creatorId  String    @db.NVarChar(36)
+  projectId  String?   @db.NVarChar(36)
+  customerId String?   @db.NVarChar(36)
+  title      String    @db.NVarChar(150)
+  category   String    @default("OTHER") @db.NVarChar(32)
+  url        String    @db.NVarChar(1500)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  company    Company   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator    User      @relation(fields: [companyId, creatorId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
+  project    Project?  @relation(fields: [companyId, projectId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
+  customer   Customer? @relation(fields: [companyId, customerId], references: [companyId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([companyId, projectId])
   @@index([companyId, customerId])

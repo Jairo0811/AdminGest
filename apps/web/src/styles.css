@@ -1,7 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap');
 
 :root {
-  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   color: #132238;
   background: #f4f7fb;
   font-synthesis: none;
@@ -61,9 +61,9 @@ h3,
 p {
   margin-top: 0;
 }
-h1,
-h2,
-h3,
+/* v1.2.0: this rule used to include h1, h2 and h3, which turned every heading of the
+   application into a centered flex box (titles appeared indented next to their eyebrow
+   and panel titles were centered). It now applies only to the sidebar brand. */
 .brand {
   width: 100%;
   display: flex;
@@ -111,11 +111,7 @@ h2 {
   overflow-y: auto;
   color: #dce8f6;
   background:
-    radial-gradient(
-      circle at 20% 0%,
-      rgba(25, 125, 235, 0.23),
-      transparent 27%
-    ),
+    radial-gradient(circle at 20% 0%, rgba(25, 125, 235, 0.23), transparent 27%),
     linear-gradient(180deg, var(--navy) 0%, var(--navy-soft) 62%, #073c36 100%);
   box-shadow: 10px 0 40px rgba(10, 35, 64, 0.12);
 }
@@ -186,11 +182,7 @@ h2 {
 }
 .nav-item.active {
   color: #fff;
-  background: linear-gradient(
-    90deg,
-    rgba(24, 127, 245, 0.32),
-    rgba(36, 204, 128, 0.17)
-  );
+  background: linear-gradient(90deg, rgba(24, 127, 245, 0.32), rgba(36, 204, 128, 0.17));
   box-shadow: inset 3px 0 #2bd88a;
 }
 .nav-item.settings {
@@ -446,7 +438,7 @@ h2 {
 .metric-card strong {
   display: block;
   color: #102238;
-  font-family: "Manrope", sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 1.35rem;
 }
 .dashboard-grid {
@@ -780,16 +772,8 @@ h2 {
   overflow: hidden;
   color: #dce8f6;
   background:
-    radial-gradient(
-      circle at 72% 18%,
-      rgba(39, 205, 144, 0.18),
-      transparent 25%
-    ),
-    radial-gradient(
-      circle at 15% 75%,
-      rgba(25, 126, 243, 0.22),
-      transparent 32%
-    ),
+    radial-gradient(circle at 72% 18%, rgba(39, 205, 144, 0.18), transparent 25%),
+    radial-gradient(circle at 15% 75%, rgba(25, 126, 243, 0.22), transparent 32%),
     linear-gradient(145deg, #051529, #0b2b4c 63%, #08453d);
 }
 .auth-brand {
@@ -797,7 +781,7 @@ h2 {
   align-items: center;
   gap: 0.75rem;
   color: white;
-  font-family: "Manrope", sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 1.3rem;
   font-weight: 800;
 }
@@ -906,7 +890,7 @@ h2 {
   color: var(--muted);
 }
 .report-card strong {
-  font-family: "Manrope", sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 1.4rem;
 }
 .report-visual {
@@ -1062,7 +1046,6 @@ h2 {
     padding: 1.5rem;
   }
 }
-
 
 @media (max-width: 1100px) {
   .page-heading {
@@ -1264,7 +1247,7 @@ h2 {
   left: 0;
 }
 
-[data-theme="dark"] .app-footer,
+[data-theme='dark'] .app-footer,
 .dark .app-footer {
   border-top-color: rgba(255, 255, 255, 0.08);
   color: #9fb0c3;

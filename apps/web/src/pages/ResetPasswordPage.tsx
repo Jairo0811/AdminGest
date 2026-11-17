@@ -37,7 +37,11 @@ export function ResetPasswordPage() {
       setSuccess(true);
       window.setTimeout(() => navigate('/login', { replace: true }), 1800);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'No fue posible restablecer la contraseña.');
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : 'No fue posible restablecer la contraseña.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -54,24 +58,44 @@ export function ResetPasswordPage() {
             <p>Utiliza al menos 10 caracteres, una mayúscula, una minúscula y un número.</p>
           </div>
           {success ? (
-            <div className="alert success"><CheckCircle2 size={18} /> Contraseña actualizada. Redirigiendo al inicio de sesión…</div>
+            <div className="alert success">
+              <CheckCircle2 size={18} /> Contraseña actualizada. Redirigiendo al inicio de sesión…
+            </div>
           ) : (
             <>
               <label className="form-field full">
                 <span>Nueva contraseña</span>
-                <input autoComplete="new-password" minLength={10} name="password" required type="password" />
+                <input
+                  autoComplete="new-password"
+                  minLength={10}
+                  name="password"
+                  required
+                  type="password"
+                />
               </label>
               <label className="form-field full">
                 <span>Confirmar contraseña</span>
-                <input autoComplete="new-password" minLength={10} name="confirmation" required type="password" />
+                <input
+                  autoComplete="new-password"
+                  minLength={10}
+                  name="confirmation"
+                  required
+                  type="password"
+                />
               </label>
               {error && <div className="alert error">{error}</div>}
-              <button className="primary-button auth-submit" disabled={submitting || !token} type="submit">
+              <button
+                className="primary-button auth-submit"
+                disabled={submitting || !token}
+                type="submit"
+              >
                 <KeyRound size={18} /> {submitting ? 'Actualizando…' : 'Actualizar contraseña'}
               </button>
             </>
           )}
-          <Link className="text-button" to="/login"><ArrowLeft size={16} /> Volver al inicio de sesión</Link>
+          <Link className="text-button" to="/login">
+            <ArrowLeft size={16} /> Volver al inicio de sesión
+          </Link>
         </form>
       </section>
     </div>

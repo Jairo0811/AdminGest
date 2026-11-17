@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  assertTenantCustomer,
+  assertTenantPipelineStage,
+  assertTenantUser,
+} from '../../common/tenant/tenant-references';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
@@ -37,8 +42,8 @@ export class OpportunitiesService {
         customer: true,
         pipelineStage: true,
         owner: { select: { id: true, firstName: true, lastName: true } },
-        activities: { orderBy: { scheduledAt: 'desc' } },
-        quotes: true,
+        activities: { where: { companyId }, orderBy: { scheduledAt: 'desc' } },
+        quotes: { where: { companyId } },
       },
     });
     if (!opportunity) throw new NotFoundException('Oportunidad no encontrada.');
@@ -46,14 +51,14 @@ export class OpportunitiesService {
   }
 
   async create(companyId: string, userId: string, dto: CreateOpportunityDto) {
-    await this.ensureReferences(companyId, dto.customerId, dto.pipelineStageId);
+    await assertTenantCustomer(this.prisma, companyId, dto.customerId);
+    await assertTenantPipelineStage(this.prisma, companyId, dto.pipelineStageId);
+    await assertTenantUser(this.prisma, companyId, dto.ownerId, 'responsable');
     const opportunity = await this.prisma.opportunity.create({
       data: {
         companyId,
         ...dto,
-        expectedCloseDate: dto.expectedCloseDate
-          ? new Date(dto.expectedCloseDate)
-          : undefined,
+        expectedCloseDate: dto.expectedCloseDate ? new Date(dto.expectedCloseDate) : undefined,
       },
       include: { customer: true, pipelineStage: true },
     });
@@ -68,27 +73,33 @@ export class OpportunitiesService {
     return opportunity;
   }
 
-  async update(
-    companyId: string,
-    userId: string,
-    id: string,
-    dto: UpdateOpportunityDto,
-  ) {
+  async update(companyId: string, userId: string, id: string, dto: UpdateOpportunityDto) {
     const existing = await this.findOne(companyId, id);
-    if (dto.customerId || dto.pipelineStageId) {
-      await this.ensureReferences(
-        companyId,
-        dto.customerId ?? existing.customerId,
-        dto.pipelineStageId ?? existing.pipelineStageId,
-      );
+    if (dto.customerId && dto.customerId !== existing.customerId) {
+      await assertTenantCustomer(this.prisma, companyId, dto.customerId);
+      // Quotes and projects keep the original customer; moving the opportunity would
+      // break the commercial chain customer → opportunity → quote/project.
+      const linked = await this.prisma.opportunity.findFirst({
+        where: { id, companyId },
+        select: { _count: { select: { quotes: true } }, project: { select: { id: true } } },
+      });
+      if (linked && (linked._count.quotes > 0 || linked.project)) {
+        throw new ConflictException(
+          'No es posible cambiar el cliente de una oportunidad con cotizaciones o proyecto asociados.',
+        );
+      }
+    }
+    if (dto.pipelineStageId && dto.pipelineStageId !== existing.pipelineStageId) {
+      await assertTenantPipelineStage(this.prisma, companyId, dto.pipelineStageId);
+    }
+    if (dto.ownerId && dto.ownerId !== existing.ownerId) {
+      await assertTenantUser(this.prisma, companyId, dto.ownerId, 'responsable');
     }
     const opportunity = await this.prisma.opportunity.update({
       where: { id },
       data: {
         ...dto,
-        expectedCloseDate: dto.expectedCloseDate
-          ? new Date(dto.expectedCloseDate)
-          : undefined,
+        expectedCloseDate: dto.expectedCloseDate ? new Date(dto.expectedCloseDate) : undefined,
       },
       include: { customer: true, pipelineStage: true },
     });
@@ -106,6 +117,18 @@ export class OpportunitiesService {
 
   async remove(companyId: string, userId: string, id: string) {
     const existing = await this.findOne(companyId, id);
+    const linked = await this.prisma.opportunity.findFirst({
+      where: { id, companyId },
+      select: {
+        _count: { select: { quotes: true, activities: true } },
+        project: { select: { id: true } },
+      },
+    });
+    if (linked && (linked._count.quotes > 0 || linked._count.activities > 0 || linked.project)) {
+      throw new ConflictException(
+        'La oportunidad tiene actividades, cotizaciones o un proyecto asociados. Márcala como perdida en lugar de eliminarla.',
+      );
+    }
     await this.prisma.opportunity.delete({ where: { id } });
     await this.audit.record({
       companyId,
@@ -117,21 +140,4 @@ export class OpportunitiesService {
     });
     return { deleted: true };
   }
-
-  private async ensureReferences(
-    companyId: string,
-    customerId: string,
-    pipelineStageId: string,
-  ) {
-    const [customer, stage] = await Promise.all([
-      this.prisma.customer.findFirst({ where: { id: customerId, companyId } }),
-      this.prisma.pipelineStage.findFirst({
-        where: { id: pipelineStageId, companyId },
-      }),
-    ]);
-    if (!customer || !stage) {
-      throw new NotFoundException('Cliente o etapa del pipeline no válidos.');
-    }
-  }
 }
-

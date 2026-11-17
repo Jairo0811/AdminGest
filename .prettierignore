@@ -1,0 +1,9 @@
+node_modules
+**/dist
+**/coverage
+**/coverage-integration
+**/test-results
+**/playwright-report
+package-lock.json
+apps/api/prisma/migrations
+*.sql

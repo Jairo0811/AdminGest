@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -14,5 +15,20 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    // Browser E2E specs (e2e/) run with Playwright against the real stack.
+    include: ['src/**/*.{spec,test}.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.spec.{ts,tsx}', 'src/**/*.test.{ts,tsx}', 'src/main.tsx'],
+      reporter: ['text-summary', 'html', 'lcov'],
+      // Security-critical output builders must stay covered (see docs/TESTING.md).
+      thresholds: {
+        'src/utils/html.ts': { lines: 90, functions: 90 },
+        'src/utils/quote-print.ts': { lines: 90, functions: 90 },
+        'src/utils/gantt-print.ts': { lines: 90, functions: 90 },
+      },
+    },
+  },
 });
-

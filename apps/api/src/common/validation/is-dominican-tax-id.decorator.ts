@@ -1,8 +1,4 @@
-import {
-  registerDecorator,
-  ValidationArguments,
-  ValidationOptions,
-} from 'class-validator';
+import { registerDecorator, ValidationArguments, ValidationOptions } from 'class-validator';
 import { isValidDominicanTaxId } from './dominican-tax-id';
 
 export function IsDominicanTaxId(validationOptions?: ValidationOptions) {

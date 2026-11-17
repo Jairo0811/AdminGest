@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/auth-user.interface';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -41,11 +32,7 @@ export class LeadsController {
   }
 
   @Patch(':id')
-  update(
-    @CurrentUser() user: AuthUser,
-    @Param('id') id: string,
-    @Body() dto: UpdateLeadDto,
-  ) {
+  update(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() dto: UpdateLeadDto) {
     return this.leadsService.update(user.companyId, user.id, id, dto);
   }
 
@@ -54,4 +41,3 @@ export class LeadsController {
     return this.leadsService.remove(user.companyId, user.id, id);
   }
 }
-

@@ -15,6 +15,11 @@ export class NotificationsController {
     return this.service.list(user.companyId, user.id);
   }
 
+  @Patch('read-all')
+  readAll(@CurrentUser() user: AuthUser) {
+    return this.service.markAllRead(user.companyId, user.id);
+  }
+
   @Patch(':id/read')
   read(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.service.markRead(user.companyId, user.id, id);

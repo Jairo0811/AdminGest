@@ -3,9 +3,7 @@ export function AppFooter() {
 
   return (
     <footer className="app-footer">
-      <span>
-        © {currentYear} AdminGest · Gestión Empresarial Inteligente
-      </span>
+      <span>© {currentYear} AdminGest · Gestión Empresarial Inteligente</span>
     </footer>
   );
 }

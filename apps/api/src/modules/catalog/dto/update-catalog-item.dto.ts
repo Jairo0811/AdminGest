@@ -7,4 +7,3 @@ export class UpdateCatalogItemDto extends PartialType(CreateCatalogItemDto) {
   @IsBoolean()
   isActive?: boolean;
 }
-

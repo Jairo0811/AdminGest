@@ -85,7 +85,9 @@ export function QuoteVerificationPage() {
       <section className="verification-card">
         <header className="verification-header">
           <BrandLogo />
-          <span className={`verification-badge ${invalid ? 'invalid' : accepted ? 'accepted' : ''}`}>
+          <span
+            className={`verification-badge ${invalid ? 'invalid' : accepted ? 'accepted' : ''}`}
+          >
             {invalid ? <XCircle size={18} /> : <ShieldCheck size={18} />}
             {invalid ? 'Documento rechazado' : 'Documento auténtico'}
           </span>
@@ -101,14 +103,42 @@ export function QuoteVerificationPage() {
         </div>
 
         <dl className="verification-grid">
-          <div><dt>Estado</dt><dd>{statusLabels[quote.status] ?? quote.status}</dd></div>
-          <div><dt>Cliente</dt><dd>{quote.customer.name}</dd></div>
-          <div><dt>Fecha de emisión</dt><dd>{new Date(quote.issueDate).toLocaleDateString('es-DO')}</dd></div>
-          <div><dt>Válida hasta</dt><dd>{quote.validUntil ? new Date(quote.validUntil).toLocaleDateString('es-DO') : 'Sin vencimiento'}</dd></div>
-          <div><dt>Subtotal</dt><dd>{money.format(Number(quote.subtotal))}</dd></div>
-          <div><dt>Descuento</dt><dd>{money.format(Number(quote.discount))}</dd></div>
-          <div><dt>ITBIS</dt><dd>{money.format(Number(quote.tax))}</dd></div>
-          <div className="verification-total"><dt>Total</dt><dd>{money.format(Number(quote.total))}</dd></div>
+          <div>
+            <dt>Estado</dt>
+            <dd>{statusLabels[quote.status] ?? quote.status}</dd>
+          </div>
+          <div>
+            <dt>Cliente</dt>
+            <dd>{quote.customer.name}</dd>
+          </div>
+          <div>
+            <dt>Fecha de emisión</dt>
+            <dd>{new Date(quote.issueDate).toLocaleDateString('es-DO')}</dd>
+          </div>
+          <div>
+            <dt>Válida hasta</dt>
+            <dd>
+              {quote.validUntil
+                ? new Date(quote.validUntil).toLocaleDateString('es-DO')
+                : 'Sin vencimiento'}
+            </dd>
+          </div>
+          <div>
+            <dt>Subtotal</dt>
+            <dd>{money.format(Number(quote.subtotal))}</dd>
+          </div>
+          <div>
+            <dt>Descuento</dt>
+            <dd>{money.format(Number(quote.discount))}</dd>
+          </div>
+          <div>
+            <dt>ITBIS</dt>
+            <dd>{money.format(Number(quote.tax))}</dd>
+          </div>
+          <div className="verification-total">
+            <dt>Total</dt>
+            <dd>{money.format(Number(quote.total))}</dd>
+          </div>
         </dl>
 
         <footer className="verification-footer">

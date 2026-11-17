@@ -7,4 +7,3 @@ import { ActivitiesService } from './activities.service';
   providers: [ActivitiesService],
 })
 export class ActivitiesModule {}
-

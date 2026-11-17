@@ -53,7 +53,9 @@ const activityFields = [
 
 export function ActivitiesPage() {
   const [view, setView] = useState<'table' | 'calendar'>('table');
-  const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [month, setMonth] = useState(
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+  );
   const activities = useQuery({
     queryKey: ['/activities'],
     queryFn: () => api<Activity[]>('/activities'),
@@ -200,11 +202,16 @@ export function ActivitiesPage() {
         </div>
 
         <div className="calendar-grid calendar-weekdays">
-          {weekDays.map((day) => <strong key={day}>{day}</strong>)}
+          {weekDays.map((day) => (
+            <strong key={day}>{day}</strong>
+          ))}
         </div>
         <div className="calendar-grid calendar-body">
           {calendarDays.map(({ date, currentMonth, activities: dayItems }) => (
-            <article className={currentMonth ? 'calendar-day' : 'calendar-day muted'} key={date.toISOString()}>
+            <article
+              className={currentMonth ? 'calendar-day' : 'calendar-day muted'}
+              key={date.toISOString()}
+            >
               <time>{date.getDate()}</time>
               <div>
                 {dayItems.slice(0, 4).map((item) => (
@@ -214,9 +221,10 @@ export function ActivitiesPage() {
                     title={`${item.subject} · ${item.customer?.name ?? ''}`}
                   >
                     <b>
-                      {new Intl.DateTimeFormat('es-DO', { hour: 'numeric', minute: '2-digit' }).format(
-                        new Date(item.scheduledAt),
-                      )}
+                      {new Intl.DateTimeFormat('es-DO', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      }).format(new Date(item.scheduledAt))}
                     </b>
                     {item.subject}
                   </span>

@@ -13,3 +13,7 @@ coverage/
 apps/api/prisma/dev.db
 playwright-report/
 test-results/
+
+# Playwright
+apps/web/test-results
+apps/web/playwright-report

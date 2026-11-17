@@ -23,4 +23,3 @@ export class CompaniesController {
     return this.companiesService.update(user.companyId, dto);
   }
 }
-

@@ -1,6 +1,6 @@
 # Accesibilidad de AdminGest
 
-AdminGest incorpora una base transversal de accesibilidad alineada con los principios de **NORTIC B2:2017** y las **WCAG 2.0 nivel AA**.
+AdminGest incorpora una base transversal de accesibilidad alineada con los principios de **NORTIC B2:2017** y con el objetivo de calidad **WCAG 2.2 nivel AA**.
 
 > Este documento describe una implementación técnica alineada con dichos criterios. No constituye una certificación formal emitida por una entidad auditora.
 
@@ -57,6 +57,20 @@ Antes de cada versión estable debe comprobarse:
 6. Contraste mediante Lighthouse, axe DevTools o WAVE.
 7. Formularios con errores identificables sin depender únicamente del color.
 8. Modales y confirmaciones sin pérdida ni trampa de foco.
+
+## Verificación de la versión 1.2.0
+
+- **Automatizada:** axe-core (reglas WCAG 2.0, 2.1 y 2.2 A/AA) sobre 16 rutas, a 375 y 1440 px, en tema
+  claro y oscuro. La primera auditoría encontró 78 violaciones graves o críticas (contraste, `aria-expanded`
+  no permitido en la búsqueda y un gráfico SVG sin nombre accesible); tras las correcciones no quedan
+  violaciones graves ni críticas.
+- **Diseño adaptable:** 320, 375, 390, 768, 1024 y 1440 px sin desplazamiento horizontal en ninguna ruta.
+- **Modal:** pruebas automatizadas de foco inicial, contención de `Tab`/`Shift + Tab`, cierre con `Escape`,
+  restauración del foco y clic fuera seguro (`components.spec.tsx`).
+- **Movimiento reducido:** las animaciones se anulan con `prefers-reduced-motion`.
+
+Pendiente: lectura completa con NVDA o Narrator y verificación con zoom al 200 % en dispositivos físicos.
+Estos resultados no constituyen una certificación.
 
 ## Política de mantenimiento
 

@@ -1,4 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  assertTenantCustomer,
+  assertTenantOpportunity,
+  assertTenantUser,
+} from '../../common/tenant/tenant-references';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -36,6 +41,9 @@ export class ActivitiesService {
 
   async create(companyId: string, userId: string, dto: CreateActivityDto) {
     await this.validateRelations(companyId, dto.customerId, dto.opportunityId);
+    if (dto.ownerId && dto.ownerId !== userId) {
+      await assertTenantUser(this.prisma, companyId, dto.ownerId, 'responsable');
+    }
     const activity = await this.prisma.activity.create({
       data: {
         companyId,
@@ -64,14 +72,18 @@ export class ActivitiesService {
     return activity;
   }
 
-  async update(
-    companyId: string,
-    userId: string,
-    id: string,
-    dto: UpdateActivityDto,
-  ) {
+  async update(companyId: string, userId: string, id: string, dto: UpdateActivityDto) {
     const existing = await this.findOne(companyId, id);
-    await this.validateRelations(companyId, dto.customerId, dto.opportunityId);
+    if (dto.customerId !== undefined || dto.opportunityId !== undefined) {
+      await this.validateRelations(
+        companyId,
+        dto.customerId ?? existing.customerId,
+        dto.opportunityId ?? existing.opportunityId,
+      );
+    }
+    if (dto.ownerId && dto.ownerId !== existing.ownerId) {
+      await assertTenantUser(this.prisma, companyId, dto.ownerId, 'responsable');
+    }
     const activity = await this.prisma.activity.update({
       where: { id },
       data: {
@@ -79,7 +91,7 @@ export class ActivitiesService {
         scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined,
         completedAt:
           dto.status === 'COMPLETED'
-            ? existing.completedAt ?? new Date()
+            ? (existing.completedAt ?? new Date())
             : dto.status
               ? null
               : undefined,
@@ -94,6 +106,17 @@ export class ActivitiesService {
       oldValues: existing,
       newValues: dto,
     });
+    if (activity.ownerId && activity.ownerId !== existing.ownerId) {
+      await this.notifications.emit({
+        companyId,
+        userId: activity.ownerId,
+        eventType: 'ACTIVITY_ASSIGNED',
+        title: 'Actividad reasignada',
+        message: activity.subject,
+        path: '/activities',
+        dedupeKey: `activity-owner:${activity.id}:${activity.ownerId}`,
+      });
+    }
     return activity;
   }
 
@@ -113,21 +136,10 @@ export class ActivitiesService {
 
   private async validateRelations(
     companyId: string,
-    customerId?: string,
-    opportunityId?: string,
+    customerId?: string | null,
+    opportunityId?: string | null,
   ) {
-    if (customerId) {
-      const customer = await this.prisma.customer.findFirst({
-        where: { id: customerId, companyId },
-      });
-      if (!customer) throw new NotFoundException('Cliente no válido.');
-    }
-    if (opportunityId) {
-      const opportunity = await this.prisma.opportunity.findFirst({
-        where: { id: opportunityId, companyId },
-      });
-      if (!opportunity) throw new NotFoundException('Oportunidad no válida.');
-    }
+    await assertTenantCustomer(this.prisma, companyId, customerId);
+    await assertTenantOpportunity(this.prisma, companyId, opportunityId, customerId);
   }
 }
-

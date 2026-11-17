@@ -1,28 +1,28 @@
-import type { ReactNode } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { useAuth } from "./auth/AuthContext";
-import { AppResource, hasPermission } from "./auth/permissions";
-import { AppLayout } from "./components/AppLayout";
-import { BrandLogo } from "./components/BrandLogo";
-import { ActivitiesPage } from "./pages/ActivitiesPage";
-import { CatalogPage } from "./pages/CatalogPage";
-import { CustomersPage } from "./pages/CustomersPage";
-import { DashboardPage } from "./pages/DashboardPage";
-import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
-import { LeadsPage } from "./pages/LeadsPage";
-import { LoginPage } from "./pages/LoginPage";
-import { OpportunitiesPage } from "./pages/OpportunitiesPage";
-import { ProfilePage } from "./pages/ProfilePage";
-import { ProjectsPage } from "./pages/ProjectsPage";
-import { QuoteVerificationPage } from "./pages/QuoteVerificationPage";
-import { QuotesPage } from "./pages/QuotesPage";
-import { ReportsPage } from "./pages/ReportsPage";
-import { ResetPasswordPage } from "./pages/ResetPasswordPage";
-import { SettingsPage } from "./pages/SettingsPage";
-import { UsersPage } from "./pages/UsersPage";
-import { NotificationsPage } from "./pages/NotificationsPage";
-import { DocumentsPage } from "./pages/DocumentsPage";
-import { WorkflowsPage } from "./pages/WorkflowsPage";
+import type { ReactNode } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { useAuth } from './auth/AuthContext';
+import { AppResource, hasPermission } from './auth/permissions';
+import { AppLayout } from './components/AppLayout';
+import { BrandLogo } from './components/BrandLogo';
+import { ActivitiesPage } from './pages/ActivitiesPage';
+import { CatalogPage } from './pages/CatalogPage';
+import { CustomersPage } from './pages/CustomersPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { LeadsPage } from './pages/LeadsPage';
+import { LoginPage } from './pages/LoginPage';
+import { OpportunitiesPage } from './pages/OpportunitiesPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { ProjectsPage } from './pages/ProjectsPage';
+import { QuoteVerificationPage } from './pages/QuoteVerificationPage';
+import { QuotesPage } from './pages/QuotesPage';
+import { ReportsPage } from './pages/ReportsPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { UsersPage } from './pages/UsersPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { DocumentsPage } from './pages/DocumentsPage';
+import { WorkflowsPage } from './pages/WorkflowsPage';
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
@@ -39,13 +39,7 @@ function ProtectedLayout() {
   return user ? <AppLayout /> : <Navigate replace to="/login" />;
 }
 
-function PermissionRoute({
-  children,
-  resource,
-}: {
-  children: ReactNode;
-  resource: AppResource;
-}) {
+function PermissionRoute({ children, resource }: { children: ReactNode; resource: AppResource }) {
   const { user } = useAuth();
   return hasPermission(user?.role, resource) ? children : <Navigate replace to="/" />;
 }
@@ -59,20 +53,111 @@ export default function App() {
       <Route element={<QuoteVerificationPage />} path="/verify/quote/:publicCode" />
       <Route element={<ProtectedLayout />}>
         <Route element={<DashboardPage />} index />
-        <Route element={<PermissionRoute resource="leads"><LeadsPage /></PermissionRoute>} path="leads" />
-        <Route element={<PermissionRoute resource="customers"><CustomersPage /></PermissionRoute>} path="customers" />
-        <Route element={<PermissionRoute resource="opportunities"><OpportunitiesPage /></PermissionRoute>} path="opportunities" />
-        <Route element={<PermissionRoute resource="activities"><ActivitiesPage /></PermissionRoute>} path="activities" />
-        <Route element={<PermissionRoute resource="catalog"><CatalogPage /></PermissionRoute>} path="catalog" />
-        <Route element={<PermissionRoute resource="quotes"><QuotesPage /></PermissionRoute>} path="quotes" />
-        <Route element={<PermissionRoute resource="projects"><ProjectsPage /></PermissionRoute>} path="projects" />
-        <Route element={<PermissionRoute resource="reports"><ReportsPage /></PermissionRoute>} path="reports" />
-        <Route element={<PermissionRoute resource="users"><UsersPage /></PermissionRoute>} path="users" />
-        <Route element={<PermissionRoute resource="notifications"><NotificationsPage /></PermissionRoute>} path="notifications" />
-        <Route element={<PermissionRoute resource="documents"><DocumentsPage /></PermissionRoute>} path="documents" />
-        <Route element={<PermissionRoute resource="workflows"><WorkflowsPage /></PermissionRoute>} path="workflows" />
+        <Route
+          element={
+            <PermissionRoute resource="leads">
+              <LeadsPage />
+            </PermissionRoute>
+          }
+          path="leads"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="customers">
+              <CustomersPage />
+            </PermissionRoute>
+          }
+          path="customers"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="opportunities">
+              <OpportunitiesPage />
+            </PermissionRoute>
+          }
+          path="opportunities"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="activities">
+              <ActivitiesPage />
+            </PermissionRoute>
+          }
+          path="activities"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="catalog">
+              <CatalogPage />
+            </PermissionRoute>
+          }
+          path="catalog"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="quotes">
+              <QuotesPage />
+            </PermissionRoute>
+          }
+          path="quotes"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="projects">
+              <ProjectsPage />
+            </PermissionRoute>
+          }
+          path="projects"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="reports">
+              <ReportsPage />
+            </PermissionRoute>
+          }
+          path="reports"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="users">
+              <UsersPage />
+            </PermissionRoute>
+          }
+          path="users"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="notifications">
+              <NotificationsPage />
+            </PermissionRoute>
+          }
+          path="notifications"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="documents">
+              <DocumentsPage />
+            </PermissionRoute>
+          }
+          path="documents"
+        />
+        <Route
+          element={
+            <PermissionRoute resource="workflows">
+              <WorkflowsPage />
+            </PermissionRoute>
+          }
+          path="workflows"
+        />
         <Route element={<ProfilePage />} path="profile" />
-        <Route element={<PermissionRoute resource="settings"><SettingsPage /></PermissionRoute>} path="settings" />
+        <Route
+          element={
+            <PermissionRoute resource="settings">
+              <SettingsPage />
+            </PermissionRoute>
+          }
+          path="settings"
+        />
       </Route>
       <Route element={<Navigate replace to="/" />} path="*" />
     </Routes>

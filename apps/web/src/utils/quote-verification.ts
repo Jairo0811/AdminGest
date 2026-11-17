@@ -20,7 +20,8 @@ function loadImage(source: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('No fue posible cargar el logo de AdminGest para el QR.'));
+    image.onerror = () =>
+      reject(new Error('No fue posible cargar el logo de AdminGest para el QR.'));
     image.src = source;
   });
 }

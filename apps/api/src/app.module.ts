@@ -32,13 +32,13 @@ import { DocumentsModule } from './modules/documents/documents.module';
       cache: true,
       validate: validateEnvironment,
     }),
-    ThrottlerModule.forRoot([
-      {
-        name: 'default',
-        ttl: 60_000,
-        limit: 100,
-      },
-    ]),
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'default', ttl: 60_000, limit: 100 }],
+      // Only the automated integration suite may disable rate limiting; the flag is
+      // ignored in production.
+      skipIf: () =>
+        process.env.NODE_ENV !== 'production' && process.env.THROTTLE_DISABLED === 'true',
+    }),
     PrismaModule,
     AuditModule,
     HealthModule,

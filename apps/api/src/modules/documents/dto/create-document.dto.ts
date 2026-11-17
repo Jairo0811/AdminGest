@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export const DOCUMENT_CATEGORIES = ['CONTRACT', 'PROPOSAL', 'DELIVERABLE', 'OTHER'] as const;
 
@@ -16,9 +16,11 @@ export class CreateDocumentDto {
 
   @IsOptional()
   @IsString()
+  @IsUUID()
   projectId?: string;
 
   @IsOptional()
   @IsString()
+  @IsUUID()
   customerId?: string;
 }

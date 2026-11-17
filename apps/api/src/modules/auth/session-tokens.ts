@@ -29,9 +29,14 @@ export function hashesMatch(expected: string, received: string): boolean {
 }
 
 export function refreshCookieValue(header: string | undefined): string | undefined {
-  const cookie = header?.split(';').map((part) => part.trim())
+  const cookie = header
+    ?.split(';')
+    .map((part) => part.trim())
     .find((part) => part.startsWith(REFRESH_COOKIE_NAME + '='));
   if (!cookie) return undefined;
-  try { return decodeURIComponent(cookie.slice(REFRESH_COOKIE_NAME.length + 1)); }
-  catch { return undefined; }
+  try {
+    return decodeURIComponent(cookie.slice(REFRESH_COOKIE_NAME.length + 1));
+  } catch {
+    return undefined;
+  }
 }

@@ -5,7 +5,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
+import { acquireTransactionLock, TRANSACTION_OPTIONS } from '../../common/tenant/app-lock';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -14,7 +16,12 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { assertCanChangeUserStatus } from './user-policy';
+import {
+  assertCanManageUser,
+  PolicySubject,
+  removesAdministrativeAccess,
+  requiresSessionRevocation,
+} from './user-policy';
 
 const PUBLIC_USER_SELECT = {
   id: true,
@@ -76,20 +83,21 @@ export class UsersService {
       throw new ConflictException('Ya existe un usuario con este correo.');
     }
 
-    await this.subscriptions.assertCanCreate(companyId, 'users');
-
     const { password, ...profile } = dto;
-    const created = await this.prisma.user.create({
-      data: {
-        ...profile,
-        firstName: profile.firstName.trim(),
-        lastName: profile.lastName.trim(),
-        email,
-        passwordHash: await hash(password, 12),
-        companyId,
-      },
-      select: PUBLIC_USER_SELECT,
-    });
+    const passwordHash = await hash(password, 12);
+    const created = await this.subscriptions.runWithinQuota(companyId, 'users', (tx) =>
+      tx.user.create({
+        data: {
+          ...profile,
+          firstName: profile.firstName.trim(),
+          lastName: profile.lastName.trim(),
+          email,
+          passwordHash,
+          companyId,
+        },
+        select: PUBLIC_USER_SELECT,
+      }),
+    );
     await this.audit.record({
       companyId,
       userId: actorId,
@@ -101,9 +109,9 @@ export class UsersService {
     return created;
   }
 
-  async update(companyId: string, actorId: string, id: string, dto: UpdateUserDto) {
+  async update(companyId: string, actor: PolicySubject, id: string, dto: UpdateUserDto) {
     const existing = await this.requireUser(companyId, id);
-    assertCanChangeUserStatus(actorId, id, dto.status);
+    assertCanManageUser(actor, existing, dto);
 
     const email = dto.email?.trim().toLowerCase();
     if (email && email !== existing.email) {
@@ -111,19 +119,48 @@ export class UsersService {
       if (duplicate) throw new ConflictException('Ya existe un usuario con este correo.');
     }
 
-    const updated = await this.prisma.user.update({
-      where: { id },
-      data: {
-        ...dto,
-        email,
-        firstName: dto.firstName?.trim(),
-        lastName: dto.lastName?.trim(),
-      },
-      select: PUBLIC_USER_SELECT,
-    });
+    const data = {
+      ...dto,
+      email,
+      firstName: dto.firstName?.trim(),
+      lastName: dto.lastName?.trim(),
+    };
+    const reactivating = dto.status === 'ACTIVE' && existing.status !== 'ACTIVE';
+    const revokeSessions = requiresSessionRevocation(existing, { ...dto, email }, existing.email);
+
+    const apply = async (tx: Prisma.TransactionClient) => {
+      if (removesAdministrativeAccess(existing, dto)) {
+        await acquireTransactionLock(tx, `admins:${companyId}`);
+        const otherAdmins = await tx.user.count({
+          where: {
+            companyId,
+            id: { not: id },
+            status: 'ACTIVE',
+            role: { in: ['ADMIN', 'SUPER_ADMIN'] },
+          },
+        });
+        if (otherAdmins === 0) {
+          throw new BadRequestException(
+            'La empresa debe conservar al menos un administrador activo.',
+          );
+        }
+      }
+      const result = await tx.user.update({ where: { id }, data, select: PUBLIC_USER_SELECT });
+      if (revokeSessions) {
+        await tx.authSession.updateMany({
+          where: { userId: id, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+      }
+      return result;
+    };
+
+    const updated = reactivating
+      ? await this.subscriptions.runWithinQuota(companyId, 'users', apply)
+      : await this.prisma.$transaction(apply, TRANSACTION_OPTIONS);
     await this.audit.record({
       companyId,
-      userId: actorId,
+      userId: actor.id,
       action: 'UPDATE',
       entity: 'User',
       entityId: id,
@@ -191,19 +228,22 @@ export class UsersService {
     return { changed: true };
   }
 
-  async resetPassword(companyId: string, actorId: string, id: string, dto: ResetPasswordDto) {
-    await this.requireUser(companyId, id);
+  async resetPassword(companyId: string, actor: PolicySubject, id: string, dto: ResetPasswordDto) {
+    const target = await this.requireUser(companyId, id);
+    assertCanManageUser(actor, target);
     await this.prisma.$transaction(async (transaction) => {
       await transaction.user.update({
-        where: { id }, data: { passwordHash: await hash(dto.password, 12) },
+        where: { id },
+        data: { passwordHash: await hash(dto.password, 12) },
       });
       await transaction.authSession.updateMany({
-        where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() },
+        where: { userId: id, revokedAt: null },
+        data: { revokedAt: new Date() },
       });
     });
     await this.audit.record({
       companyId,
-      userId: actorId,
+      userId: actor.id,
       action: 'RESET_PASSWORD',
       entity: 'User',
       entityId: id,

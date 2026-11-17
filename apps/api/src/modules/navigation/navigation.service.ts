@@ -38,10 +38,7 @@ export class NavigationService {
       this.prisma.opportunity.findMany({
         where: {
           companyId,
-          OR: [
-            { name: { contains: term } },
-            { customer: { name: { contains: term } } },
-          ],
+          OR: [{ name: { contains: term } }, { customer: { name: { contains: term } } }],
         },
         select: { id: true, name: true, customer: { select: { name: true } } },
         take: 5,
@@ -49,10 +46,7 @@ export class NavigationService {
       this.prisma.project.findMany({
         where: {
           companyId,
-          OR: [
-            { name: { contains: term } },
-            { customer: { name: { contains: term } } },
-          ],
+          OR: [{ name: { contains: term } }, { customer: { name: { contains: term } } }],
         },
         select: { id: true, name: true, customer: { select: { name: true } } },
         take: 5,
@@ -60,10 +54,7 @@ export class NavigationService {
       this.prisma.quote.findMany({
         where: {
           companyId,
-          OR: [
-            { number: { contains: term } },
-            { customer: { name: { contains: term } } },
-          ],
+          OR: [{ number: { contains: term } }, { customer: { name: { contains: term } } }],
         },
         select: { id: true, number: true, customer: { select: { name: true } } },
         take: 5,
@@ -173,7 +164,10 @@ export class NavigationService {
         path: '/projects',
       })),
     ]
-      .sort((left, right) => new Date(left.occurredAt ?? 0).getTime() - new Date(right.occurredAt ?? 0).getTime())
+      .sort(
+        (left, right) =>
+          new Date(left.occurredAt ?? 0).getTime() - new Date(right.occurredAt ?? 0).getTime(),
+      )
       .slice(0, 10);
   }
 }

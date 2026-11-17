@@ -27,7 +27,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload): Promise<AuthUser> {
     if (!payload.sid) throw new UnauthorizedException('Token de sesión sin identificador.');
     const session = await this.prisma.authSession.findFirst({
-      where: { id: payload.sid, userId: payload.sub, revokedAt: null, expiresAt: { gt: new Date() } },
+      where: {
+        id: payload.sid,
+        userId: payload.sub,
+        revokedAt: null,
+        expiresAt: { gt: new Date() },
+      },
       select: { id: true },
     });
     if (!session) throw new UnauthorizedException('Sesión revocada.');
@@ -55,4 +60,3 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return user;
   }
 }
-

@@ -4,4 +4,3 @@ export class UpdateQuoteStatusDto {
   @IsIn(['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED'])
   status!: string;
 }
-
