@@ -106,3 +106,9 @@ docker compose up -d
 - Registro, login y recuperación de contraseña funcionan.
 - Las migraciones aparecen aplicadas en `_prisma_migrations`.
 - No se muestran trazas internas en respuestas HTTP.
+
+## Cloudflare Pages
+
+La opción de hospedaje del frontend en Cloudflare Pages y la función proxy same-origin
+`/api/*` están documentadas en [CLOUDFLARE.md](CLOUDFLARE.md). NestJS y SQL Server
+necesitan un proveedor externo; la ausencia de `API_ORIGIN` retorna 503.

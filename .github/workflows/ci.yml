@@ -101,6 +101,9 @@ jobs:
           SEED_FIRST_PASSWORD: 'Seed-Primera-2026!'
           SEED_SECOND_PASSWORD: 'Seed-Segunda-2026!'
 
+      - name: Cloudflare Pages Function proxy tests
+        run: node --test tests/cloudflare-pages-proxy.test.mjs
+
       - name: Build
         run: npm run build
 

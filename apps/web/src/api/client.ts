@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+// Relative by default: Cloudflare Pages Functions and the Vite dev proxy both serve /api.
+const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 /** Message used across tabs so that a logout in one tab closes the others. */
 export const AUTH_CHANNEL = 'admingest-auth';
