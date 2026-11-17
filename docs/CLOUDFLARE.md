@@ -4,8 +4,18 @@
 
 - **Cloudflare Pages:** React 19, Vite, rutas SPA y assets.
 - **Pages Function `/api/*`:** proxy same-origin hacia la API NestJS mediante `API_ORIGIN`.
-- **API NestJS:** corre en un servidor Node.js externo con HTTPS (Render, VPS u otro).
-- **SQL Server 2022:** se conecta únicamente a la API; **nunca** al navegador ni a Pages.
+- **API NestJS:** corre en un servidor Node.js externo con HTTPS. Opción documentada: Render
+  ([RENDER.md](RENDER.md)).
+- **SQL Server:** se conecta únicamente a la API; **nunca** al navegador ni a Pages. Opción documentada:
+  Azure SQL Database ([AZURE-SQL.md](AZURE-SQL.md)).
+
+```text
+Navegador → Cloudflare Pages → Pages Function /api/* → Render (NestJS) → Azure SQL Database
+```
+
+**Estado actual de `admingest.pages.dev`:** frontend y Function publicados; `API_ORIGIN` sin configurar.
+`/api/health` responde 503 `API_NOT_CONFIGURED` y la pantalla de inicio de sesión lo indica. No hay login
+funcional hasta conectar Render y Azure SQL.
 
 Esta integración NO despliega NestJS o SQL Server en Cloudflare. Sin API pública, las rutas
 `/api/*` devuelven **503 JSON**, y el login no estará disponible. No se anuncia una demo funcional
@@ -18,16 +28,16 @@ sin backend.
 3. Autoriza GitHub y selecciona `Jairo0811/AdminGest`.
 4. Configura:
 
-| Campo Cloudflare       | Valor                                                  |
-| ---------------------- | ------------------------------------------------------ |
-| Nombre de proyecto     | `admingest` (si está disponible)                       |
-| Rama de producción     | `main` (después de fusionar PR #33 y el PR Cloudflare) |
-| Framework preset       | None (configuración manual)                            |
-| Root directory         | Raíz del repositorio, `/` (no `apps/web`)              |
-| Build command          | `npm run build --workspace @admingest/web`             |
-| Build output directory | `apps/web/dist`                                        |
-| Variable de build      | `NODE_VERSION=24`                                      |
-| Variable de build      | `VITE_API_URL=/api`                                    |
+| Campo Cloudflare       | Valor                                                                  |
+| ---------------------- | ---------------------------------------------------------------------- |
+| Nombre de proyecto     | `admingest` (si está disponible)                                       |
+| Rama de producción     | `main` (después de fusionar los PR #33, #34 y el de preparación cloud) |
+| Framework preset       | None (configuración manual)                                            |
+| Root directory         | Raíz del repositorio, `/` (no `apps/web`)                              |
+| Build command          | `npm run build --workspace @admingest/web`                             |
+| Build output directory | `apps/web/dist`                                                        |
+| Variable de build      | `NODE_VERSION=24`                                                      |
+| Variable de build      | `VITE_API_URL=/api`                                                    |
 
 **Importante:** mantener la raíz del repositorio para instalar dependencias de los
 `npm workspaces` y detectar `functions/api/[[path]].js`.
@@ -39,13 +49,15 @@ los QR públicos. Al omitirla, los QR usan el dominio actual (incluidas previews
 
 ## Configurar el proxy/API
 
-En el proyecto Pages, entra a **Settings → Variables and Secrets** y define
-**API_ORIGIN** como variable de entorno de runtime en **Production** (y en Preview si
-necesitas probar las ramas). Ejemplo ilustrativo:
+En el proyecto Pages, entra a **Settings → Variables and Secrets** y define en **Production** (y en
+Preview si necesitas probar las ramas):
 
 ```env
-API_ORIGIN=https://TU_API_NESTJS_PUBLICA
+API_ORIGIN=https://TU_SERVICIO.onrender.com      # variable de texto
+API_PROXY_SECRET=<32+ caracteres aleatorios>      # tipo Secret (cifrado); igual que en la API
 ```
+
+Después de cambiar variables, redespliega Pages para que la Function las reciba.
 
 No incluye `/api`, rutas, credenciales, query strings ni barra con subruta. Debe usar
 HTTPS y responder en `/api/health` y `/api/health/ready`. Si todavía no tienes
@@ -58,6 +70,12 @@ Pages Function:
 - Copia la cabecera `Set-Cookie` de NestJS, por lo que el navegador mantiene la cookie
   `HttpOnly; Secure; SameSite=Strict; Path=/api/auth` bajo el dominio de Pages.
 - Limpia cabeceras de forwarding proporcionadas por el cliente y utiliza HTTPS.
+- Con `API_PROXY_SECRET`, envía el secreto y la IP del visitante (`cf-connecting-ip`) en cabeceras
+  propias; la API rechaza llamadas que no lleven el secreto (403 `DIRECT_ACCESS_FORBIDDEN`) y aplica el
+  rate limiting por visitante y no por IP de Cloudflare.
+- Responde con JSON y un `code` que la interfaz distingue: `API_NOT_CONFIGURED` (503),
+  `API_UNREACHABLE` (502). La API añade `DATABASE_UNAVAILABLE` (503) y `REGISTRATION_DISABLED` (403).
+- No sigue redirecciones del backend (`redirect: manual`).
 - Nunca almacena ni expone las credenciales de SQL Server.
 - Deshabilita caché para todas las respuestas de `/api/*`.
 - Rechaza configuración de backend insegura; no es un proxy abierto.
@@ -71,13 +89,13 @@ CORS_ORIGIN=https://TU_SITIO.pages.dev
 PASSWORD_RESET_URL=https://TU_SITIO.pages.dev/reset-password
 SWAGGER_ENABLED=false
 TRUST_PROXY=1
+PUBLIC_REGISTRATION=false
+API_PROXY_SECRET=<el mismo valor que en Cloudflare>
 ```
 
-Configura además en **el servidor de API, no en Cloudflare**: `DATABASE_URL`,
-`JWT_SECRET` aleatorio, `RESEND_API_KEY`, `MAIL_FROM`,
-`DOCUMENT_ALLOWED_HOSTS`, y un SQL Server con TLS y respaldos. Ajusta `TRUST_PROXY`
-a la cadena real de proxies confiables y restringe el acceso directo a la API cuando
-la infraestructura lo permita. El proxy de Pages no sustituye la autenticación ni RBAC.
+Configura además en **el servidor de API, no en Cloudflare**: `DATABASE_URL`, `JWT_SECRET` aleatorio,
+`RESEND_API_KEY`, `MAIL_FROM`, `DOCUMENT_ALLOWED_HOSTS`. Lista completa y clasificación en
+[ENVIRONMENT.md](ENVIRONMENT.md). El proxy de Pages no sustituye la autenticación ni RBAC.
 
 ### Seguridad y privacidad
 
@@ -92,6 +110,8 @@ la infraestructura lo permita. El proxy de Pages no sustituye la autenticación 
 - El código no habilita una versión demo sin persistencia ni credenciales.
 
 ## Validación después del despliegue
+
+Lista completa: [PRODUCTION-CHECKLIST.md](PRODUCTION-CHECKLIST.md). Resumen:
 
 1. Abre `https://TU_SITIO.pages.dev/` y recarga directamente rutas como `/login`
    y `/verify/quote/CODIGO` (el fallback SPA de Pages funciona sin `404.html`).
@@ -109,6 +129,5 @@ Prueba local de la función proxy (sin dependencias extra):
 node --test tests/cloudflare-pages-proxy.test.mjs
 ```
 
-> La release v1.2.0 del PR #33 y este despliegue se revisan por separado.
 > No crear tags, no fusionar PRs, no desplegar secretos y no crear servidores de
 > pago sin autorización del propietario.

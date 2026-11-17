@@ -20,6 +20,7 @@ import { SessionsService } from './sessions.service';
 import { AuthUser } from '../../common/auth-user.interface';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { clientIpOf } from '../../common/proxy/trusted-proxy';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
@@ -168,7 +169,7 @@ export class AuthController {
 
   private getRequestMetadata(request: Request) {
     return {
-      ipAddress: request.ip,
+      ipAddress: clientIpOf(request),
       userAgent: request.get('user-agent'),
     };
   }

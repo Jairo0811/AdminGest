@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { trustedProxyMiddleware } from './common/proxy/trusted-proxy';
 
 /**
  * HTTP configuration shared by the production server and the integration tests, so that
@@ -25,6 +26,9 @@ export function configureApp(app: NestExpressApplication): void {
       /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy === 'true' ? true : trustProxy,
     );
   }
+  // First middleware: requests must come through the Cloudflare Pages Function when
+  // API_PROXY_SECRET is set (see common/proxy/trusted-proxy.ts).
+  app.use(trustedProxyMiddleware(config.get<string>('API_PROXY_SECRET')));
   app.use(
     helmet({
       contentSecurityPolicy: isProduction ? undefined : false,

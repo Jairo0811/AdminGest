@@ -1,5 +1,18 @@
 # Despliegue de AdminGest
 
+Despliegue documentado para v1.2.0 (cada guía indica qué está verificado y qué está pendiente):
+
+| Capa                      | Guía                                               |
+| ------------------------- | -------------------------------------------------- |
+| Frontend y proxy `/api/*` | [CLOUDFLARE.md](CLOUDFLARE.md)                     |
+| API NestJS                | [RENDER.md](RENDER.md)                             |
+| Base de datos             | [AZURE-SQL.md](AZURE-SQL.md)                       |
+| Variables de entorno      | [ENVIRONMENT.md](ENVIRONMENT.md)                   |
+| Verificación posterior    | [PRODUCTION-CHECKLIST.md](PRODUCTION-CHECKLIST.md) |
+
+Este documento describe los requisitos comunes a cualquier infraestructura (incluido un servidor propio con
+IIS o Nginx).
+
 ## Componentes
 
 - Frontend React compilado en `apps/web/dist`.
@@ -22,7 +35,14 @@ DOCUMENT_ALLOWED_HOSTS=docs.admingest.example.com
 PASSWORD_RESET_URL=https://admingest.example.com/reset-password
 RESEND_API_KEY=CLAVE_DEL_PROVEEDOR
 MAIL_FROM=AdminGest <no-reply@example.com>
+PUBLIC_REGISTRATION=false
+# Solo detrás de Cloudflare Pages: el mismo valor que en la Pages Function.
+API_PROXY_SECRET=SECRETO_ALEATORIO_DE_AL_MENOS_32_CARACTERES
 ```
+
+`PUBLIC_REGISTRATION` controla el alta de empresas desde la pantalla de inicio de sesión: si se omite está
+cerrada en producción y la API responde 403 `REGISTRATION_DISABLED` aunque alguien llame directamente al
+endpoint. La interfaz consulta `GET /api/auth/registration` y oculta el enlace de registro cuando está cerrado.
 
 `JWT_EXPIRES_IN` admite entre `1m` y `1h`; un valor mayor impide iniciar la API. La sesión del usuario se
 mantiene con el refresh token rotativo (7 días). `TRUST_PROXY` indica cuántos proxies de confianza preceden
@@ -107,8 +127,12 @@ docker compose up -d
 - Las migraciones aparecen aplicadas en `_prisma_migrations`.
 - No se muestran trazas internas en respuestas HTTP.
 
-## Cloudflare Pages
+## Health checks
 
-La opción de hospedaje del frontend en Cloudflare Pages y la función proxy same-origin
-`/api/*` están documentadas en [CLOUDFLARE.md](CLOUDFLARE.md). NestJS y SQL Server
-necesitan un proveedor externo; la ausencia de `API_ORIGIN` retorna 503.
+- `GET /api/health` (liveness): no consulta la base. Úsalo como health check del proveedor.
+- `GET /api/health/ready` (readiness): ejecuta `SELECT 1`; 503 `DATABASE_UNAVAILABLE` si la base no
+  responde. Úsalo para monitoreo, no para reiniciar el proceso.
+
+La API inicia aunque la base no esté disponible (por ejemplo, Azure SQL en pausa) y se reconecta en la
+siguiente consulta. Mientras tanto, las operaciones que necesitan la base responden 503
+`DATABASE_UNAVAILABLE` en lugar de 500.

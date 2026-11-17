@@ -1,0 +1,48 @@
+# Render Blueprint for the AdminGest API (NestJS). Review before applying it in Render:
+# Dashboard → New → Blueprint. It creates ONE free web service; it does not create a
+# database (AdminGest uses Azure SQL Database, see docs/AZURE-SQL.md) and stores no secrets:
+# every value marked `sync: false` is requested by Render when the Blueprint is applied.
+services:
+  - type: web
+    name: admingest-api
+    runtime: node
+    plan: free
+    # region: oregon  # choose the region closest to the Azure SQL server
+    branch: main
+    autoDeploy: false
+    # devDependencies (Nest CLI, Prisma CLI, TypeScript) are needed to build even though
+    # NODE_ENV=production at runtime.
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build --workspace @admingest/api
+    startCommand: npm run start:prod --workspace @admingest/api
+    # Liveness only: it does not query the database, so a paused Azure SQL database does not
+    # make Render restart the service. Monitor /api/health/ready separately.
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '24'
+      - key: SWAGGER_ENABLED
+        value: 'false'
+      - key: PUBLIC_REGISTRATION
+        value: 'false'
+      - key: TRUST_PROXY
+        value: '1'
+      - key: JWT_EXPIRES_IN
+        value: 15m
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: API_PROXY_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: PASSWORD_RESET_URL
+        sync: false
+      - key: DOCUMENT_ALLOWED_HOSTS
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false

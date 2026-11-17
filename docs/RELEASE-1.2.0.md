@@ -1,13 +1,15 @@
 # AdminGest v1.2.0 — Hardening final y congelamiento
 
 **Estado:** candidata a congelamiento técnico (pendiente de autorización para fusionar y etiquetar).
-**Rama:** `chore/final-hardening-freeze-v1.2.0` → `main`.
+**Ramas y PR (en orden de integración):** #33 `chore/final-hardening-freeze-v1.2.0` → `main`;
+#34 `feat/cloudflare-pages-deployment` (sobre #33); `fix/v1.2.0-cloud-readiness` (sobre #34). Ver
+[sección 10](#10-preparación-para-el-despliegue-en-la-nube).
 **Versión anterior publicada:** `v1.0.1`. Las fases 1.1.0 (SaaS Foundation y Production Security) y 1.2.0
 (Business Automation) se fusionaron en `main` sin etiqueta; esta versión las consolida junto con el
 hardening.
 
 > **Congelado técnicamente** no equivale a **listo para comercialización**. Ver la sección
-> [Estado comercial](#estado-comercial).
+> [Niveles de congelamiento](#7-niveles-de-congelamiento-y-estado-comercial).
 
 ## 1. Auditoría inicial
 
@@ -115,32 +117,42 @@ sin inventar importes por línea; el diseño corporativo, temas y navegación se
    producción: `SEED_RESET_ADMIN_PASSWORD=true SEED_ADMIN_PASSWORD=... npm run db:seed`.
 4. **Descuentos**: un descuento mayor que el subtotal responde 400 en lugar de ajustarse.
 5. **Proxy inverso**: definir `TRUST_PROXY=1` (o el número de saltos) cuando la API esté detrás de HTTPS.
+6. **Registro público**: con `NODE_ENV=production` queda cerrado salvo `PUBLIC_REGISTRATION=true`.
+7. **Cloudflare Pages**: definir el mismo `API_PROXY_SECRET` en la Pages Function y en la API.
+8. **Render**: el build debe usar `npm ci --include=dev` (ver [RENDER.md](RENDER.md)).
 
 ## 6. Riesgos restantes y limitaciones
 
-| Riesgo / limitación                                                                                                    | Severidad | Decisión                                                                                                     |
-| ---------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
-| `npm audit`: `multer` (vía `@nestjs/platform-express`) y Prisma CLI con avisos altos; requieren NestJS 12 / Prisma 7.  | P2        | Aceptado: no hay rutas multipart; Prisma CLI se usa en build/migración. Revisar en la próxima versión mayor. |
-| Recordatorios con temporizador dentro del proceso de la API.                                                           | P2        | Aceptado y documentado: sin ejecución mientras la API está detenida; sin outbox ni worker persistente.       |
-| Listados completos por empresa con paginación en el cliente.                                                           | P2        | Aceptado para el volumen previsto; paginación de servidor recomendada antes de clientes grandes.             |
-| Documentos: solo referencias externas, sin almacenamiento privado.                                                     | P2        | Documentado; la privacidad depende del proveedor externo.                                                    |
-| Sin facturación SaaS, cobros ni renovación automática; plan asignado por un operador.                                  | —         | Documentado; la interfaz no muestra botones de compra.                                                       |
-| Almacenamiento, reportes avanzados y acceso API del plan son informativos.                                             | —         | Documentado en la API (`informativeFeatures`) y en Configuración.                                            |
-| Sin MFA para cuentas privilegiadas.                                                                                    | P2        | Fuera del alcance del congelamiento.                                                                         |
-| Accesibilidad verificada con axe-core y pruebas de teclado automatizadas; sin auditoría manual con lector de pantalla. | P3        | No se declara certificación WCAG.                                                                            |
-| Pruebas móviles mediante emulación (Pixel 7) y capturas; sin dispositivos físicos.                                     | P3        | Aceptado.                                                                                                    |
-| **Licencia**: el repositorio no contiene archivo `LICENSE`.                                                            | —         | **Requiere decisión del propietario.** Sin licencia, se aplican por defecto todos los derechos reservados.   |
+| Riesgo / limitación                                                                                                    | Severidad | Decisión                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `npm audit`: `multer` (vía `@nestjs/platform-express`) y Prisma CLI con avisos altos; requieren NestJS 12 / Prisma 7.  | P2        | Aceptado: no hay rutas multipart; Prisma CLI se usa en build/migración. Revisar en la próxima versión mayor.            |
+| Recordatorios con temporizador dentro del proceso de la API.                                                           | P2        | Aceptado y documentado: sin ejecución mientras la API está detenida; sin outbox ni worker persistente.                  |
+| Listados completos por empresa con paginación en el cliente.                                                           | P2        | Aceptado para el volumen previsto; paginación de servidor recomendada antes de clientes grandes.                        |
+| Documentos: solo referencias externas, sin almacenamiento privado.                                                     | P2        | Documentado; la privacidad depende del proveedor externo.                                                               |
+| Sin facturación SaaS, cobros ni renovación automática; plan asignado por un operador.                                  | —         | Documentado; la interfaz no muestra botones de compra.                                                                  |
+| Almacenamiento, reportes avanzados y acceso API del plan son informativos.                                             | —         | Documentado en la API (`informativeFeatures`) y en Configuración.                                                       |
+| Sin MFA para cuentas privilegiadas.                                                                                    | P2        | Fuera del alcance del congelamiento.                                                                                    |
+| Accesibilidad verificada con axe-core y pruebas de teclado automatizadas; sin auditoría manual con lector de pantalla. | P3        | No se declara certificación WCAG.                                                                                       |
+| Pruebas móviles mediante emulación (Pixel 7) y capturas; sin dispositivos físicos.                                     | P3        | Aceptado.                                                                                                               |
+| Render Free: suspensión tras 15 min sin tráfico, ~1 min de arranque, 750 h/mes, sin workers.                           | P2        | Documentado ([RENDER.md](RENDER.md)); la interfaz informa el arranque. Disponibilidad permanente requiere plan de pago. |
+| Rate limiting en memoria del proceso (se reinicia con la instancia; no se comparte entre réplicas).                    | P3        | Aceptado para una instancia; almacenamiento compartido en el roadmap (B.2).                                             |
+| Sin Content-Security-Policy en la aplicación principal (sí en las ventanas de impresión).                              | P3        | Documentado: la ventana de impresión hereda la política del documento; requiere rediseño (roadmap B.2).                 |
+| Verificación de extremo a extremo en Cloudflare + Render + Azure SQL.                                                  | —         | **Pendiente**: no existe esa infraestructura ([PRODUCTION-CHECKLIST.md](PRODUCTION-CHECKLIST.md)).                      |
+| **Licencia**: el repositorio no contiene archivo `LICENSE`.                                                            | —         | **Requiere decisión del propietario.** Sin licencia, se aplican por defecto todos los derechos reservados.              |
 
-## 7. Estado comercial
+## 7. Niveles de congelamiento y estado comercial
 
-**CONGELADO TÉCNICAMENTE:** sí, al fusionar este PR con CI verde (funcionalidades definidas, pruebas y
-documentación alineadas con el código).
+| Nivel                                       | Criterio                                                                                                                     | Estado                                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **1. CÓDIGO ESTABLE**                       | Compilación, pruebas y correcciones técnicas verificadas; CI verde; documentación alineada con el código.                    | **Candidato**: se alcanza al fusionar #33, #34 y el PR de preparación cloud con CI verde en `main`. |
+| **2. DESPLIEGUE FUNCIONAL**                 | Frontend, backend, base de datos y servicios conectados y probados en el entorno real.                                       | **No alcanzado**: Render y Azure SQL sin configurar; lista de producción pendiente.                 |
+| **3. PRODUCTO LISTO PARA COMERCIALIZACIÓN** | Además: cobros si corresponde, soporte, operación, protección de datos, requisitos legales y fiscales, monitoreo y respaldo. | **No alcanzado.**                                                                                   |
 
-**LISTO PARA COMERCIALIZACIÓN:** no. Requiere además: operación real con clientes piloto, integración de
-cobros si se vende por suscripción, infraestructura administrada con HTTPS, respaldos y restauraciones
-probadas, monitoreo y alertas, soporte, términos de servicio y política de privacidad, licencia, y la
-revisión de requisitos legales y fiscales aplicables. Las cotizaciones **no son facturas ni comprobantes
-fiscales** y AdminGest no está autorizado por la DGII para emitir e-CF.
+Alcanzar un nivel no implica los siguientes. Para comercializar se requiere además: operación real con
+clientes piloto, integración de cobros si se vende por suscripción, infraestructura administrada con HTTPS,
+respaldos y restauraciones probadas, monitoreo y alertas, soporte, términos de servicio y política de
+privacidad, licencia, y la revisión de requisitos legales y fiscales aplicables. Las cotizaciones **no son
+facturas ni comprobantes fiscales** y AdminGest no está autorizado por la DGII para emitir e-CF.
 
 ## 8. Checklist de congelamiento
 
@@ -158,13 +170,21 @@ fiscales** y AdminGest no está autorizado por la DGII para emitir e-CF.
 - [x] README y CHANGELOG corresponden al código.
 - [x] Sin credenciales ni secretos reales en el repositorio (solo valores de CI y ejemplos).
 - [x] CI verde (validación, actualización de esquema y E2E).
+- [x] Despliegue documentado y reproducible (Cloudflare, Render, Azure SQL, variables, migraciones).
+- [x] Roadmap documentado en el README; bloqueos de infraestructura identificados.
+- [x] Contexto académico conservado.
+- [ ] CI verde del PR de preparación cloud.
 - [ ] Decisión sobre la licencia.
 - [ ] Autorización para fusionar y etiquetar.
 
 ## 9. Procedimiento de liberación (requiere autorización)
 
+Orden recomendado: **#33 → #34 → PR de preparación cloud** (cada uno contiene al anterior; al fusionar uno,
+GitHub reapunta el siguiente a `main`). Después: CI verde en `main` → configurar Azure SQL, Render y
+Cloudflare desde `main` → [lista de producción](PRODUCTION-CHECKLIST.md) → etiqueta.
+
 ```bash
-# 1. Fusionar el PR en main (squash no recomendado: conserva los commits por área).
+# 1. Fusionar los PR en main en el orden indicado (squash no recomendado: conserva los commits por área).
 git checkout main && git pull --ff-only
 
 # 2. Verificar en main.
@@ -177,3 +197,39 @@ git push origin v1.2.0
 
 El workflow `release.yml` publica la release con los artefactos de API y web y el `CHANGELOG.md`.
 Después de publicar, proteger `main` y considerar archivada la línea 1.x salvo correcciones de seguridad.
+
+## 10. Preparación para el despliegue en la nube
+
+Auditoría del despliegue objetivo `Navegador → Cloudflare Pages → Pages Function /api/* → Render (NestJS) →
+Azure SQL Database`, realizada sobre `admingest.pages.dev` (frontend y Function publicados, sin
+`API_ORIGIN`) y sobre el código de los PR #33 y #34.
+
+| #   | Sev. | Hallazgo                                                                                                                                                                                                                           | Archivos                                                                           | Riesgo                                                                | Corrección                                                                                                                |
+| --- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| C1  | P1   | Detrás de Pages → Render todas las peticiones llegan desde IP de Cloudflare: el límite de 10 inicios de sesión/min se compartía entre todos los usuarios; IP de sesión y auditoría incorrectas; la API era accesible directamente. | `functions/api/[[path]].js`, `bootstrap.ts`, `app.module.ts`, `auth.controller.ts` | Bloqueo del login para todos con poco tráfico; elusión del proxy.     | `API_PROXY_SECRET` + cabecera de IP del visitante; 403 `DIRECT_ACCESS_FORBIDDEN`; `ClientIpThrottlerGuard`.               |
+| C2  | P1   | Sin backend, el login mostraba errores engañosos o técnicos («Failed to fetch», HTML del proveedor, mensajes genéricos).                                                                                                           | `apps/web/src/api/client.ts`, `errors.ts`, `LoginPage.tsx`, `ServiceStatus.tsx`    | El usuario cree que sus credenciales son incorrectas.                 | Clasificación de errores por código y estado; aviso de servicio previo al login.                                          |
+| C3  | P1   | La API se detenía al iniciar si la base no respondía (Azure SQL en pausa automática).                                                                                                                                              | `prisma.service.ts`                                                                | Reinicios en bucle en Render.                                         | Arranque sin base; reconexión en la siguiente consulta.                                                                   |
+| C4  | P2   | Base no disponible respondía 500 genérico.                                                                                                                                                                                         | `global-exception.filter.ts`, `health.controller.ts`                               | Diagnóstico imposible para el usuario y el operador.                  | 503 `DATABASE_UNAVAILABLE` sin detalles internos; la ruta registrada ya no incluye la query string.                       |
+| C5  | P2   | Cualquiera podía crear empresas en producción; no había forma de cerrar el registro en la API.                                                                                                                                     | `auth.service.ts`, `auth.controller.ts`, `registration-policy.ts`                  | Altas no autorizadas y consumo de recursos.                           | `PUBLIC_REGISTRATION` (cerrado por defecto en producción), aplicado antes de tocar la base; la interfaz oculta el enlace. |
+| C6  | P2   | Reintentos por defecto de TanStack Query (3 con espera) ante un backend dormido.                                                                                                                                                   | `apps/web/src/main.tsx`, `errors.ts`                                               | Ráfagas de peticiones mientras Render arranca.                        | Sin reintentos en 4xx/no configurado/base; uno solo ante servidor o red.                                                  |
+| C7  | P2   | Build en Render con `NODE_ENV=production` omite devDependencies (Nest CLI, Prisma CLI).                                                                                                                                            | `render.yaml`, `docs/RENDER.md`                                                    | El build falla.                                                       | `npm ci --include=dev`; Blueprint sin secretos.                                                                           |
+| C8  | P3   | `engines >=22` permitía a Render elegir otra versión de Node.                                                                                                                                                                      | `.node-version`                                                                    | Diferencias entre CI y producción.                                    | `.node-version` 24 y `NODE_VERSION=24`.                                                                                   |
+| C9  | P3   | Sesión revocada en otro dispositivo terminaba sin explicación.                                                                                                                                                                     | `AuthContext.tsx`, `client.ts`                                                     | Confusión del usuario.                                                | Aviso de sesión expirada en el login.                                                                                     |
+| C10 | P3   | Errores de la Function sin código distinguible.                                                                                                                                                                                    | `functions/api/[[path]].js`                                                        | La interfaz no podía diferenciar «no configurado» de «no disponible». | `API_NOT_CONFIGURED` (503) y `API_UNREACHABLE` (502).                                                                     |
+
+**Verificado:** HTTPS, métodos GET/POST/PUT/PATCH/DELETE con cuerpo JSON, query y `Authorization`,
+cookies y varias `Set-Cookie`, `HttpOnly`/`SameSite=Strict`/`Path=/api/auth`, cabeceras de forwarding
+saneadas, redirecciones sin seguir, respuestas vacías, `no-store`, ausencia de proxy abierto y
+`API_ORIGIN` solo HTTPS sin ruta ni credenciales (pruebas de la Function); en `admingest.pages.dev`:
+fallback SPA, cabeceras de seguridad, 503 `API_NOT_CONFIGURED` y una sola llamada de restauración de
+sesión al cargar.
+
+**Evidencia local** (el CI del PR la repite sobre SQL Server real): API Jest 81 pruebas; web Vitest 39;
+proxy `node:test` 9; `tsc`, ESLint, Prettier y build sin errores. Integración nueva:
+`proxy-access.int-spec.ts` (acceso directo, IP de sesión, límite por visitante) y la política de registro
+en `auth-sessions`.
+
+**Pendiente de infraestructura (no son defectos del código):** servicio Render, base Azure SQL, variables
+`API_ORIGIN`/`API_PROXY_SECRET` en Cloudflare, dominio verificado en Resend y la
+[verificación de producción](PRODUCTION-CHECKLIST.md). Guías: [RENDER.md](RENDER.md),
+[AZURE-SQL.md](AZURE-SQL.md), [CLOUDFLARE.md](CLOUDFLARE.md), [ENVIRONMENT.md](ENVIRONMENT.md).

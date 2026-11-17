@@ -181,3 +181,25 @@ test('never leaves the configured upstream (no open proxy)', async () => {
     });
   }
 });
+
+test('sends the proxy secret and the visitor address only when configured', async () => {
+  const spoofed = {
+    'cf-connecting-ip': '203.0.113.9',
+    'x-admingest-proxy-secret': 'guessed',
+    'x-admingest-client-ip': '198.51.100.1',
+  };
+  await withUpstream(new Response('{}', { status: 200 }), async (calls) => {
+    await onRequest(context('/api/auth/login', undefined, { method: 'POST', headers: spoofed }));
+    assert.equal(calls[0].request.headers.get('x-admingest-proxy-secret'), null);
+    assert.equal(calls[0].request.headers.get('x-admingest-client-ip'), null);
+  });
+
+  await withUpstream(new Response('{}', { status: 200 }), async (calls) => {
+    const ctx = context('/api/auth/login', undefined, { method: 'POST', headers: spoofed });
+    ctx.env.API_PROXY_SECRET = 's'.repeat(40);
+    const response = await onRequest(ctx);
+    assert.equal(calls[0].request.headers.get('x-admingest-proxy-secret'), 's'.repeat(40));
+    assert.equal(calls[0].request.headers.get('x-admingest-client-ip'), '203.0.113.9');
+    assert.equal(response.headers.get('x-admingest-proxy-secret'), null);
+  });
+});

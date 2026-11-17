@@ -56,11 +56,37 @@ y riesgos en [docs/RELEASE-1.2.0.md](docs/RELEASE-1.2.0.md).
 - Registro de referencias documentales HTTPS con filtros por tenant.
 - Vistas de Notificaciones, Documentos y Flujos.
 
+### Despliegue en la nube (Cloudflare Pages + Render + Azure SQL)
+
+- Frontend en Cloudflare Pages con Pages Function `/api/*` same-origin que conserva la cookie
+  `HttpOnly; SameSite=Strict`, no sigue redirecciones, no almacena en caché y falla cerrado (503) sin
+  `API_ORIGIN`.
+- `API_PROXY_SECRET`: la API rechaza el acceso directo (403 `DIRECT_ACCESS_FORBIDDEN`, salvo health checks)
+  y aplica rate limiting, sesiones y auditoría con la IP real del visitante en lugar de la IP de Cloudflare.
+- La interfaz distingue API no configurada, servidor iniciando o caído, base de datos no disponible, sin
+  conexión, sesión expirada, permisos y validación; nunca muestra «credenciales incorrectas» por un fallo
+  del servicio, ni HTML del proveedor. Aviso «Conectando con el servidor…» durante el arranque en frío.
+- Reintentos limitados: sin reintentos en errores 4xx, API no configurada o base no disponible; uno solo
+  ante servidor no disponible o error de red.
+- La API inicia aunque la base no responda y devuelve 503 `DATABASE_UNAVAILABLE` (antes 500) mientras
+  tanto; `/api/health/ready` responde 503 con el mismo código.
+- `PUBLIC_REGISTRATION`: registro de empresas configurable y aplicado por la API (`GET /api/auth/registration`
+  informa la política a la interfaz).
+- `render.yaml` (plan free, sin secretos), `.node-version` 24 y guías [RENDER.md](docs/RENDER.md),
+  [AZURE-SQL.md](docs/AZURE-SQL.md), [ENVIRONMENT.md](docs/ENVIRONMENT.md) y
+  [PRODUCTION-CHECKLIST.md](docs/PRODUCTION-CHECKLIST.md).
+- README con estado por categorías (implementado, pendiente de configuración, no implementado, propuesta
+  futura), niveles de congelamiento y roadmap.
+
 ### Cambios que requieren acción
 
 - `JWT_EXPIRES_IN` mayor de `1h` impide iniciar la API: usar `15m`.
 - Ejecutar `npm run db:deploy` con respaldo previo; la migración aborta si encuentra referencias entre
   empresas.
+- Con `NODE_ENV=production` el registro público queda **cerrado** si no se define
+  `PUBLIC_REGISTRATION=true`.
+- Detrás de Cloudflare Pages, definir el mismo `API_PROXY_SECRET` en la Function y en la API.
+- En Render, el build debe instalar las devDependencies (`npm ci --include=dev`).
 
 ## [1.1.0] - No publicada por separado (incluida en 1.2.0)
 

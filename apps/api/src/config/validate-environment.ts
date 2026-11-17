@@ -48,6 +48,11 @@ export function validateEnvironment(environment: Record<string, unknown>): Recor
     );
   }
 
+  const proxySecret = String(environment.API_PROXY_SECRET ?? '').trim();
+  if (proxySecret && proxySecret.length < 32) {
+    throw new Error('API_PROXY_SECRET debe tener al menos 32 caracteres aleatorios.');
+  }
+
   const publicRegistration = String(environment.PUBLIC_REGISTRATION ?? '')
     .trim()
     .toLowerCase();
