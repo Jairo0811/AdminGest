@@ -26,6 +26,24 @@ describe('mapPrismaError', () => {
     expect(mapPrismaError(prismaError('P2010', 'syntax'))).toBeNull();
   });
 
+  it('informa una base de datos inaccesible como 503 DATABASE_UNAVAILABLE', () => {
+    for (const code of ['P1001', 'P1002', 'P1008', 'P1017', 'P2024']) {
+      expect(mapPrismaError(prismaError(code, 'Server at db.example:1433 unreachable'))).toEqual(
+        expect.objectContaining({
+          statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+          code: 'DATABASE_UNAVAILABLE',
+        }),
+      );
+    }
+    const initialization = new Prisma.PrismaClientInitializationError(
+      "Can't reach database server at secret-host.database.windows.net",
+      'test',
+    );
+    const mapped = mapPrismaError(initialization);
+    expect(mapped?.code).toBe('DATABASE_UNAVAILABLE');
+    expect(String(mapped?.message)).not.toContain('secret-host');
+  });
+
   it('ignora errores que no provienen de Prisma', () => {
     expect(mapPrismaError(new Error('x'))).toBeNull();
   });

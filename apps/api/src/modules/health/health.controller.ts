@@ -1,4 +1,5 @@
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+import { DATABASE_UNAVAILABLE } from '../../common/filters/global-exception.filter';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
@@ -27,7 +28,11 @@ export class HealthController {
       await this.prisma.$queryRawUnsafe('SELECT 1');
       return { status: 'ready', timestamp: new Date().toISOString() };
     } catch {
-      throw new ServiceUnavailableException('Base de datos no disponible.');
+      throw new ServiceUnavailableException({
+        message: DATABASE_UNAVAILABLE.message,
+        error: DATABASE_UNAVAILABLE.error,
+        code: DATABASE_UNAVAILABLE.code,
+      });
     }
   }
 }

@@ -11,8 +11,12 @@ const JSON_HEADERS = {
   'cache-control': 'private, no-store, max-age=0',
 };
 
-function errorResponse(status, message) {
-  return new Response(JSON.stringify({ message }), {
+/**
+ * Error codes understood by the web client (apps/web/src/api/errors.ts) so that the UI can
+ * tell "API not configured" from "API unreachable" without exposing internal details.
+ */
+function errorResponse(status, message, code) {
+  return new Response(JSON.stringify({ statusCode: status, message, code }), {
     status,
     headers: JSON_HEADERS,
   });
@@ -22,12 +26,16 @@ export async function onRequest(context) {
   const incoming = new URL(context.request.url);
 
   if (incoming.pathname !== '/api' && !incoming.pathname.startsWith('/api/')) {
-    return errorResponse(404, 'Ruta no encontrada.');
+    return errorResponse(404, 'Ruta no encontrada.', 'NOT_FOUND');
   }
 
   const configuredOrigin = context.env.API_ORIGIN;
   if (typeof configuredOrigin !== 'string' || !configuredOrigin.trim()) {
-    return errorResponse(503, 'La API de AdminGest todavía no está configurada.');
+    return errorResponse(
+      503,
+      'La API de AdminGest todavía no está configurada.',
+      'API_NOT_CONFIGURED',
+    );
   }
 
   let upstream;
@@ -45,7 +53,7 @@ export async function onRequest(context) {
       throw new Error('Invalid upstream origin');
     }
   } catch {
-    return errorResponse(503, 'La dirección de la API no es válida.');
+    return errorResponse(503, 'La dirección de la API no es válida.', 'API_NOT_CONFIGURED');
   }
 
   // The destination is fixed by the server-side API_ORIGIN binding.
@@ -94,6 +102,6 @@ export async function onRequest(context) {
     });
   } catch {
     // Avoid leaking backend hostnames, credentials, or exception messages.
-    return errorResponse(502, 'La API de AdminGest no está disponible.');
+    return errorResponse(502, 'La API de AdminGest no está disponible.', 'API_UNREACHABLE');
   }
 }

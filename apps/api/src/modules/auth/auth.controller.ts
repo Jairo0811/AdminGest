@@ -35,6 +35,13 @@ export class AuthController {
     private readonly config: ConfigService,
   ) {}
 
+  @Get('registration')
+  @Public()
+  @ApiOperation({ summary: 'Indica si el registro público de empresas está habilitado' })
+  registration(): { enabled: boolean } {
+    return { enabled: this.authService.isRegistrationEnabled() };
+  }
+
   @Post('register')
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })

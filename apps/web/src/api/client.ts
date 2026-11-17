@@ -4,14 +4,9 @@ const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 /** Message used across tabs so that a logout in one tab closes the others. */
 export const AUTH_CHANNEL = 'admingest-auth';
 
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number,
-  ) {
-    super(message);
-  }
-}
+import { ApiError, errorFromResponse, networkError } from './errors';
+
+export { ApiError };
 
 interface SessionPayload {
   accessToken: string;
@@ -44,6 +39,10 @@ async function refreshOnce(): Promise<Response> {
   return fetch(API_URL + '/auth/refresh', { method: 'POST', credentials: 'include' });
 }
 
+/** Last reason why restoring the session failed for a service problem, if any. */
+let lastRestoreProblem: ApiError | null = null;
+export const getRestoreProblem = () => lastRestoreProblem;
+
 /**
  * All tabs share the same rotating refresh cookie. Without coordination two tabs
  * refreshing at the same time send the same token: one rotates it and the other is
@@ -52,12 +51,24 @@ async function refreshOnce(): Promise<Response> {
  */
 async function refreshSession(): Promise<SessionPayload | null> {
   const run = async () => {
-    let response = await refreshOnce();
-    if (response.status === 401) {
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+    let response: Response;
+    try {
       response = await refreshOnce();
+      if (response.status === 401) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        response = await refreshOnce();
+      }
+    } catch {
+      lastRestoreProblem = networkError();
+      return null;
     }
-    return response.ok ? ((await response.json()) as SessionPayload) : null;
+    if (response.ok) {
+      lastRestoreProblem = null;
+      return (await response.json()) as SessionPayload;
+    }
+    const problem = response.status === 401 ? null : await errorFromResponse(response);
+    lastRestoreProblem = problem?.isServiceProblem ? problem : null;
+    return null;
   };
   const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
   return locks ? locks.request(REFRESH_LOCK, run) : run();
@@ -91,15 +102,20 @@ export async function closeSession(): Promise<void> {
 }
 
 async function request(path: string, options: RequestInit, token: string | null) {
-  return fetch(API_URL + path, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: 'Bearer ' + token } : {}),
-      ...options.headers,
-    },
-  });
+  try {
+    return await fetch(API_URL + path, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: 'Bearer ' + token } : {}),
+        ...options.headers,
+      },
+    });
+  } catch {
+    // fetch only rejects when the server cannot be reached (offline, DNS, CORS).
+    throw networkError();
+  }
 }
 
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -120,14 +136,12 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   }
 
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as {
-      message?: string | string[];
-    } | null;
-    const message = Array.isArray(body?.message)
-      ? body.message.join(', ')
-      : (body?.message ?? 'No fue posible completar la operación.');
-    throw new ApiError(message, response.status);
+    const error = await errorFromResponse(response);
+    // A 401 on a protected call after the refresh failed means the session ended.
+    if (response.status === 401 && !isAuthCall) {
+      throw new ApiError('Tu sesión expiró. Inicia sesión nuevamente.', 401, 'session-expired');
+    }
+    throw error;
   }
-
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
 }

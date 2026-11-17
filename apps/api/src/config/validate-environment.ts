@@ -48,6 +48,13 @@ export function validateEnvironment(environment: Record<string, unknown>): Recor
     );
   }
 
+  const publicRegistration = String(environment.PUBLIC_REGISTRATION ?? '')
+    .trim()
+    .toLowerCase();
+  if (publicRegistration && !['true', 'false'].includes(publicRegistration)) {
+    throw new Error('PUBLIC_REGISTRATION admite true o false.');
+  }
+
   const trustProxy = String(environment.TRUST_PROXY ?? '').trim();
   if (trustProxy && !/^(false|true|loopback|\d{1,2})$/.test(trustProxy)) {
     throw new Error('TRUST_PROXY admite false, true, loopback o el número de proxies (0-99).');
