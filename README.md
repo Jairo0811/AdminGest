@@ -8,7 +8,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/versi%C3%B3n-1.2.0-0057B8?style=for-the-badge" alt="Versión 1.2.0" />
-  <img src="https://img.shields.io/badge/estado-Candidata%20a%20congelamiento-18A96F?style=for-the-badge" alt="Candidata a congelamiento técnico" />
+  <img src="https://img.shields.io/badge/estado-C%C3%B3digo%20estable-18A96F?style=for-the-badge" alt="Código estable" />
   <img src="https://img.shields.io/badge/arquitectura-Monorepo-0F172A?style=for-the-badge" alt="Arquitectura monorepo" />
 </p>
 
@@ -359,11 +359,11 @@ Ver el [Roadmap](#roadmap--evolución-futura-de-admingest) al final de este docu
 
 ### 🧊 Niveles de congelamiento
 
-| Nivel                                       | Significado                                                                                                   | Estado v1.2.0                                                                                                |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **1. Código estable**                       | Compilación, pruebas y correcciones técnicas verificadas.                                                     | **Candidato.** CI verde en los PR; se alcanza al fusionarlos en `main` con CI verde (requiere autorización). |
-| **2. Despliegue funcional**                 | Frontend, backend, base de datos y servicios conectados y probados.                                           | **No alcanzado.** Render y Azure SQL sin configurar; verificación de producción pendiente.                   |
-| **3. Producto listo para comercialización** | Además: cobros, soporte, operación, protección de datos, requisitos legales y fiscales, monitoreo y respaldo. | **No alcanzado.**                                                                                            |
+| Nivel                                       | Significado                                                                                                   | Estado v1.2.0                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **1. Código estable**                       | Compilación, pruebas y correcciones técnicas verificadas.                                                     | **Alcanzado.** PR #33, #34 y #35 fusionados en `main` con CI verde.                        |
+| **2. Despliegue funcional**                 | Frontend, backend, base de datos y servicios conectados y probados.                                           | **No alcanzado.** Render y Azure SQL sin configurar; verificación de producción pendiente. |
+| **3. Producto listo para comercialización** | Además: cobros, soporte, operación, protección de datos, requisitos legales y fiscales, monitoreo y respaldo. | **No alcanzado.**                                                                          |
 
 Alcanzar un nivel no implica los siguientes. Procedimiento: [RELEASE-1.2.0.md](docs/RELEASE-1.2.0.md).
 
