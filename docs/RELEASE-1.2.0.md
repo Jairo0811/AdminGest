@@ -1,6 +1,7 @@
 # AdminGest v1.2.0 — Hardening final y congelamiento
 
-**Estado:** candidata a congelamiento técnico (pendiente de autorización para fusionar y etiquetar).
+**Estado:** **código estable** — PR #33, #34 y #35 fusionados en `main` con CI verde. Etiqueta `v1.2.0`
+pendiente de autorización; despliegue funcional pendiente de infraestructura.
 **Ramas y PR (en orden de integración):** #33 `chore/final-hardening-freeze-v1.2.0` → `main`;
 #34 `feat/cloudflare-pages-deployment` (sobre #33); `fix/v1.2.0-cloud-readiness` (sobre #34). Ver
 [sección 10](#10-preparación-para-el-despliegue-en-la-nube).
@@ -142,11 +143,11 @@ sin inventar importes por línea; el diseño corporativo, temas y navegación se
 
 ## 7. Niveles de congelamiento y estado comercial
 
-| Nivel                                       | Criterio                                                                                                                     | Estado                                                                                              |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **1. CÓDIGO ESTABLE**                       | Compilación, pruebas y correcciones técnicas verificadas; CI verde; documentación alineada con el código.                    | **Candidato**: se alcanza al fusionar #33, #34 y el PR de preparación cloud con CI verde en `main`. |
-| **2. DESPLIEGUE FUNCIONAL**                 | Frontend, backend, base de datos y servicios conectados y probados en el entorno real.                                       | **No alcanzado**: Render y Azure SQL sin configurar; lista de producción pendiente.                 |
-| **3. PRODUCTO LISTO PARA COMERCIALIZACIÓN** | Además: cobros si corresponde, soporte, operación, protección de datos, requisitos legales y fiscales, monitoreo y respaldo. | **No alcanzado.**                                                                                   |
+| Nivel                                       | Criterio                                                                                                                     | Estado                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **1. CÓDIGO ESTABLE**                       | Compilación, pruebas y correcciones técnicas verificadas; CI verde; documentación alineada con el código.                    | **Alcanzado**: #33, #34 y #35 fusionados en `main` con CI verde.                    |
+| **2. DESPLIEGUE FUNCIONAL**                 | Frontend, backend, base de datos y servicios conectados y probados en el entorno real.                                       | **No alcanzado**: Render y Azure SQL sin configurar; lista de producción pendiente. |
+| **3. PRODUCTO LISTO PARA COMERCIALIZACIÓN** | Además: cobros si corresponde, soporte, operación, protección de datos, requisitos legales y fiscales, monitoreo y respaldo. | **No alcanzado.**                                                                   |
 
 Alcanzar un nivel no implica los siguientes. Para comercializar se requiere además: operación real con
 clientes piloto, integración de cobros si se vende por suscripción, infraestructura administrada con HTTPS,
@@ -173,9 +174,10 @@ facturas ni comprobantes fiscales** y AdminGest no está autorizado por la DGII 
 - [x] Despliegue documentado y reproducible (Cloudflare, Render, Azure SQL, variables, migraciones).
 - [x] Roadmap documentado en el README; bloqueos de infraestructura identificados.
 - [x] Contexto académico conservado.
-- [ ] CI verde del PR de preparación cloud.
+- [x] CI verde del PR de preparación cloud y de `main` tras la fusión.
 - [ ] Decisión sobre la licencia.
-- [ ] Autorización para fusionar y etiquetar.
+- [x] PR #33, #34 y #35 fusionados en `main`.
+- [ ] Autorización para crear la etiqueta `v1.2.0`.
 
 ## 9. Procedimiento de liberación (requiere autorización)
 

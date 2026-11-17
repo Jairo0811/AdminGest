@@ -13,6 +13,9 @@
 Navegador → Cloudflare Pages → Pages Function /api/* → Render (NestJS) → Azure SQL Database
 ```
 
+**Rama de producción:** debe ser `main` (**Settings → Builds → Branch control → Production branch**). Si
+apunta a otra rama, `main` se publica solo como vista previa en `https://main.admingest.pages.dev`.
+
 **Estado actual de `admingest.pages.dev`:** frontend y Function publicados; `API_ORIGIN` sin configurar.
 `/api/health` responde 503 `API_NOT_CONFIGURED` y la pantalla de inicio de sesión lo indica. No hay login
 funcional hasta conectar Render y Azure SQL.
@@ -28,16 +31,16 @@ sin backend.
 3. Autoriza GitHub y selecciona `Jairo0811/AdminGest`.
 4. Configura:
 
-| Campo Cloudflare       | Valor                                                                  |
-| ---------------------- | ---------------------------------------------------------------------- |
-| Nombre de proyecto     | `admingest` (si está disponible)                                       |
-| Rama de producción     | `main` (después de fusionar los PR #33, #34 y el de preparación cloud) |
-| Framework preset       | None (configuración manual)                                            |
-| Root directory         | Raíz del repositorio, `/` (no `apps/web`)                              |
-| Build command          | `npm run build --workspace @admingest/web`                             |
-| Build output directory | `apps/web/dist`                                                        |
-| Variable de build      | `NODE_VERSION=24`                                                      |
-| Variable de build      | `VITE_API_URL=/api`                                                    |
+| Campo Cloudflare       | Valor                                      |
+| ---------------------- | ------------------------------------------ |
+| Nombre de proyecto     | `admingest` (si está disponible)           |
+| Rama de producción     | `main`                                     |
+| Framework preset       | None (configuración manual)                |
+| Root directory         | Raíz del repositorio, `/` (no `apps/web`)  |
+| Build command          | `npm run build --workspace @admingest/web` |
+| Build output directory | `apps/web/dist`                            |
+| Variable de build      | `NODE_VERSION=24`                          |
+| Variable de build      | `VITE_API_URL=/api`                        |
 
 **Importante:** mantener la raíz del repositorio para instalar dependencias de los
 `npm workspaces` y detectar `functions/api/[[path]].js`.
