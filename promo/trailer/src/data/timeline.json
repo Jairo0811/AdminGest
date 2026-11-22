@@ -1,0 +1,115 @@
+{
+  "fps": 30,
+  "total": 45.895,
+  "scenes": [
+    {
+      "id": "intro",
+      "start": 0.0,
+      "end": 4.74
+    },
+    {
+      "id": "problem",
+      "start": 4.74,
+      "end": 10.45
+    },
+    {
+      "id": "solution",
+      "start": 10.45,
+      "end": 14.05
+    },
+    {
+      "id": "platform",
+      "start": 14.05,
+      "end": 18.91
+    },
+    {
+      "id": "crm",
+      "start": 18.91,
+      "end": 24.31
+    },
+    {
+      "id": "quotes",
+      "start": 24.31,
+      "end": 29.71
+    },
+    {
+      "id": "reports",
+      "start": 29.71,
+      "end": 34.51
+    },
+    {
+      "id": "unified",
+      "start": 34.51,
+      "end": 38.39
+    },
+    {
+      "id": "closing",
+      "start": 38.39,
+      "end": 45.895
+    }
+  ],
+  "marks": {
+    "logoReveal": 12.37,
+    "loginToDashboard": 16.15,
+    "customersToKanban": 21.31,
+    "quoteToGantt": 26.71,
+    "finalLogo": 38.74,
+    "tagline": 40.565,
+    "versionLine": 42.945
+  },
+  "music": {
+    "bpm": 100,
+    "grooveStart": 18.91,
+    "growthStart": 10.45,
+    "resolveStart": 34.51,
+    "finalHit": 38.74,
+    "logoHit": 12.37,
+    "end": 45.895
+  },
+  "sfx": [
+    {
+      "type": "whoosh",
+      "t": 4.74
+    },
+    {
+      "type": "shimmer",
+      "t": 12.319999999999999
+    },
+    {
+      "type": "whoosh",
+      "t": 14.05
+    },
+    {
+      "type": "click",
+      "t": 15.799999999999999
+    },
+    {
+      "type": "swoosh",
+      "t": 18.91
+    },
+    {
+      "type": "swoosh",
+      "t": 21.31
+    },
+    {
+      "type": "swoosh",
+      "t": 24.31
+    },
+    {
+      "type": "swoosh",
+      "t": 26.71
+    },
+    {
+      "type": "swoosh",
+      "t": 29.71
+    },
+    {
+      "type": "whoosh",
+      "t": 34.51
+    },
+    {
+      "type": "shimmer",
+      "t": 38.690000000000005
+    }
+  ]
+}

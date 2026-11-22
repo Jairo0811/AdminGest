@@ -1,0 +1,75 @@
+{
+  "_comment": "Guion de narración. gapBefore = silencio (s) antes de la frase; cues = subtítulos. El orden y el texto deben coincidir con la grabación.",
+  "leadIn": 0.6,
+  "tail": 3.2,
+  "segments": [
+    {
+      "id": "s1",
+      "text": "Una empresa crece… cuando tiene claridad para avanzar.",
+      "gapBefore": 0
+    },
+    {
+      "id": "s2",
+      "text": "Pero entre clientes, tareas y cotizaciones, la información puede perderse.",
+      "gapBefore": 0.5,
+      "cues": ["Pero entre clientes, tareas y cotizaciones,", "la información puede perderse."]
+    },
+    {
+      "id": "s3a",
+      "text": "Por eso existe…",
+      "gapBefore": 0.8
+    },
+    {
+      "id": "s3b",
+      "text": "AdminGest.",
+      "gapBefore": 0.5
+    },
+    {
+      "id": "s4",
+      "text": "Una plataforma diseñada para reunir lo que tu equipo necesita.",
+      "gapBefore": 1.1,
+      "cues": ["Una plataforma diseñada para reunir", "lo que tu equipo necesita."]
+    },
+    {
+      "id": "s5a",
+      "text": "Organiza tus clientes.",
+      "gapBefore": 1.0
+    },
+    {
+      "id": "s5b",
+      "text": "Da seguimiento a cada oportunidad.",
+      "gapBefore": 0.4
+    },
+    {
+      "id": "s6a",
+      "text": "Crea cotizaciones precisas.",
+      "gapBefore": 0.9
+    },
+    {
+      "id": "s6b",
+      "text": "Planifica proyectos y tareas.",
+      "gapBefore": 0.5
+    },
+    {
+      "id": "s7",
+      "text": "Consulta tus reportes y toma decisiones con más contexto.",
+      "gapBefore": 1.0,
+      "cues": ["Consulta tus reportes", "y toma decisiones con más contexto."]
+    },
+    {
+      "id": "s8",
+      "text": "Todo, desde una misma plataforma.",
+      "gapBefore": 1.1
+    },
+    {
+      "id": "s9a",
+      "text": "AdminGest…",
+      "gapBefore": 1.0
+    },
+    {
+      "id": "s9b",
+      "text": "Gestión Empresarial Inteligente.",
+      "gapBefore": 0.8
+    }
+  ]
+}

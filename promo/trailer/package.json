@@ -1,0 +1,27 @@
+{
+  "name": "@admingest/trailer",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Tráiler oficial de AdminGest v1.2.0 (Remotion). Aislado del frontend y del backend.",
+  "scripts": {
+    "studio": "remotion studio",
+    "assets": "python3 tools/build_timeline.py && python3 tools/process_voice.py && python3 tools/compose_music.py && python3 tools/make_sfx.py",
+    "align": "python3 tools/align.py && npm run assets",
+    "render:16x9": "remotion render AdminGestTrailer out/admingest-trailer-16x9.raw.mp4",
+    "render:9x16": "remotion render AdminGestTrailerVertical out/admingest-trailer-9x16.raw.mp4",
+    "master": "bash tools/master.sh",
+    "render": "npm run assets && npm run render:16x9 && npm run render:9x16 && npm run master",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.545",
+    "@remotion/fonts": "^4.0.545",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "^4.0.545"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "typescript": "^5.9.3"
+  }
+}

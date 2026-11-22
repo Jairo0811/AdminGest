@@ -7,3 +7,5 @@ node_modules
 package-lock.json
 apps/api/prisma/migrations
 *.sql
+promo/trailer/src/data
+promo/trailer/out
