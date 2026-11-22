@@ -1,0 +1,554 @@
+{
+  "source": "narration-source.mp3",
+  "total": 45.895,
+  "segments": [
+    {
+      "id": "s1",
+      "text": "Una empresa crece… cuando tiene claridad para avanzar.",
+      "src": [0.01, 4.0],
+      "at": 0.6,
+      "duration": 3.99,
+      "words": [
+        {
+          "w": "Una",
+          "start": 0.59,
+          "end": 0.83
+        },
+        {
+          "w": "empresa",
+          "start": 0.83,
+          "end": 1.19
+        },
+        {
+          "w": "crece",
+          "start": 1.19,
+          "end": 1.77
+        },
+        {
+          "w": "cuando",
+          "start": 1.77,
+          "end": 2.47
+        },
+        {
+          "w": "tiene",
+          "start": 2.47,
+          "end": 2.91
+        },
+        {
+          "w": "claridad",
+          "start": 2.91,
+          "end": 3.55
+        },
+        {
+          "w": "para",
+          "start": 3.55,
+          "end": 3.83
+        },
+        {
+          "w": "avanzar.",
+          "start": 3.83,
+          "end": 4.55
+        }
+      ],
+      "cues": [
+        {
+          "text": "Una empresa crece… cuando tiene claridad para avanzar.",
+          "start": 0.59,
+          "end": 4.55
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "Pero entre clientes, tareas y cotizaciones, la información puede perderse.",
+      "src": [4.43, 9.24],
+      "at": 5.09,
+      "duration": 4.81,
+      "words": [
+        {
+          "w": "Pero",
+          "start": 5.06,
+          "end": 5.28
+        },
+        {
+          "w": "entre",
+          "start": 5.28,
+          "end": 5.54
+        },
+        {
+          "w": "clientes,",
+          "start": 5.54,
+          "end": 6.22
+        },
+        {
+          "w": "tareas",
+          "start": 6.42,
+          "end": 6.82
+        },
+        {
+          "w": "y",
+          "start": 6.82,
+          "end": 6.94
+        },
+        {
+          "w": "cotizaciones,",
+          "start": 6.94,
+          "end": 7.56
+        },
+        {
+          "w": "la",
+          "start": 8.04,
+          "end": 8.1
+        },
+        {
+          "w": "información",
+          "start": 8.1,
+          "end": 8.44
+        },
+        {
+          "w": "puede",
+          "start": 8.44,
+          "end": 9.04
+        },
+        {
+          "w": "perderse.",
+          "start": 9.04,
+          "end": 9.68
+        }
+      ],
+      "cues": [
+        {
+          "text": "Pero entre clientes, tareas y cotizaciones,",
+          "start": 5.06,
+          "end": 7.56
+        },
+        {
+          "text": "la información puede perderse.",
+          "start": 8.04,
+          "end": 9.68
+        }
+      ]
+    },
+    {
+      "id": "s3a",
+      "text": "Por eso existe…",
+      "src": [9.58, 10.75],
+      "at": 10.7,
+      "duration": 1.17,
+      "words": [
+        {
+          "w": "Por",
+          "start": 10.7,
+          "end": 10.88
+        },
+        {
+          "w": "eso",
+          "start": 10.88,
+          "end": 11.06
+        },
+        {
+          "w": "existe",
+          "start": 11.06,
+          "end": 11.56
+        }
+      ],
+      "cues": [
+        {
+          "text": "Por eso existe…",
+          "start": 10.7,
+          "end": 11.56
+        }
+      ]
+    },
+    {
+      "id": "s3b",
+      "text": "AdminGest.",
+      "src": [10.84, 11.92],
+      "at": 12.37,
+      "duration": 1.08,
+      "words": [
+        {
+          "w": "AdminGest,",
+          "start": 11.97,
+          "end": 13.17
+        }
+      ],
+      "cues": [
+        {
+          "text": "AdminGest.",
+          "start": 11.97,
+          "end": 13.17
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "Una plataforma diseñada para reunir lo que tu equipo necesita.",
+      "src": [12.1, 15.91],
+      "at": 14.55,
+      "duration": 3.81,
+      "words": [
+        {
+          "w": "una",
+          "start": 14.55,
+          "end": 14.79
+        },
+        {
+          "w": "plataforma",
+          "start": 14.79,
+          "end": 15.17
+        },
+        {
+          "w": "diseñada",
+          "start": 15.17,
+          "end": 15.91
+        },
+        {
+          "w": "para",
+          "start": 15.91,
+          "end": 16.19
+        },
+        {
+          "w": "reunir",
+          "start": 16.19,
+          "end": 16.67
+        },
+        {
+          "w": "lo",
+          "start": 16.67,
+          "end": 16.83
+        },
+        {
+          "w": "que",
+          "start": 16.83,
+          "end": 16.95
+        },
+        {
+          "w": "tu",
+          "start": 16.95,
+          "end": 17.13
+        },
+        {
+          "w": "equipo",
+          "start": 17.13,
+          "end": 17.47
+        },
+        {
+          "w": "necesita.",
+          "start": 17.47,
+          "end": 18.01
+        }
+      ],
+      "cues": [
+        {
+          "text": "Una plataforma diseñada para reunir",
+          "start": 14.55,
+          "end": 16.67
+        },
+        {
+          "text": "lo que tu equipo necesita.",
+          "start": 16.67,
+          "end": 18.01
+        }
+      ]
+    },
+    {
+      "id": "s5a",
+      "text": "Organiza tus clientes.",
+      "src": [16.22, 17.75],
+      "at": 19.36,
+      "duration": 1.53,
+      "words": [
+        {
+          "w": "Organiza",
+          "start": 19.4,
+          "end": 19.88
+        },
+        {
+          "w": "tus",
+          "start": 19.88,
+          "end": 20.08
+        },
+        {
+          "w": "clientes.",
+          "start": 20.08,
+          "end": 20.7
+        }
+      ],
+      "cues": [
+        {
+          "text": "Organiza tus clientes.",
+          "start": 19.4,
+          "end": 20.7
+        }
+      ]
+    },
+    {
+      "id": "s5b",
+      "text": "Da seguimiento a cada oportunidad.",
+      "src": [17.86, 20.13],
+      "at": 21.29,
+      "duration": 2.27,
+      "words": [
+        {
+          "w": "Da",
+          "start": 21.43,
+          "end": 21.51
+        },
+        {
+          "w": "seguimiento",
+          "start": 21.51,
+          "end": 22.11
+        },
+        {
+          "w": "a",
+          "start": 22.11,
+          "end": 22.31
+        },
+        {
+          "w": "cada",
+          "start": 22.31,
+          "end": 22.57
+        },
+        {
+          "w": "oportunidad.",
+          "start": 22.57,
+          "end": 23.17
+        }
+      ],
+      "cues": [
+        {
+          "text": "Da seguimiento a cada oportunidad.",
+          "start": 21.43,
+          "end": 23.17
+        }
+      ]
+    },
+    {
+      "id": "s6a",
+      "text": "Crea cotizaciones precisas.",
+      "src": [20.35, 22.3],
+      "at": 24.46,
+      "duration": 1.95,
+      "words": [
+        {
+          "w": "Crea",
+          "start": 24.55,
+          "end": 24.77
+        },
+        {
+          "w": "cotizaciones",
+          "start": 24.77,
+          "end": 25.45
+        },
+        {
+          "w": "precisas.",
+          "start": 25.45,
+          "end": 26.13
+        }
+      ],
+      "cues": [
+        {
+          "text": "Crea cotizaciones precisas.",
+          "start": 24.55,
+          "end": 26.13
+        }
+      ]
+    },
+    {
+      "id": "s6b",
+      "text": "Planifica proyectos y tareas.",
+      "src": [22.45, 24.55],
+      "at": 26.91,
+      "duration": 2.1,
+      "words": [
+        {
+          "w": "Planifica",
+          "start": 26.96,
+          "end": 27.4
+        },
+        {
+          "w": "proyectos",
+          "start": 27.4,
+          "end": 28.14
+        },
+        {
+          "w": "y",
+          "start": 28.14,
+          "end": 28.3
+        },
+        {
+          "w": "tareas.",
+          "start": 28.3,
+          "end": 28.78
+        }
+      ],
+      "cues": [
+        {
+          "text": "Planifica proyectos y tareas.",
+          "start": 26.96,
+          "end": 28.78
+        }
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "Consulta tus reportes y toma decisiones con más contexto.",
+      "src": [24.77, 28.8],
+      "at": 30.01,
+      "duration": 4.03,
+      "words": [
+        {
+          "w": "Consulta",
+          "start": 30.04,
+          "end": 30.58
+        },
+        {
+          "w": "tus",
+          "start": 30.58,
+          "end": 30.76
+        },
+        {
+          "w": "reportes",
+          "start": 30.76,
+          "end": 31.38
+        },
+        {
+          "w": "y",
+          "start": 31.38,
+          "end": 31.72
+        },
+        {
+          "w": "toma",
+          "start": 31.72,
+          "end": 31.98
+        },
+        {
+          "w": "decisiones",
+          "start": 31.98,
+          "end": 32.7
+        },
+        {
+          "w": "con",
+          "start": 32.7,
+          "end": 32.92
+        },
+        {
+          "w": "más",
+          "start": 32.92,
+          "end": 33.24
+        },
+        {
+          "w": "contexto.",
+          "start": 33.24,
+          "end": 33.62
+        }
+      ],
+      "cues": [
+        {
+          "text": "Consulta tus reportes",
+          "start": 30.04,
+          "end": 31.38
+        },
+        {
+          "text": "y toma decisiones con más contexto.",
+          "start": 31.38,
+          "end": 33.62
+        }
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "Todo, desde una misma plataforma.",
+      "src": [29.09, 31.69],
+      "at": 35.14,
+      "duration": 2.6,
+      "words": [
+        {
+          "w": "Todo,",
+          "start": 34.91,
+          "end": 35.37
+        },
+        {
+          "w": "desde",
+          "start": 35.81,
+          "end": 36.05
+        },
+        {
+          "w": "una",
+          "start": 36.05,
+          "end": 36.39
+        },
+        {
+          "w": "misma",
+          "start": 36.39,
+          "end": 36.75
+        },
+        {
+          "w": "plataforma.",
+          "start": 36.75,
+          "end": 37.41
+        }
+      ],
+      "cues": [
+        {
+          "text": "Todo, desde una misma plataforma.",
+          "start": 34.91,
+          "end": 37.41
+        }
+      ]
+    },
+    {
+      "id": "s9a",
+      "text": "AdminGest…",
+      "src": [31.98, 33.005],
+      "at": 38.74,
+      "duration": 1.025,
+      "words": [
+        {
+          "w": "AdminGest,",
+          "start": 38.64,
+          "end": 39.56
+        }
+      ],
+      "cues": [
+        {
+          "text": "AdminGest…",
+          "start": 38.64,
+          "end": 39.56
+        }
+      ]
+    },
+    {
+      "id": "s9b",
+      "text": "Gestión Empresarial Inteligente.",
+      "src": [33.08, 35.21],
+      "at": 40.565,
+      "duration": 2.13,
+      "words": [
+        {
+          "w": "gestión",
+          "start": 40.545,
+          "end": 41.085
+        },
+        {
+          "w": "empresarial",
+          "start": 41.085,
+          "end": 41.705
+        },
+        {
+          "w": "inteligente.",
+          "start": 41.705,
+          "end": 42.405
+        }
+      ],
+      "cues": [
+        {
+          "text": "Gestión Empresarial Inteligente.",
+          "start": 40.545,
+          "end": 42.405
+        }
+      ]
+    }
+  ]
+}
