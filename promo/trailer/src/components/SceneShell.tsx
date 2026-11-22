@@ -3,17 +3,30 @@ import { f, scene, SceneId } from '../time';
 
 const PAD = 8; // frames of cross-fade shared with the neighbouring scenes
 
+/**
+ * Default transition: the outgoing scene fades to the background and the next one rises from it
+ * (no double exposure of two interfaces). `dissolve` keeps a classic cross-fade for scenes that
+ * continue the same imagery (problem → solution).
+ */
 const Fade: React.FC<{
   length: number;
   children: React.ReactNode;
   first: boolean;
   last: boolean;
-}> = ({ length, children, first, last }) => {
+  enter: 'dip' | 'dissolve';
+  exit: 'dip' | 'dissolve';
+}> = ({ length, children, first, last, enter, exit }) => {
   const frame = useCurrentFrame();
-  const opacity = Math.min(
-    first ? 1 : interpolate(frame, [0, PAD * 2], [0, 1], { extrapolateRight: 'clamp' }),
-    last ? 1 : interpolate(frame, [length - PAD * 2, length], [1, 0], { extrapolateLeft: 'clamp' }),
-  );
+  const clamp = { extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const };
+  const fadeIn =
+    enter === 'dip'
+      ? interpolate(frame, [PAD - 2, PAD * 2], [0, 1], clamp)
+      : interpolate(frame, [0, PAD * 2], [0, 1], clamp);
+  const fadeOut =
+    exit === 'dip'
+      ? interpolate(frame, [length - PAD * 2, length - PAD + 2], [1, 0], clamp)
+      : interpolate(frame, [length - PAD * 2, length], [1, 0], clamp);
+  const opacity = Math.min(first ? 1 : fadeIn, last ? 1 : fadeOut);
   return <AbsoluteFill style={{ opacity }}>{children}</AbsoluteFill>;
 };
 
@@ -23,8 +36,10 @@ const Fade: React.FC<{
  */
 export const SceneShell: React.FC<{
   id: SceneId;
+  enter?: 'dip' | 'dissolve';
+  exit?: 'dip' | 'dissolve';
   children: (helpers: { at: (seconds: number) => number; length: number }) => React.ReactNode;
-}> = ({ id, children }) => {
+}> = ({ id, enter = 'dip', exit = 'dip', children }) => {
   const { durationInFrames } = useVideoConfig();
   const s = scene(id);
   const first = s.start === 0;
@@ -36,7 +51,7 @@ export const SceneShell: React.FC<{
   const at = (seconds: number) => f(seconds) - f(s.start) + offset;
   return (
     <Sequence from={start} durationInFrames={length} name={id}>
-      <Fade length={length} first={first} last={end >= durationInFrames}>
+      <Fade length={length} first={first} last={end >= durationInFrames} enter={enter} exit={exit}>
         {children({ at, length })}
       </Fade>
     </Sequence>

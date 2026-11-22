@@ -17,8 +17,12 @@ export const Trailer: React.FC<{ orientation: Orientation }> = ({ orientation })
     <AbsoluteFill style={{ backgroundColor: '#050d18' }}>
       <Background />
       <SceneShell id="intro">{({ at, length }) => <Intro at={at} length={length} />}</SceneShell>
-      <SceneShell id="problem">{({ at }) => <Fragments at={at} mode="problem" />}</SceneShell>
-      <SceneShell id="solution">{({ at }) => <Fragments at={at} mode="solution" />}</SceneShell>
+      <SceneShell id="problem" exit="dissolve">
+        {({ at }) => <Fragments at={at} mode="problem" />}
+      </SceneShell>
+      <SceneShell id="solution" enter="dissolve">
+        {({ at }) => <Fragments at={at} mode="solution" />}
+      </SceneShell>
       <SceneShell id="platform">
         {({ at, length }) => <Platform at={at} length={length} />}
       </SceneShell>

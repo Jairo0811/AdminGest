@@ -5,10 +5,7 @@
     {
       "id": "s1",
       "text": "Una empresa crece… cuando tiene claridad para avanzar.",
-      "src": [
-        0.01,
-        4.0
-      ],
+      "src": [0.01, 4.0],
       "at": 0.6,
       "duration": 3.99,
       "words": [
@@ -64,10 +61,7 @@
     {
       "id": "s2",
       "text": "Pero entre clientes, tareas y cotizaciones, la información puede perderse.",
-      "src": [
-        4.43,
-        9.24
-      ],
+      "src": [4.43, 9.24],
       "at": 5.09,
       "duration": 4.81,
       "words": [
@@ -138,10 +132,7 @@
     {
       "id": "s3a",
       "text": "Por eso existe…",
-      "src": [
-        9.58,
-        10.75
-      ],
+      "src": [9.58, 10.75],
       "at": 10.7,
       "duration": 1.17,
       "words": [
@@ -172,10 +163,7 @@
     {
       "id": "s3b",
       "text": "AdminGest.",
-      "src": [
-        10.84,
-        11.92
-      ],
+      "src": [10.84, 11.92],
       "at": 12.37,
       "duration": 1.08,
       "words": [
@@ -196,10 +184,7 @@
     {
       "id": "s4",
       "text": "Una plataforma diseñada para reunir lo que tu equipo necesita.",
-      "src": [
-        12.1,
-        15.91
-      ],
+      "src": [12.1, 15.91],
       "at": 14.55,
       "duration": 3.81,
       "words": [
@@ -270,10 +255,7 @@
     {
       "id": "s5a",
       "text": "Organiza tus clientes.",
-      "src": [
-        16.22,
-        17.75
-      ],
+      "src": [16.22, 17.75],
       "at": 19.36,
       "duration": 1.53,
       "words": [
@@ -304,10 +286,7 @@
     {
       "id": "s5b",
       "text": "Da seguimiento a cada oportunidad.",
-      "src": [
-        17.86,
-        20.13
-      ],
+      "src": [17.86, 20.13],
       "at": 21.29,
       "duration": 2.27,
       "words": [
@@ -348,10 +327,7 @@
     {
       "id": "s6a",
       "text": "Crea cotizaciones precisas.",
-      "src": [
-        20.35,
-        22.3
-      ],
+      "src": [20.35, 22.3],
       "at": 24.46,
       "duration": 1.95,
       "words": [
@@ -382,10 +358,7 @@
     {
       "id": "s6b",
       "text": "Planifica proyectos y tareas.",
-      "src": [
-        22.45,
-        24.55
-      ],
+      "src": [22.45, 24.55],
       "at": 26.91,
       "duration": 2.1,
       "words": [
@@ -421,10 +394,7 @@
     {
       "id": "s7",
       "text": "Consulta tus reportes y toma decisiones con más contexto.",
-      "src": [
-        24.77,
-        28.8
-      ],
+      "src": [24.77, 28.8],
       "at": 30.01,
       "duration": 4.03,
       "words": [
@@ -490,10 +460,7 @@
     {
       "id": "s8",
       "text": "Todo, desde una misma plataforma.",
-      "src": [
-        29.09,
-        31.69
-      ],
+      "src": [29.09, 31.69],
       "at": 35.14,
       "duration": 2.6,
       "words": [
@@ -534,10 +501,7 @@
     {
       "id": "s9a",
       "text": "AdminGest…",
-      "src": [
-        31.98,
-        33.005
-      ],
+      "src": [31.98, 33.005],
       "at": 38.74,
       "duration": 1.025,
       "words": [
@@ -558,10 +522,7 @@
     {
       "id": "s9b",
       "text": "Gestión Empresarial Inteligente.",
-      "src": [
-        33.08,
-        35.21
-      ],
+      "src": [33.08, 35.21],
       "at": 40.565,
       "duration": 2.13,
       "words": [
